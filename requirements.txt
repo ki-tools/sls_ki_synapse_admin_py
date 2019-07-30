@@ -1,0 +1,4 @@
+Flask==1.1.1
+Werkzeug==0.15.5
+synapseclient==1.9.3
+boto3==1.9.113

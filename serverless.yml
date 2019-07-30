@@ -1,0 +1,75 @@
+service:
+  name: sls-ki-synapse-admin
+
+plugins:
+  - serverless-wsgi
+  - serverless-domain-manager
+  - serverless-python-requirements
+
+provider:
+  name: aws
+  runtime: python3.6
+  stage: ${opt:stage, "dev"}
+  profile: ${self:custom.slsDeploy}.AWS_PROFILE}
+  region: ${self:custom.slsDeploy}.AWS_REGION}
+  timeout: 30
+  environment:
+    SERVICE_NAME: ${self:service}
+    SERVICE_STAGE: ${self:provider.stage}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ssm:GetParameter"
+      Resource: { "Fn::Join": ["", ["arn:aws:ssm:${self:provider.region}:", { "Ref": "AWS::AccountId" }, ":parameter/${self:service}/${self:provider.stage}/*" ] ]  }
+
+functions:
+  www:
+    handler: wsgi_handler.handler
+    events:
+      - http: ANY /
+      - http: ANY {proxy+}
+
+resources:
+  Resources:
+    # https://serverless.com/blog/cors-api-gateway-survival-guide/#cors-with-custom-authorizers
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+
+custom:
+  slsDeploy: ${file(./private.sls.deploy.json):${self:provider.stage}
+  wsgi:
+    app: www/server.app
+    packRequirements: false
+    pythonBin: python3
+  customDomain:
+    enabled: ${self:custom.slsDeploy}.DOMAIN_ENABLED}
+    domainName: ${self:custom.slsDeploy}.DOMAIN_NAME}
+    basePath: ${self:custom.slsDeploy}.DOMAIN_BASE_PATH}
+    certificateName: ${self:custom.slsDeploy}.DOMAIN_CERTIFICATE_NAME}
+    createRoute53Record: ${self:custom.slsDeploy}.DOMAIN_CREATE_ROUTE_53_RECORD}
+    endpointType: ${self:custom.slsDeploy}.DOMAIN_ENDPOINT_TYPE}
+    pythonRequirements:
+      dockerizePip: non-linux
+      slim: true
+      noDeploy:
+        - pytest
+
+package:
+  exclude:
+    - private.*
+    - .venv/**
+    - .vscode/**
+    - node_modules/**
+    - __pycache__/**
+    - .pytest_cache/**
+    - requirements-dev.txt
+    - templates
+    - tests
+    - scripts
