@@ -19,7 +19,7 @@ else:
 
 # Import the remaining modules after the ENV variables have been loaded and set.
 from tests.synapse_test_helper import SynapseTestHelper
-from core import Synapse
+from www.core import Synapse
 
 
 @pytest.fixture(scope='session')

@@ -1,2 +1,2 @@
 from .views import (home, about)
-from .create_space_views import create_space
+from .synapse_space import views

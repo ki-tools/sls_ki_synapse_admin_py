@@ -1,7 +1,7 @@
 import pytest
 import os
 from moto import mock_ssm
-from core import ParamStore
+from www.core import ParamStore
 
 
 @pytest.fixture

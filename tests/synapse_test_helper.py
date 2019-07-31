@@ -1,6 +1,6 @@
 import os
 import uuid
-from core import Synapse
+from www.core import Synapse
 import synapseclient
 from synapseclient import Project, Folder, File, Team, Wiki
 

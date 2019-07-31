@@ -1,5 +1,5 @@
 import pytest
-from core import (ParamStore, Synapse)
+from www.core import (ParamStore, Synapse)
 
 
 def test_client():
