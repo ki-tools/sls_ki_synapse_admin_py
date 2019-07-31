@@ -90,3 +90,7 @@ class ParamStore:
     @classmethod
     def SYNAPSE_PASSWORD(cls, default=None):
         return cls.get('SYNAPSE_PASSWORD', default)
+
+    @classmethod
+    def SECRET_KEY(cls, default=None):
+        return cls.get('SECRET_KEY', default)
