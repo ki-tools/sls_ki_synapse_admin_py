@@ -9,13 +9,15 @@ plugins:
 provider:
   name: aws
   runtime: python3.6
-  stage: ${opt:stage, "dev"}
+  stage: ${opt:stage, "development"}
   profile: ${self:custom.slsDeploy}.AWS_PROFILE}
   region: ${self:custom.slsDeploy}.AWS_REGION}
   timeout: 30
   environment:
     SERVICE_NAME: ${self:service}
     SERVICE_STAGE: ${self:provider.stage}
+    FLASK_ENV: ${self:provider.stage}
+    FLASK_DEBUG: ${self:custom.slsDeploy}.FLASK_DEBUG}
   iamRoleStatements:
     - Effect: "Allow"
       Action:

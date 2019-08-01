@@ -34,7 +34,7 @@ A [Serverless](https://serverless.com/framework/docs/getting-started) applicatio
     - Example: - `sls create_domain --stage production` 
   - See [serverless-domain-manager](https://github.com/amplify-education/serverless-domain-manager) for more details on configuring your custom domain.
 - Deploy to AWS
-  - Deploy to "dev": `make deploy_dev`
+  - Deploy to "dev": `make deploy_development`
   - Deploy to "staging": `make deploy_staging`
   - Deploy to "production": `make deploy_production`
   

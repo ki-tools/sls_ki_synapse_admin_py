@@ -8,7 +8,7 @@ import yaml
 script_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(script_dir, '..'))
 try:
-    from core.param_store import ParamStore
+    from www.core.param_store import ParamStore
 except Exception as ex:
     print('WARNING: Failed to load param_store: {0}'.format(ex))
 
@@ -72,9 +72,9 @@ def get_service_name():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--stage',
-                        choices=['production', 'staging', 'dev', 'test'],
+                        choices=['production', 'staging', 'development', 'test'],
                         help='The deploy stage.',
-                        default='dev')
+                        default='development')
     args = parser.parse_args()
 
     service_name = get_service_name()

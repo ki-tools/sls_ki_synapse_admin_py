@@ -1,43 +1,47 @@
 {
-    "description": "This file contains variables used during the serverless deploy process.",
-    "production": {
-        "AWS_PROFILE": "dev",
-        "AWS_REGION": "us-west-2",
-        "DOMAIN_ENABLED": false,
-        "DOMAIN_NAME": "web.mydomain.com",
-        "DOMAIN_BASE_PATH": "",
-        "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
-        "DOMAIN_CREATE_ROUTE_53_RECORD": true,
-        "DOMAIN_ENDPOINT_TYPE": "regional"
-    },
-    "staging": {
-        "AWS_PROFILE": "dev",
-        "AWS_REGION": "us-west-2",
-        "DOMAIN_ENABLED": false,
-        "DOMAIN_NAME": "web-staging.mydomain.com",
-        "DOMAIN_BASE_PATH": "",
-        "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
-        "DOMAIN_CREATE_ROUTE_53_RECORD": true,
-        "DOMAIN_ENDPOINT_TYPE": "regional"
-    },
-    "dev": {
-        "AWS_PROFILE": "dev",
-        "AWS_REGION": "us-west-2",
-        "DOMAIN_ENABLED": false,
-        "DOMAIN_NAME": "web-dev.mydomain.com",
-        "DOMAIN_BASE_PATH": "",
-        "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
-        "DOMAIN_CREATE_ROUTE_53_RECORD": true,
-        "DOMAIN_ENDPOINT_TYPE": "regional"
-    },
-    "test": {
-        "AWS_PROFILE": "dev",
-        "AWS_REGION": "us-west-2",
-        "DOMAIN_ENABLED": false,
-        "DOMAIN_NAME": "web-test.mydomain.com",
-        "DOMAIN_BASE_PATH": "",
-        "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
-        "DOMAIN_CREATE_ROUTE_53_RECORD": true,
-        "DOMAIN_ENDPOINT_TYPE": "regional"
-    }
+  "description": "This file contains variables used during the serverless deploy process.",
+  "production": {
+    "AWS_PROFILE": "dev",
+    "AWS_REGION": "us-west-2",
+    "DOMAIN_ENABLED": false,
+    "DOMAIN_NAME": "web.mydomain.com",
+    "DOMAIN_BASE_PATH": "",
+    "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
+    "DOMAIN_CREATE_ROUTE_53_RECORD": true,
+    "DOMAIN_ENDPOINT_TYPE": "regional",
+    "FLASK_DEBUG": "False"
+  },
+  "staging": {
+    "AWS_PROFILE": "dev",
+    "AWS_REGION": "us-west-2",
+    "DOMAIN_ENABLED": false,
+    "DOMAIN_NAME": "web-staging.mydomain.com",
+    "DOMAIN_BASE_PATH": "",
+    "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
+    "DOMAIN_CREATE_ROUTE_53_RECORD": true,
+    "DOMAIN_ENDPOINT_TYPE": "regional",
+    "FLASK_DEBUG": "False"
+  },
+  "development": {
+    "AWS_PROFILE": "dev",
+    "AWS_REGION": "us-west-2",
+    "DOMAIN_ENABLED": false,
+    "DOMAIN_NAME": "web-dev.mydomain.com",
+    "DOMAIN_BASE_PATH": "",
+    "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
+    "DOMAIN_CREATE_ROUTE_53_RECORD": true,
+    "DOMAIN_ENDPOINT_TYPE": "regional",
+    "FLASK_DEBUG": "False"
+  },
+  "test": {
+    "AWS_PROFILE": "dev",
+    "AWS_REGION": "us-west-2",
+    "DOMAIN_ENABLED": false,
+    "DOMAIN_NAME": "web-test.mydomain.com",
+    "DOMAIN_BASE_PATH": "",
+    "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
+    "DOMAIN_CREATE_ROUTE_53_RECORD": true,
+    "DOMAIN_ENDPOINT_TYPE": "regional",
+    "FLASK_DEBUG": "False"
+  }
 }

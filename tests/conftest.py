@@ -6,7 +6,7 @@ import tempfile
 # Load Environment variables.
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
-test_env_file = os.path.join(module_dir, '../private.test.env.json')
+test_env_file = os.path.join(module_dir, '../private.env.json')
 
 if os.path.isfile(test_env_file):
     with open(test_env_file) as f:

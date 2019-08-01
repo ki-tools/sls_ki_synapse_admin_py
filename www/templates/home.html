@@ -4,6 +4,14 @@
 <div class="row">
   <div class="col">
     <h1>Home</h1>
+
+    {% if not current_user.is_authenticated %}
+    <div>
+      <span>Please login to access administrative functions.</span>
+      <a class="btn btn-success" href="{{ url_for('login') }}">Login with Google</a>
+    </div>
+    {% endif %}
+
   </div>
 </div>
 {% endblock %}
