@@ -1,11 +1,5 @@
-from flask import render_template, redirect, url_for, flash, request
-from flask_login import (
-    LoginManager,
-    current_user,
-    login_required,
-    login_user,
-    logout_user,
-)
+from flask import redirect, url_for, request, render_template
+from flask_login import login_required, login_user, logout_user
 import requests
 import json
 import server
@@ -17,7 +11,7 @@ from www.models import User
 @app.route("/login")
 def login():
     # Find out what URL to hit for Google login
-    google_provider_cfg = get_google_provider_cfg()
+    google_provider_cfg = _get_google_provider_cfg()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
     # Use library to construct the request for Google login and provide
@@ -32,15 +26,15 @@ def login():
 
 @app.route("/login/callback")
 def auth_callback():
-    # Get authorization code Google sent back
+    # Get authorization code Google sent back.
     code = request.args.get("code")
 
     # Find out what URL to hit to get tokens that allow you to ask for
-    # things on behalf of a user
-    google_provider_cfg = get_google_provider_cfg()
+    # things on behalf of a user.
+    google_provider_cfg = _get_google_provider_cfg()
     token_endpoint = google_provider_cfg["token_endpoint"]
 
-    # Prepare and send a request to get tokens! Yay tokens!
+    # Prepare and send a request to get tokens.
     token_url, headers, body = server.auth_client.prepare_token_request(
         token_endpoint,
         authorization_response=request.url,
@@ -54,31 +48,29 @@ def auth_callback():
         auth=(ParamStore.GOOGLE_CLIENT_ID(), ParamStore.GOOGLE_CLIENT_SECRET()),
     )
 
-    # Parse the tokens!
+    # Parse the tokens
     server.auth_client.parse_request_body_response(json.dumps(token_response.json()))
 
-    # Now that you have tokens (yay) let's find and hit the URL
+    # Now that you have tokens let's find and hit the URL
     # from Google that gives you the user's profile information,
-    # including their Google profile image and email
+    # including their Google profile image and email.
     userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
     uri, headers, body = server.auth_client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body)
 
     # You want to make sure their email is verified.
     # The user authenticated with Google, authorized your
-    # app, and now you've verified their email through Google!
+    # app, and now you've verified their email through Google.
     if userinfo_response.json().get("email_verified"):
         unique_id = userinfo_response.json()["sub"]
         users_email = userinfo_response.json()["email"]
-        picture = userinfo_response.json()["picture"]
-        users_name = userinfo_response.json()["given_name"]
 
-        # TODO: Check the email against the whitelist (TODO: create the whitelist)
-
-        login_user(User(unique_id, users_email))
-
-        # Send user back to homepage
-        return redirect(url_for('home'))
+        if _can_login(users_email):
+            login_user(User(unique_id, users_email))
+            # Send user back to homepage or the 'next' location.
+            return redirect(request.args.get("next") or url_for("home"))
+        else:
+            return redirect(url_for('forbidden'))
     else:
         return "User email not available or not verified by Google.", 400
 
@@ -90,5 +82,16 @@ def logout():
     return redirect(url_for('home'))
 
 
-def get_google_provider_cfg():
+@app.route("/forbidden")
+def forbidden():
+    return render_template('auth/forbidden.html')
+
+
+def _get_google_provider_cfg():
     return requests.get(ParamStore.GOOGLE_DISCOVERY_URL()).json()
+
+
+def _can_login(email):
+    whitelist = ParamStore.LOGIN_WHITELIST()
+    allowed_emails = [e.strip() for e in whitelist.split(',') if e and e.strip()]
+    return email in allowed_emails

@@ -160,7 +160,7 @@ class ParamStore:
     @classmethod
     def SECRET_KEY(cls, default=str(uuid.uuid4())):
         return cls.get('SECRET_KEY', default)
-    
+
     @classmethod
     def LOG_LEVEL(cls, default=None):
         return cls.get('LOG_LEVEL', default)
@@ -184,3 +184,7 @@ class ParamStore:
     @classmethod
     def GOOGLE_DISCOVERY_URL(cls, default='https://accounts.google.com/.well-known/openid-configuration'):
         return cls.get('GOOGLE_DISCOVERY_URL', default)
+
+    @classmethod
+    def LOGIN_WHITELIST(cls, default=None):
+        return cls.get('LOGIN_WHITELIST', default)

@@ -1,12 +1,12 @@
 from flask import render_template, redirect, url_for, flash
-from flask_login import login_required
+from flask_login import login_required, fresh_login_required
 from server import app
 from www.services.create_synapse_space_service import CreateSynapseSpaceService
 from .forms import CreateSynapseSpaceForm
 
 
 @app.route("/synapse_space/create", methods=('GET', 'POST'))
-@login_required
+@fresh_login_required
 def create_synapse_space():
     form = CreateSynapseSpaceForm()
     if form.validate_on_submit():
