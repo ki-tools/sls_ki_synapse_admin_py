@@ -31,7 +31,7 @@ def encrypt_synapse_space():
         errors = service.execute()
 
         if not errors:
-            flash('Synapse project has been encrypted')
+            flash('Synapse project {0} has been encrypted'.format(service.project_id))
             return redirect(url_for('encrypt_synapse_space'))
 
     return render_template('synapse_space/encrypt.html', form=form, errors=errors)
