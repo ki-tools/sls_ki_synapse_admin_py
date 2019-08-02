@@ -1,12 +1,10 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, TextAreaField
-from wtforms.validators import DataRequired, ValidationError, Email
-
-from www.core import ParamStore
+from wtforms.validators import DataRequired, ValidationError
 from www.core.synapse import Synapse
-import synapseclient as syn
-from synapseclient.exceptions import SynapseHTTPError
 import re
+
+from www.services import EncryptSynapseSpaceService
 
 
 class CreateSynapseSpaceForm(FlaskForm):
@@ -77,23 +75,11 @@ class EncryptSynapseSpaceForm(FlaskForm):
     def validate_project_id(self, field):
         self.can_encrypt = False
         self.project_name = None
-        try:
-            project = Synapse.client().get(syn.Project(id=field.data))
-            storage_id = ParamStore.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
 
-            # Check if the project is already encrypted.
-            storage_setting = Synapse.client().getProjectSetting(project, 'upload')
-            if storage_setting is not None:
-                storage_ids = storage_setting.get('locations')
-                if storage_id in storage_ids:
-                    raise ValidationError(
-                        'Storage location already set for project: {0} ({1})'.format(project.name, project.id))
+        project, error = EncryptSynapseSpaceService(field.data).validate()
 
+        if error:
+            raise ValidationError(error)
+        else:
             self.can_encrypt = True
             self.project_name = project.name
-
-        except SynapseHTTPError as ex:
-            if ex.response.status_code == 404:
-                raise ValidationError('Synapse project ID: "{0}" does not exist.'.format(field.data))
-            else:
-                raise ValidationError('Unknown error validating synapse project.')
