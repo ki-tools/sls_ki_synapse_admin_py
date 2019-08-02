@@ -85,6 +85,42 @@ def test_get_bool(key, monkeypatch):
 
 
 @mock_ssm
+def test_get_int(key, monkeypatch):
+    # TODO: also test 'only_from_env' param
+    assert os.environ.get(key) is None
+    assert ParamStore._get_from_os(key) is None
+    assert ParamStore._get_from_ssm(key) is None
+    assert ParamStore.get(key) is None
+
+    value = "123"
+    expected_int = 123
+
+    # From OS
+    monkeypatch.setenv(key, value)
+    assert os.environ.get(key) == value
+    assert ParamStore.get_int(key) == expected_int
+
+    monkeypatch.delenv(key)
+    assert os.environ.get(key) is None
+    assert ParamStore.get(key) is None
+
+    # From SSM
+    ParamStore._set_ssm_parameter(key, value)
+    assert ParamStore.get_int(key) == expected_int
+
+    # Returns None
+    ParamStore._set_ssm_parameter(key, '')
+    assert ParamStore.get_int(key) is None
+
+    ParamStore._delete_ssm_parameter(key)
+    assert ParamStore.get(key) is None
+    assert ParamStore.get_int(key) is None
+
+    # Returns default
+    assert ParamStore.get_int(key, default=321) == 321
+
+
+@mock_ssm
 def test__get_from_os(key, value, monkeypatch):
     assert os.environ.get(key) is None
     assert ParamStore._get_from_os(key) is None

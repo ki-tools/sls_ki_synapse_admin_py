@@ -13,7 +13,7 @@ class CreateSynapseSpaceService(object):
 
         # TODO: Create the project et al...
 
-        errors.append('test error 1')  # TODO: remove this.
-        errors.append('test error 2')  # TODO: remove this.
+        errors.append('Not Implemented')  # TODO: remove this.
+        errors.append('Test Error')  # TODO: remove this.
 
         return errors

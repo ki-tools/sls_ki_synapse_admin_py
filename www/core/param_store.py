@@ -39,6 +39,20 @@ class ParamStore:
             return str(value).lower() == 'true'
 
     @classmethod
+    def get_int(cls, key, default=None, only_from_env=False):
+        """
+        Tries to get an integer value from the OS then SSM otherwise it returns the default value.
+        """
+        value = cls.get(key, default=default, only_from_env=only_from_env)
+
+        if isinstance(value, int):
+            return value
+        elif value is not None and str(value).strip() == '':
+            value = None
+        elif value is not None:
+            return int(value)
+
+    @classmethod
     def _get_from_os(cls, key):
         """
         Gets a value from the OS.
@@ -172,6 +186,10 @@ class ParamStore:
     @classmethod
     def SYNAPSE_PASSWORD(cls, default=None):
         return cls.get('SYNAPSE_PASSWORD', default)
+
+    @classmethod
+    def SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(cls, default=None):
+        return cls.get_int('SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID', default)
 
     @classmethod
     def GOOGLE_CLIENT_ID(cls, default=None):

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Encrypt Synapse Space{% endblock %}
+{% block body %}
+<div class="row">
+  <div class="col">
+    <h1>Encrypt Synapse Space</h1>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <form method="POST" action="">
+      {{ form.csrf_token }}
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <ul>
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% if errors %}
+      <div class="alert alert-danger" role="alert">
+        <span>Errors:</span>
+        <ul>
+          {% for message in errors %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        {{ form.project_id.label }}
+        {{ form.project_id(class_='form-control') }}
+        {% for error in form.project_id.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        {{ form.check_project(class_='btn btn-primary') }}
+      </div>
+
+      {% if form.can_encrypt %}
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Confirm Synapse Project</h5>
+          <p class="card-text">
+
+
+          <div class="form-group row">
+            <label for="confirmProjectId" class="col-sm-2 col-form-label">Project ID</label>
+            <div class="col-sm-10">
+              <input type="text" readonly class="form-control-plaintext" id="confirmProjectId"
+                     value="{{ form.project_id.data }}">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="confirmProjectName" class="col-sm-2 col-form-label">Project Name</label>
+            <div class="col-sm-10">
+              <input type="text" readonly class="form-control-plaintext" id="confirmProjectName"
+                     value="{{ form.project_name }}">
+            </div>
+          </div>
+
+          </p>
+          {{ form.encrypt_project(class_='btn btn-success') }}
+        </div>
+      </div>
+      {% endif %}
+
+    </form>
+  </div>
+</div>
+{% endblock %}
