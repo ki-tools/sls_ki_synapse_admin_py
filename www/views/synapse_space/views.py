@@ -1,6 +1,6 @@
+from flask import current_app as app
 from flask import render_template, redirect, url_for, flash
 from flask_login import fresh_login_required
-from server import app
 from www.services import CreateSynapseSpaceService, EncryptSynapseSpaceService
 from .forms import CreateSynapseSpaceForm, EncryptSynapseSpaceForm
 

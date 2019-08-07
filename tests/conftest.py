@@ -1,9 +1,12 @@
+import flask_login
 import pytest
 import os
 import json
 import tempfile
 
 # Load Environment variables.
+from www.models import User
+
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
 test_env_file = os.path.join(module_dir, '../private.env.json')
@@ -18,8 +21,28 @@ else:
     print('WARNING: Test environment file not found at: {0}'.format(test_env_file))
 
 # Import the remaining modules after the ENV variables have been loaded and set.
+from www.server import app
 from tests.synapse_test_helper import SynapseTestHelper
 from www.core import Synapse
+
+
+@pytest.fixture
+def test_app():
+    with app.app_context():
+        app.config['TESTING'] = True
+        yield app
+
+
+@pytest.fixture
+def client(test_app):
+    with test_app.test_client() as client:
+        yield client
+
+
+@pytest.fixture
+def authenticated_request(test_app):
+    with test_app.test_request_context():
+        yield flask_login.login_user(User(id='1'))
 
 
 @pytest.fixture(scope='session')

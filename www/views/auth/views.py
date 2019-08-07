@@ -1,9 +1,9 @@
+from flask import current_app as app
 from flask import redirect, url_for, request, render_template
 from flask_login import login_required, login_user, logout_user
 import requests
 import json
-import server
-from server import app
+from www import server
 from www.core import ParamStore
 from www.models import User
 
@@ -58,9 +58,9 @@ def auth_callback():
     uri, headers, body = server.auth_client.add_token(userinfo_endpoint)
     userinfo_response = requests.get(uri, headers=headers, data=body)
 
-    # You want to make sure their email is verified.
-    # The user authenticated with Google, authorized your
-    # app, and now you've verified their email through Google.
+    # Make sure the email is verified.
+    # The user authenticated with Google, authorized the app,
+    # and now we've verified their email through Google.
     if userinfo_response.json().get("email_verified"):
         unique_id = userinfo_response.json()["sub"]
         users_email = userinfo_response.json()["email"]
