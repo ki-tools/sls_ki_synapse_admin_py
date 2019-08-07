@@ -65,7 +65,7 @@ class EncryptSynapseSpaceForm(FlaskForm):
     # Form Fields
     project_id = StringField('Synapse Project ID', validators=[DataRequired()])
     check_project = SubmitField('Check Project ID')
-    encrypt_project = SubmitField('Encrypt')
+    submit = SubmitField('Encrypt')
 
     # Validated form data
     can_encrypt = False
