@@ -21,15 +21,15 @@ else:
     print('WARNING: Test environment file not found at: {0}'.format(test_env_file))
 
 # Import the remaining modules after the ENV variables have been loaded and set.
+from www import server
 from www.server import app
 from tests.synapse_test_helper import SynapseTestHelper
-from www.core import Synapse
+from www.core import Synapse, ParamStore
 
 
 @pytest.fixture
 def test_app():
     with app.app_context():
-        app.config['TESTING'] = True
         yield app
 
 
@@ -40,9 +40,12 @@ def client(test_app):
 
 
 @pytest.fixture
-def authenticated_request(test_app):
-    with test_app.test_request_context():
-        yield flask_login.login_user(User(id='1'))
+def login_enabled(test_app):
+    test_app.config['LOGIN_DISABLED'] = False
+    server.init_all()
+    yield
+    test_app.config['LOGIN_DISABLED'] = ParamStore.FLASK_LOGIN_DISABLED()
+    server.init_all()
 
 
 @pytest.fixture(scope='session')

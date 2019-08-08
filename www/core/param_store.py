@@ -158,6 +158,13 @@ class ParamStore:
         return cls.get_bool('FLASK_TESTING', default=default, only_from_env=True)
 
     @classmethod
+    def FLASK_LOGIN_DISABLED(cls, default=False):
+        """
+        This variable must be set on the OS (not on SSM)
+        """
+        return cls.get_bool('FLASK_LOGIN_DISABLED', default=default, only_from_env=True)
+
+    @classmethod
     def SERVICE_NAME(cls, default=None):
         """
         This variable must be set on the OS (not on SSM)

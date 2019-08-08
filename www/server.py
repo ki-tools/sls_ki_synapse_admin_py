@@ -20,12 +20,21 @@ login_manager.session_protection = "strong"
 # OAuth 2 client setup.
 auth_client = WebApplicationClient(ParamStore.GOOGLE_CLIENT_ID())
 
+
+def init_all():
+    if ParamStore.FLASK_LOGIN_DISABLED() and ParamStore.FLASK_ENV() != 'test':
+        raise Exception('Only the "test" environment can have FLASK_LOGIN_DISABLED set to True')
+
+    login_manager.init_app(app)
+
+
 with app.app_context():
     app.secret_key = ParamStore.SECRET_KEY()
     app.testing = ParamStore.FLASK_TESTING()
+    app.config['LOGIN_DISABLED'] = ParamStore.FLASK_LOGIN_DISABLED()
     app.debug = ParamStore.FLASK_DEBUG()
 
-    login_manager.init_app(app)
+    init_all()
 
     # Load the views AFTER the app has been instantiated.
     import www.views

@@ -1,6 +1,7 @@
 import pytest
 
 
-def test_home(client):
+@pytest.mark.usefixtures("login_enabled")
+def test_it_loads_the_page(client):
     res = client.get('/')
     assert res.status_code == 200
