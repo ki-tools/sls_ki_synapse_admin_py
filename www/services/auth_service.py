@@ -1,5 +1,5 @@
 from www import server
-from www.core import ParamStore, AuthEmailNotVerified, AuthForbidden
+from www.core import ParamStore, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
 from www.models import User
 import json
 import requests
@@ -19,7 +19,7 @@ class AuthService:
         """
 
         # Find out what URL to hit for Google login
-        google_provider_cfg = cls.get_google_provider_cfg()
+        google_provider_cfg = cls.get_google_provider_config()
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
 
         # Use library to construct the request for Google login and provide
@@ -40,11 +40,11 @@ class AuthService:
         :param request_url: The callback request.url
         :param request_base_url: The callback request.base_url
         :return: The logged in user.
-        :raises AuthEmailNotVerified, AuthForbidden
+        :raises AuthEmailNotVerifiedError, AuthForbiddenError
         """
         # Find out what URL to hit to get tokens that allow you to ask for
         # things on behalf of a user.
-        google_provider_cfg = cls.get_google_provider_cfg()
+        google_provider_cfg = cls.get_google_provider_config()
         token_endpoint = google_provider_cfg["token_endpoint"]
 
         # Prepare and send a request to get tokens.
@@ -78,14 +78,16 @@ class AuthService:
         users_email = res_json.get("email", None)
 
         if not email_verified:
-            raise AuthEmailNotVerified()
+            raise AuthEmailNotVerifiedError()
 
         if not cls.user_allowed_login(users_email):
-            raise AuthForbidden('Email: {0} not allowed to login.'.format(users_email))
+            raise AuthForbiddenError('Email: {0} not allowed to login.'.format(users_email))
 
         user = User(unique_id, users_email)
-        login_user(user)
-        return user
+        if cls.login_user(user):
+            return user
+        else:
+            raise AuthLoginFailureError()
 
     @classmethod
     def user_allowed_login(cls, email):
@@ -100,6 +102,10 @@ class AuthService:
         return email in allowed_emails
 
     @classmethod
+    def login_user(cls, user):
+        return login_user(user)
+
+    @classmethod
     def logout_user(cls):
         """
         Logs out the current user.
@@ -109,7 +115,7 @@ class AuthService:
         return logout_user()
 
     @classmethod
-    def get_google_provider_cfg(cls):
+    def get_google_provider_config(cls):
         """
         Gets the Google auth provider configuration.
 
