@@ -6,8 +6,7 @@ reqs:
 
 .PHONY: devserve
 devserve:
-	scripts/devserve.py . www/server.app 5000 localhost --ssl-context adhoc
-# 	sls wsgi serve
+	sls wsgi serve --ssl
 
 
 .PHONY: test
