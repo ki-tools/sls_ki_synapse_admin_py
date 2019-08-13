@@ -12,7 +12,7 @@ def login():
 
 
 @app.route("/login/callback")
-def auth_callback():
+def login_callback():
     code = request.args.get("code")
     request_url = request.url
     request_base_url = request.base_url
@@ -22,7 +22,7 @@ def auth_callback():
     except AuthEmailNotVerifiedError:
         return "Email not verified by Google.", 400
     except (AuthForbiddenError, AuthLoginFailureError):
-        return redirect(url_for('forbidden'))
+        return redirect(url_for('login_forbidden'))
 
 
 @app.route("/logout")
@@ -32,6 +32,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route("/forbidden")
-def forbidden():
-    return render_template('auth/forbidden.html')
+@app.route("/login/login_forbidden")
+def login_forbidden():
+    return render_template('login/login_forbidden.html')

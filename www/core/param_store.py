@@ -211,5 +211,5 @@ class ParamStore:
         return cls.get('GOOGLE_DISCOVERY_URL', default)
 
     @classmethod
-    def LOGIN_WHITELIST(cls, default=None):
+    def LOGIN_WHITELIST(cls, default=''):
         return cls.get('LOGIN_WHITELIST', default)

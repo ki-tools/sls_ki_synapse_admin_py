@@ -97,7 +97,7 @@ class AuthService:
         :param email: The email address to check against the whitelist of emails.
         :return: True or False
         """
-        whitelist = ParamStore.LOGIN_WHITELIST()
+        whitelist = ParamStore.LOGIN_WHITELIST() or ''
         allowed_emails = [e.strip() for e in whitelist.split(',') if e and e.strip()]
         return email in allowed_emails
 

@@ -79,8 +79,39 @@ def test_handle_callback_and_login(mk_stub_google_endpoints, request_base_url, m
 
     with responses.RequestsMock() as res_mock:
         mk_stub_google_endpoints(res_mock, with_provider_config=True, with_token=True, with_user_info=True)
-        res = AuthService.handle_callback_and_login('123', request_base_url + '?code=123&state=abc', request_base_url)
-        assert res is not None
+        user = AuthService.handle_callback_and_login('123', request_base_url + '?code=123&state=abc', request_base_url)
+        assert user is not None
+        assert user.email in ParamStore.LOGIN_WHITELIST()
+
+
+def test_user_allowed_login(monkeypatch):
+    emails = ['user1@test.com', 'user2@test.com', 'user3@test.com']
+
+    # Test single emails in the whitelist.
+    for email in emails:
+        monkeypatch.delenv('LOGIN_WHITELIST', raising=False)
+
+        assert AuthService.user_allowed_login(email) is False
+        monkeypatch.setenv('LOGIN_WHITELIST', email)
+        assert AuthService.user_allowed_login(email) is True
+        assert AuthService.user_allowed_login('x{0}'.format(email)) is False
+
+    # Test all emails in the whitelist.
+    monkeypatch.setenv('LOGIN_WHITELIST', '  ,  '.join(emails))
+    for email in emails:
+        assert AuthService.user_allowed_login(email) is True
+        assert AuthService.user_allowed_login('x{0}'.format(email)) is False
+
+    # Test poorly formatted email list.
+    monkeypatch.setenv('LOGIN_WHITELIST', 'user1@test.com,,  , ')
+    assert AuthService.user_allowed_login('user1@test.com') is True
+    assert AuthService.user_allowed_login('user1') is False
+    assert AuthService.user_allowed_login('user1@') is False
+    assert AuthService.user_allowed_login('user1@test') is False
+    assert AuthService.user_allowed_login('test.com') is False
+    assert AuthService.user_allowed_login('@test.com') is False
+    assert AuthService.user_allowed_login('') is False
+    assert AuthService.user_allowed_login(None) is False
 
 
 def test_login_user():
