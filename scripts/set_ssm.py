@@ -9,6 +9,7 @@ script_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(script_dir, '..'))
 try:
     from www.core.param_store import ParamStore
+    import www.config as config
 except Exception as ex:
     print('WARNING: Failed to load param_store: {0}'.format(ex))
 
@@ -72,9 +73,9 @@ def get_service_name():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--stage',
-                        choices=['production', 'staging', 'development', 'test'],
+                        choices=config.Envs.ALL,
                         help='The deploy stage.',
-                        default='development')
+                        default=config.Envs.DEVELOPMENT)
     args = parser.parse_args()
 
     service_name = get_service_name()

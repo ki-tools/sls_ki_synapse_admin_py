@@ -1,30 +1,19 @@
-import flask_login
 import pytest
 import os
-import json
 import tempfile
 
 # Load Environment variables.
-from www.models import User
+import www.config as config
 
-module_dir = os.path.dirname(os.path.abspath(__file__))
-
-test_env_file = os.path.join(module_dir, '../private.env.json')
-
-if os.path.isfile(test_env_file):
-    with open(test_env_file) as f:
-        config = json.load(f).get('test')
-
-        for key, value in config.items():
-            os.environ[key] = value
-else:
-    print('WARNING: Test environment file not found at: {0}'.format(test_env_file))
+config.load_local(config.Envs.TEST)
 
 # Import the remaining modules after the ENV variables have been loaded and set.
 from www import server
 from www.server import app
 from tests.synapse_test_helper import SynapseTestHelper
 from www.core import Synapse, ParamStore
+
+assert ParamStore.FLASK_ENV() == config.Envs.TEST
 
 
 @pytest.fixture
