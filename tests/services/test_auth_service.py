@@ -73,15 +73,23 @@ def test_get_redirect_uri(mk_stub_google_endpoints, request_base_url, expected_r
         assert redirect_uri == expected_redirect_uri
 
 
-def test_handle_callback_and_login(mk_stub_google_endpoints, request_base_url, mocker):
+def test_handle_callback_and_login(mk_stub_google_endpoints, request_base_url, mocker, monkeypatch):
     mock = mocker.patch.object(AuthService, 'login_user')
     mock.return_value = True
 
+    email = 'random.user@test.com'
+    monkeypatch.setenv('LOGIN_WHITELIST', email)
+    assert email in ParamStore.LOGIN_WHITELIST()
+
     with responses.RequestsMock() as res_mock:
-        mk_stub_google_endpoints(res_mock, with_provider_config=True, with_token=True, with_user_info=True)
+        mk_stub_google_endpoints(res_mock,
+                                 with_provider_config=True,
+                                 with_token=True,
+                                 with_user_info=True,
+                                 userinfo={'email': email})
         user = AuthService.handle_callback_and_login('123', request_base_url + '?code=123&state=abc', request_base_url)
         assert user is not None
-        assert user.email in ParamStore.LOGIN_WHITELIST()
+        assert user.email == email
 
 
 def test_user_allowed_login(monkeypatch):

@@ -17,7 +17,6 @@ class AuthService:
         :param request_base_url: The login request.base_url
         :return: URL
         """
-
         # Find out what URL to hit for Google login
         google_provider_cfg = cls.get_google_provider_config()
         authorization_endpoint = google_provider_cfg["authorization_endpoint"]
@@ -103,6 +102,12 @@ class AuthService:
 
     @classmethod
     def login_user(cls, user):
+        """
+        Logs in a user.
+
+        :param user: The user to login.
+        :return: True
+        """
         return login_user(user)
 
     @classmethod
@@ -119,6 +124,6 @@ class AuthService:
         """
         Gets the Google auth provider configuration.
 
-        :return:
+        :return: Google config has a hash.
         """
         return requests.get(ParamStore.GOOGLE_DISCOVERY_URL()).json()
