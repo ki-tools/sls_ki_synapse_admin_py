@@ -62,8 +62,8 @@ def mk_stub_google_endpoints(request_base_url, google_provider_config_url, googl
 
 @pytest.fixture
 def expected_redirect_uri(google_provider_config_url):
-    return '{0}?response_type=code&client_id=set-this&redirect_uri=https%3A%2F%2Fwww.test.com%2Fbase_url%2Fcallback&scope=openid+email+profile'.format(
-        google_provider_config_url)
+    return '{0}?response_type=code&client_id={1}&redirect_uri=https%3A%2F%2Fwww.test.com%2Fbase_url%2Fcallback&scope=openid+email+profile'.format(
+        google_provider_config_url, ParamStore.GOOGLE_CLIENT_ID())
 
 
 def test_get_redirect_uri(mk_stub_google_endpoints, request_base_url, expected_redirect_uri):
