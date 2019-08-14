@@ -1,6 +1,6 @@
 # SLS KI Synapse Admin
 
-[![Build Status](TBD)](TBD)
+[![Build Status](https://travis-ci.com/pcstout/sls_ki_synapse_admin_py.svg?token=3ixgAsZG3yWFLjxfsY9Z&branch=master)](https://travis-ci.com/pcstout/sls_ki_synapse_admin_py)
 [![Coverage Status](TBD)](TBD)
 
 ## Overview
