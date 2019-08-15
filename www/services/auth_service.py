@@ -86,7 +86,7 @@ class AuthService:
         if cls.login_user(user):
             return user
         else:
-            raise AuthLoginFailureError()
+            raise AuthLoginFailureError('Unknown error logging user in.')
 
     @classmethod
     def user_allowed_login(cls, email):

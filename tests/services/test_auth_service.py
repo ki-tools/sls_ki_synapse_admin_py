@@ -1,8 +1,16 @@
 import pytest
 import json
-from www.core import ParamStore, AuthEmailNotVerifiedError
+from www.core import ParamStore, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
 from www.services import AuthService
 import responses
+
+
+@pytest.fixture
+def call_handle_callback_and_login(request_base_url):
+    def _call():
+        return AuthService.handle_callback_and_login('123', request_base_url + '?code=123&state=abc', request_base_url)
+
+    yield _call
 
 
 @pytest.fixture
@@ -27,7 +35,7 @@ def google_userinfo_url():
 
 @pytest.fixture
 def mk_stub_google_endpoints(request_base_url, google_provider_config_url, google_token_url, google_userinfo_url,
-                             mocker):
+                             mocker, monkeypatch):
     def _mk(res_mock,
             with_all=False,
             with_provider_config=False,
@@ -58,13 +66,20 @@ def mk_stub_google_endpoints(request_base_url, google_provider_config_url, googl
             res_mock.add(responses.POST, google_token_url, status=200, body=json.dumps(body))
 
         # google_userinfo_endpoint
+        user_info_body = None
         if with_user_info or with_all:
-            body = {
+            user_info_body = {
                 'email_verified': userinfo.get('email_verified', True),
                 'sub': userinfo.get('user_id', 1),
                 'email': userinfo.get('email', 'user@test.com'),
             }
-            res_mock.add(responses.GET, google_userinfo_url, status=200, body=json.dumps(body))
+            res_mock.add(responses.GET, google_userinfo_url, status=200, body=json.dumps(user_info_body))
+
+        if isinstance(login_whitelist, bool) and login_whitelist is True and user_info_body is not None:
+            login_whitelist = user_info_body.get('email')
+
+        if login_whitelist:
+            monkeypatch.setenv('LOGIN_WHITELIST', login_whitelist)
 
         mock = mocker.patch.object(AuthService, 'login_user')
         mock.return_value = login_user_return_value
@@ -86,23 +101,13 @@ def test_get_redirect_uri(mk_stub_google_endpoints, request_base_url, expected_r
 
 
 def test_handle_callback_and_login(mk_stub_google_endpoints, call_handle_callback_and_login, monkeypatch):
-    email = 'random.user@test.com'
-    monkeypatch.setenv('LOGIN_WHITELIST', email)
-    assert email in ParamStore.LOGIN_WHITELIST()
-
     with responses.RequestsMock() as res_mock:
-        mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email': email}, login_whitelist=email)
+        email = 'random.user@test.com'
+        mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email': email}, login_whitelist=True)
+        assert email in ParamStore.LOGIN_WHITELIST()
         user = call_handle_callback_and_login()
         assert user is not None
         assert user.email == email
-
-
-@pytest.fixture
-def call_handle_callback_and_login(request_base_url):
-    def _run():
-        return AuthService.handle_callback_and_login('123', request_base_url + '?code=123&state=abc', request_base_url)
-
-    yield _run
 
 
 def test_callback_raises_email_not_verified_error(mk_stub_google_endpoints, call_handle_callback_and_login):
@@ -110,6 +115,26 @@ def test_callback_raises_email_not_verified_error(mk_stub_google_endpoints, call
         mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email_verified': False})
 
         with pytest.raises(AuthEmailNotVerifiedError):
+            call_handle_callback_and_login()
+
+
+def test_callback_raises_forbidden_error(mk_stub_google_endpoints, call_handle_callback_and_login):
+    with responses.RequestsMock() as res_mock:
+        email = 'user.not.in.whitelist@test.com'
+        mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email': email}, login_whitelist=False)
+
+        with pytest.raises(AuthForbiddenError):
+            call_handle_callback_and_login()
+
+
+def test_callback_raises_login_failure_error(mk_stub_google_endpoints, call_handle_callback_and_login):
+    with responses.RequestsMock() as res_mock:
+        mk_stub_google_endpoints(res_mock,
+                                 with_all=True,
+                                 login_whitelist=True,
+                                 login_user_return_value=False)
+
+        with pytest.raises(AuthLoginFailureError):
             call_handle_callback_and_login()
 
 
