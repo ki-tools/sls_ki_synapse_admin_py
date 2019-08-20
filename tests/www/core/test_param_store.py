@@ -27,7 +27,7 @@ def test_get(key, value, monkeypatch):
     assert os.environ.get(key) == value
     assert ParamStore.get(key) == value
 
-    monkeypatch.delenv(key)
+    monkeypatch.delenv(key, raising=False)
     assert os.environ.get(key) is None
     assert ParamStore.get(key) is None
 
@@ -55,7 +55,7 @@ def test_get_bool(key, monkeypatch):
         assert os.environ.get(key) == true_value
         assert ParamStore.get_bool(key) is True
 
-        monkeypatch.delenv(key)
+        monkeypatch.delenv(key, raising=False)
         assert os.environ.get(key) is None
         assert ParamStore.get_bool(key) is False
 
@@ -71,11 +71,15 @@ def test_get_bool(key, monkeypatch):
         assert ParamStore._get_from_ssm(key) is None
         assert ParamStore.get_bool(key) is False
 
-        monkeypatch.setenv(key, false_value)
-        assert os.environ.get(key) == str(false_value)
+        if false_value is None:
+            monkeypatch.delenv(key, raising=False)
+            assert os.environ.get(key) is None
+        else:
+            monkeypatch.setenv(key, false_value)
+            assert os.environ.get(key) == str(false_value)
         assert ParamStore.get_bool(key) is False
 
-        monkeypatch.delenv(key)
+        monkeypatch.delenv(key, raising=False)
         assert os.environ.get(key) is None
         assert ParamStore.get_bool(key) is False
 
@@ -100,7 +104,7 @@ def test_get_int(key, monkeypatch):
     assert os.environ.get(key) == value
     assert ParamStore.get_int(key) == expected_int
 
-    monkeypatch.delenv(key)
+    monkeypatch.delenv(key, raising=False)
     assert os.environ.get(key) is None
     assert ParamStore.get(key) is None
 

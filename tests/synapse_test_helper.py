@@ -1,7 +1,5 @@
-import os
 import uuid
 from www.core import Synapse
-import synapseclient
 from synapseclient import Project, Folder, File, Team, Wiki
 
 
@@ -21,6 +19,14 @@ class SynapseTestHelper:
 
     def uniq_name(self, prefix='', postfix=''):
         return "{0}{1}_{2}{3}".format(prefix, self.test_id(), uuid.uuid4().hex, postfix)
+
+    def fake_synapse_id(self):
+        """
+        Gets a Synapse entity ID that does not exist in Synapse.
+
+        :return: String
+        """
+        return 'syn000'
 
     def dispose_of(self, *syn_objects):
         """

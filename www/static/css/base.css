@@ -1,0 +1,201 @@
+body {
+  background-color: #F0F0EE;
+}
+
+main > .container {
+  padding: 60px 15px 0;
+}
+
+.footer {
+  color: #e0e0e0;
+  background-color: #373838;
+}
+
+.footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+/* Remove rounding from cards, buttons and inputs */
+.card, .btn, .form-control {
+  border-radius: 0;
+}
+
+/* Navbar */
+.navbar-default {
+  background-color: #8CB7C7;
+  border-color: #8CB7C7;
+}
+
+/* Title */
+.navbar-default .navbar-brand {
+  color: #fff;
+}
+
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+  color: #fff;
+}
+
+/* Link */
+.navbar-default .navbar-nav > li > a {
+  color: #fff;
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > .active > a:focus {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.navbar-default .navbar-nav > .open > a,
+.navbar-default .navbar-nav > .open > a:hover,
+.navbar-default .navbar-nav > .open > a:focus {
+  color: #fff;
+  background-color: #D5D5D5;
+}
+
+/* Caret */
+.navbar-default .navbar-nav > .dropdown > a .caret {
+  border-top-color: #777;
+  border-bottom-color: #777;
+}
+
+.navbar-default .navbar-nav > .dropdown > a:hover .caret,
+.navbar-default .navbar-nav > .dropdown > a:focus .caret {
+  border-top-color: #333;
+  border-bottom-color: #333;
+}
+
+.navbar-default .navbar-nav > .open > a .caret,
+.navbar-default .navbar-nav > .open > a:hover .caret,
+.navbar-default .navbar-nav > .open > a:focus .caret {
+  border-top-color: #555;
+  border-bottom-color: #555;
+}
+
+/* Dropdown */
+.navbar-default .dropdown-menu {
+  background-color: #6698AD;
+  border-radius: 0;
+}
+
+.navbar-default .dropdown-item {
+  background-color: #6698AD;
+  color: #fff;
+}
+
+.navbar-default .dropdown-item:hover,
+.navbar-default .dropdown-item:focus {
+  color: white;
+  background-color: #6698AD;
+  text-decoration: underline;
+}
+
+/* Primary Button*/
+
+.btn-primary {
+  color: #fff;
+  background-color: #3086AB;
+  border-color: #3086AB
+}
+
+.btn-primary:hover {
+  color: #fff;
+  background-color: #266A87;
+  border-color: #266A87
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  box-shadow: 0 0 0 .1rem rgba(0, 90, 90, 0.5)
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+  color: #fff;
+  background-color: #266A87;
+  border-color: #005a5a
+}
+
+.btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active, .show > .btn-primary.dropdown-toggle {
+  color: #fff;
+  background-color: #266A87;
+  border-color: #000
+}
+
+.btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus, .show > .btn-primary.dropdown-toggle:focus {
+  box-shadow: 0 0 0 .1rem rgba(0, 90, 90, 0.5)
+}
+
+.btn-outline-primary {
+  color: #266A87;
+  background-color: transparent;
+  background-image: none;
+  border-color: #266A87
+}
+
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: #266A87;
+  border-color: #266A87
+}
+
+.btn-outline-primary:focus, .btn-outline-primary.focus {
+  box-shadow: 0 0 0 .1rem rgba(38, 106, 135, 0.5)
+}
+
+.btn-outline-primary.disabled, .btn-outline-primary:disabled {
+  color: #266A87;
+  background-color: transparent
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active, .btn-outline-primary:not(:disabled):not(.disabled).active, .show > .btn-outline-primary.dropdown-toggle {
+  color: #fff;
+  background-color: #266A87;
+  border-color: #266A87
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active:focus, .btn-outline-primary:not(:disabled):not(.disabled).active:focus, .show > .btn-outline-primary.dropdown-toggle:focus {
+  box-shadow: 0 0 0 .1rem rgba(38, 106, 135, 0.5)
+}
+
+
+/* Header Log in/out button */
+.btn-outline-login-out {
+  color: #fff;
+  background-color: transparent;
+  background-image: none;
+  border-color: transparent;
+}
+
+.btn-outline-login-out:hover {
+  color: #fff;
+  background-color: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+}
+
+.btn-outline-login-out:focus, .btn-outline-login-out.focus {
+  box-shadow: none
+}
+
+.btn-outline-login-out.disabled, .btn-outline-login-out:disabled {
+  color: #fff;
+  background-color: transparent
+}
+
+.btn-outline-login-out:not(:disabled):not(.disabled):active, .btn-outline-login-out:not(:disabled):not(.disabled).active, .show > .btn-outline-login-out.dropdown-toggle {
+  color: #fff;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.btn-outline-login-out:not(:disabled):not(.disabled):active:focus, .btn-outline-login-out:not(:disabled):not(.disabled).active:focus, .show > .btn-outline-login-out.dropdown-toggle:focus {
+  box-shadow: none
+}

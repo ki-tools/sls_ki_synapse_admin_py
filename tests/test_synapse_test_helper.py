@@ -21,6 +21,16 @@ def test_uniq_name(syn_test_helper):
         last_name = uniq_name
 
 
+def test_fake_synapse_id(syn_test_helper, syn_client):
+    fake_id = syn_test_helper.fake_synapse_id()
+
+    with pytest.raises(synapseclient.exceptions.SynapseHTTPError) as ex:
+        syn_client.get(fake_id)
+
+    err_str = str(ex.value)
+    assert 'The resource you are attempting to access cannot be found' in err_str
+
+
 def test_dispose_of(syn_test_helper):
     # Add a single object
     for obj in [object(), object()]:

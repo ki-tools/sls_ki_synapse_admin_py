@@ -14,6 +14,11 @@ test:
 	pytest -v --cov --cov-report=term --cov-report=html
 
 
+.PHONY: package
+package:
+	sls package
+
+
 .PHONY: deploy_development
 deploy_development:
 	sls deploy --stage development
@@ -47,6 +52,14 @@ deploy_production:
 	sls deploy --stage production
 
 
+.PHONY: deploy_prod
+deploy_prod: deploy_production
+
+
 .PHONY: remove_production
 remove_production:
 	sls remove --stage production
+
+
+.PHONY: remove_prod
+remove_prod: remove_production

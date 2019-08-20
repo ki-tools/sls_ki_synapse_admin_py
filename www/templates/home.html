@@ -8,7 +8,7 @@
     {% if not current_user.is_authenticated %}
     <div>
       <div>Please login to access administrative functions.</div>
-      <a class="btn btn-success" href="{{ url_for('login') }}">Login with Google</a>
+      <a class="btn btn-primary" href="{{ url_for('login') }}">Login with Google</a>
     </div>
     {% endif %}
 

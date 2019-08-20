@@ -42,7 +42,7 @@ def syn_client():
     return Synapse.client()
 
 
-@pytest.fixture()
+@pytest.fixture
 def syn_test_helper():
     """
     Provides the SynapseTestHelper as a fixture per function.
@@ -50,6 +50,14 @@ def syn_test_helper():
     helper = SynapseTestHelper()
     yield helper
     helper.dispose()
+
+
+@pytest.fixture
+def fake_synapse_id(syn_test_helper):
+    """
+    Provides a Synapse entity ID that does not exist.
+    """
+    return syn_test_helper.fake_synapse_id()
 
 
 @pytest.fixture
