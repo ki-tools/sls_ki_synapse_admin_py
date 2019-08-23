@@ -1,4 +1,5 @@
 from www.core import Synapse, WWWEnv
+from www.core.log import logger
 import synapseclient as syn
 from synapseclient.exceptions import SynapseHTTPError
 
@@ -28,7 +29,7 @@ class EncryptSynapseSpaceService:
                 self.errors.append(
                     'Environment variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Storage location cannot be set.')
         except Exception as ex:
-            # TODO: log this.
+            logger.exception(ex)
             self.errors.append('Error setting storage location: {0}'.format(ex))
 
         return self
@@ -60,6 +61,7 @@ class EncryptSynapseSpaceService:
             try:
                 project = Synapse.client().get(syn.Project(id=project_id))
             except SynapseHTTPError as ex:
+                logger.exception(ex)
                 if ex.response.status_code == 404:
                     error = 'Synapse project ID: {0} does not exist.'.format(project_id)
                 elif ex.response.status_code == 403:
@@ -91,6 +93,7 @@ class EncryptSynapseSpaceService:
                     if storage_id in storage_ids:
                         error = 'Storage location already set for Synapse project: {0}'.format(project_id)
             except SynapseHTTPError as ex:
+                logger.exception(ex)
                 if ex.response.status_code == 403:
                     error = 'This service (Synapse user: {0}) does not have administrator access to Synapse project: {0}'.format(
                         WWWEnv.SYNAPSE_USERNAME(), project_id)

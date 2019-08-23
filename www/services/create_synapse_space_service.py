@@ -1,4 +1,5 @@
 from www.core import WWWEnv
+from www.core.log import logger
 from www.core.synapse import Synapse
 import synapseclient as syn
 import json
@@ -65,7 +66,7 @@ class CreateSynapseSpaceService:
             try:
                 self.project = Synapse.client().store(syn.Project(name=self.project_name))
             except Exception as ex:
-                # TODO: log this.
+                logger.exception(ex)
                 self.errors.append('Error creating project: {0}'.format(ex))
 
         return self.project and not self.errors
@@ -80,7 +81,7 @@ class CreateSynapseSpaceService:
                 self.warnings.append(
                     'Environment variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Cannot set storage location.')
         except Exception as ex:
-            # TODO: log this.
+            logger.exception(ex)
             self.errors.append('Error setting storage location: {0}'.format(ex))
 
         return not self.errors
@@ -90,7 +91,7 @@ class CreateSynapseSpaceService:
         try:
             self.team = Synapse.client().store(syn.Team(name=team_name))
         except Exception as ex:
-            # TODO: log this.
+            logger.exception(ex)
             self.errors.append('Error creating team: {0}'.format(ex))
 
         return self.team and not self.errors
@@ -99,7 +100,7 @@ class CreateSynapseSpaceService:
         try:
             Synapse.client().setPermissions(self.project, self.team.id, accessType=Synapse.CAN_EDIT_AND_DELETE_PERMS)
         except Exception as ex:
-            # TODO: log this.
+            logger.exception(ex)
             self.errors.append('Error assigning team to project: {0}'.format(ex))
 
         return not self.errors
@@ -114,7 +115,7 @@ class CreateSynapseSpaceService:
                     }
                     Synapse.client().restPOST('/membershipInvitation', body=json.dumps(body))
             except Exception as ex:
-                # TODO: log this.
+                logger.exception(ex)
                 self.errors.append('Error inviting emails to team: {0}'.format(ex))
         else:
             self.warnings.append('No emails specified. No users will be invited to this project.')
@@ -134,7 +135,7 @@ class CreateSynapseSpaceService:
                 self.warnings.append(
                     'Environment variable: CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS not set. Admin teams will not be added to this project.')
         except Exception as ex:
-            # TODO: log this.
+            logger.exception(ex)
             self.errors.append('Error adding admin teams to project: {0}'.format(ex))
 
         return not self.errors
@@ -144,7 +145,7 @@ class CreateSynapseSpaceService:
             for folder_name in self.DEFAULT_FOLDER_NAMES:
                 Synapse.client().store(syn.Folder(name=folder_name, parent=self.project))
         except Exception as ex:
-            # TODO: log this.
+            logger.exception(ex)
             self.errors.append('Error creating folders: {0}'.format(ex))
 
         return not self.errors
@@ -167,7 +168,7 @@ class CreateSynapseSpaceService:
                 self.warnings.append(
                     'Environment variable: CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
         except Exception as ex:
-            # TODO: log this.
+            logger.exception(ex)
             self.errors.append('Error creating wiki: {0}'.format(ex))
 
         return not self.errors
@@ -183,7 +184,7 @@ class CreateSynapseSpaceService:
                     if project:
                         error = 'Project with name: "{0}" already exists.'.format(project_name)
             except Exception as ex:
-                # TODO: log this.
+                logger.exception(ex)
                 error = 'Error validating project name: {0}'.format(ex)
 
             return error
