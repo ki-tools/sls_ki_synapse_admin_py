@@ -40,9 +40,5 @@ A [Serverless](https://serverless.com/framework/docs/getting-started) applicatio
   
 ## Authentication
 
-- TBD...
-
-## Manual Testing
-
-- View Logs: `sls logs -f graphql --tail`
-- TBD...
+- Authentication will be done via Google OAuth.
+- A whitelist of email address will be stored in an environment variable (on SSM) to restrict access to the site.
