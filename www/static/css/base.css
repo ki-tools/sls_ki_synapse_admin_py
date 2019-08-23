@@ -16,6 +16,10 @@ main > .container {
   padding-left: 15px;
 }
 
+.field-error {
+  color: red;
+}
+
 /* Remove rounding from cards, buttons and inputs */
 .card, .btn, .form-control {
   border-radius: 0;

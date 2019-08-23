@@ -12,10 +12,13 @@ def synapse_space_create():
     errors = []
     if form.validate_on_submit():
         service = CreateSynapseSpaceService(form.project_name, form.valid_emails)
-        errors = service.execute()
+        errors = service.execute().errors
+        warnings = service.warnings
 
         if not errors:
-            flash('Synapse space created successfully')
+            flash('Synapse project {0} has been created.'.format(service.project.id))
+            if warnings:
+                flash('WARNINGS: {0}'.format(', '.join(warnings)))
             return redirect(url_for('synapse_space_create'))
 
     return render_template('synapse_space/create.html', form=form, errors=errors)
@@ -26,12 +29,12 @@ def synapse_space_create():
 def synapse_space_encrypt():
     form = EncryptSynapseSpaceForm()
     errors = []
-    if form.validate_on_submit() and form.submit.data:
-        service = EncryptSynapseSpaceService(form.project_id.data)
-        errors = service.execute()
+    if form.validate_on_submit() and form.field_submit.data:
+        service = EncryptSynapseSpaceService(form.field_project_id.data)
+        errors = service.execute().errors
 
         if not errors:
-            flash('Synapse project {0} has been encrypted'.format(service.project_id))
+            flash('Synapse project {0} has been encrypted.'.format(service.project_id))
             return redirect(url_for('synapse_space_encrypt'))
 
     return render_template('synapse_space/encrypt.html', form=form, errors=errors)

@@ -125,6 +125,24 @@ def test_get_int(key, monkeypatch):
 
 
 @mock_ssm
+def test_get_list(key, monkeypatch):
+    # TODO: also test 'only_from_env' param
+    value = ' a , b,c ,1  , 2, 3,,  ,   ,'
+    expected_list = ['a', 'b', 'c', '1', '2', '3']
+
+    # From OS
+    monkeypatch.setenv(key, value)
+    assert ParamStore.get_list(key) == expected_list
+
+    monkeypatch.delenv(key, raising=False)
+    assert os.environ.get(key) is None
+
+    # From SSM
+    ParamStore._set_ssm_parameter(key, value)
+    assert ParamStore.get_list(key) == expected_list
+
+
+@mock_ssm
 def test__get_from_os(key, value, monkeypatch):
     assert os.environ.get(key) is None
     assert ParamStore._get_from_os(key) is None

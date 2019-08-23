@@ -32,16 +32,5 @@
     "DOMAIN_CREATE_ROUTE_53_RECORD": true,
     "DOMAIN_ENDPOINT_TYPE": "regional",
     "FLASK_DEBUG": "False"
-  },
-  "test": {
-    "AWS_PROFILE": "dev",
-    "AWS_REGION": "us-west-2",
-    "DOMAIN_ENABLED": false,
-    "DOMAIN_NAME": "web-test.mydomain.com",
-    "DOMAIN_BASE_PATH": "",
-    "DOMAIN_CERTIFICATE_NAME": "*.mydomain.com",
-    "DOMAIN_CREATE_ROUTE_53_RECORD": true,
-    "DOMAIN_ENDPOINT_TYPE": "regional",
-    "FLASK_DEBUG": "False"
   }
 }

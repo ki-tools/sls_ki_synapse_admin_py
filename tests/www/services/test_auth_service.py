@@ -1,6 +1,6 @@
 import pytest
 import json
-from www.core import ParamStore, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
+from www.core import WWWEnv, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
 from www.services import AuthService
 import responses
 
@@ -52,7 +52,7 @@ def mk_stub_google_endpoints(request_base_url, google_provider_config_url, googl
                 'token_endpoint': google_token_url,
                 'userinfo_endpoint': google_userinfo_url
             }
-            res_mock.add(responses.GET, ParamStore.GOOGLE_DISCOVERY_URL(), status=200, body=json.dumps(body))
+            res_mock.add(responses.GET, WWWEnv.GOOGLE_DISCOVERY_URL(), status=200, body=json.dumps(body))
 
         # google_token_endpoint
         if with_token or with_all:
@@ -90,7 +90,7 @@ def mk_stub_google_endpoints(request_base_url, google_provider_config_url, googl
 @pytest.fixture
 def expected_redirect_uri(google_provider_config_url):
     return '{0}?response_type=code&client_id={1}&redirect_uri=https%3A%2F%2Fwww.test.com%2Fbase_url%2Fcallback&scope=openid+email+profile'.format(
-        google_provider_config_url, ParamStore.GOOGLE_CLIENT_ID())
+        google_provider_config_url, WWWEnv.GOOGLE_CLIENT_ID())
 
 
 def test_get_redirect_uri(mk_stub_google_endpoints, request_base_url, expected_redirect_uri):
@@ -104,7 +104,7 @@ def test_handle_callback_and_login(mk_stub_google_endpoints, call_handle_callbac
     with responses.RequestsMock() as res_mock:
         email = 'random.user@test.com'
         mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email': email}, login_whitelist=True)
-        assert email in ParamStore.LOGIN_WHITELIST()
+        assert email in WWWEnv.LOGIN_WHITELIST()
         user = call_handle_callback_and_login()
         assert user is not None
         assert user.email == email

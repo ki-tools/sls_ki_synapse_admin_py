@@ -3,7 +3,7 @@ from oauthlib.oauth2 import WebApplicationClient
 from flask import Flask
 from www.models import User
 import www.config as config
-from www.core import ParamStore
+from www.core import WWWEnv
 
 # Load the config if running an applicable environment.
 config.load_local_if_applicable()
@@ -17,21 +17,21 @@ login_manager.login_view = 'login'
 login_manager.session_protection = "strong"
 
 # OAuth 2 client setup.
-auth_client = WebApplicationClient(ParamStore.GOOGLE_CLIENT_ID())
+auth_client = WebApplicationClient(WWWEnv.GOOGLE_CLIENT_ID())
 
 
 def init_all():
-    if ParamStore.FLASK_LOGIN_DISABLED() and ParamStore.FLASK_ENV() != config.Envs.TEST:
+    if WWWEnv.FLASK_LOGIN_DISABLED() and WWWEnv.FLASK_ENV() != config.Envs.TEST:
         raise Exception('Only the "{0}" environment can have FLASK_LOGIN_DISABLED set to True'.format(config.Envs.TEST))
 
     login_manager.init_app(app)
 
 
 with app.app_context():
-    app.secret_key = ParamStore.SECRET_KEY()
-    app.testing = ParamStore.FLASK_TESTING()
-    app.config['LOGIN_DISABLED'] = ParamStore.FLASK_LOGIN_DISABLED()
-    app.debug = ParamStore.FLASK_DEBUG()
+    app.secret_key = WWWEnv.SECRET_KEY()
+    app.testing = WWWEnv.FLASK_TESTING()
+    app.config['LOGIN_DISABLED'] = WWWEnv.FLASK_LOGIN_DISABLED()
+    app.debug = WWWEnv.FLASK_DEBUG()
 
     init_all()
 

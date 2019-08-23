@@ -38,15 +38,19 @@
       {% endif %}
 
       <div class="form-group">
-        {{ form.project_id.label }}
-        {{ form.project_id(class_='form-control') }}
-        {% for error in form.project_id.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
+        {{ form.field_project_id.label }}
+        {{ form.field_project_id(class_='form-control') }}
+        {% if form.field_project_id.errors %}
+        <div>
+          {% for error in form.field_project_id.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
 
       <div class="form-group">
-        {{ form.check_project(class_='btn btn-primary') }}
+        {{ form.field_check_project(class_='btn btn-primary') }}
       </div>
 
       {% if form.can_encrypt %}
@@ -54,13 +58,11 @@
         <div class="card-body">
           <h5 class="card-title">Confirm Synapse Project</h5>
           <p class="card-text">
-
-
           <div class="form-group row">
             <label for="confirmProjectId" class="col-sm-2 col-form-label">Project ID</label>
             <div class="col-sm-10">
               <input type="text" readonly class="form-control-plaintext" id="confirmProjectId"
-                     value="{{ form.project_id.data }}">
+                     value="{{ form.field_project_id.data }}">
             </div>
           </div>
           <div class="form-group row">
@@ -70,9 +72,8 @@
                      value="{{ form.project_name }}">
             </div>
           </div>
-
           </p>
-          {{ form.submit(class_='btn btn-primary') }}
+          {{ form.field_submit(class_='btn btn-primary') }}
         </div>
       </div>
       {% endif %}

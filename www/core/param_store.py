@@ -1,7 +1,6 @@
 import os
 import boto3
 import logging
-import uuid
 
 
 class ParamStore:
@@ -48,9 +47,17 @@ class ParamStore:
         if isinstance(value, int):
             return value
         elif value is not None and str(value).strip() == '':
-            value = None
+            return None
         elif value is not None:
             return int(value)
+
+    @classmethod
+    def get_list(cls, key, default=None, only_from_env=False, delimiter=','):
+        value = cls.get(key, default=default, only_from_env=only_from_env)
+        if value:
+            value = [v.strip() for v in value.split(delimiter) if v and v.strip()]
+
+        return value
 
     @classmethod
     def _get_from_os(cls, key):
@@ -129,87 +136,3 @@ class ParamStore:
             raise KeyError('Environment variable not set: SERVICE_STAGE')
 
         return '/{0}/{1}/{2}'.format(service_name, service_stage, key)
-
-    """
-    ===============================================================================================
-    Getter Methods.
-    ===============================================================================================
-    """
-
-    @classmethod
-    def FLASK_ENV(cls, default='development'):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
-        return cls.get('FLASK_ENV', default=default, only_from_env=True)
-
-    @classmethod
-    def FLASK_DEBUG(cls, default=False):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
-        return cls.get_bool('FLASK_DEBUG', default=default, only_from_env=True)
-
-    @classmethod
-    def FLASK_TESTING(cls, default=False):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
-        return cls.get_bool('FLASK_TESTING', default=default, only_from_env=True)
-
-    @classmethod
-    def FLASK_LOGIN_DISABLED(cls, default=False):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
-        return cls.get_bool('FLASK_LOGIN_DISABLED', default=default, only_from_env=True)
-
-    @classmethod
-    def SERVICE_NAME(cls, default=None):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
-        return cls.get('SERVICE_NAME', default=default, only_from_env=True)
-
-    @classmethod
-    def SERVICE_STAGE(cls, default=None):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
-        return cls.get('SERVICE_STAGE', default=default, only_from_env=True)
-
-    @classmethod
-    def SECRET_KEY(cls, default=str(uuid.uuid4())):
-        return cls.get('SECRET_KEY', default)
-
-    @classmethod
-    def LOG_LEVEL(cls, default=None):
-        return cls.get('LOG_LEVEL', default)
-
-    @classmethod
-    def SYNAPSE_USERNAME(cls, default=None):
-        return cls.get('SYNAPSE_USERNAME', default)
-
-    @classmethod
-    def SYNAPSE_PASSWORD(cls, default=None):
-        return cls.get('SYNAPSE_PASSWORD', default)
-
-    @classmethod
-    def SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(cls, default=None):
-        return cls.get_int('SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID', default)
-
-    @classmethod
-    def GOOGLE_CLIENT_ID(cls, default=None):
-        return cls.get('GOOGLE_CLIENT_ID', default)
-
-    @classmethod
-    def GOOGLE_CLIENT_SECRET(cls, default=None):
-        return cls.get('GOOGLE_CLIENT_SECRET', default)
-
-    @classmethod
-    def GOOGLE_DISCOVERY_URL(cls, default='https://accounts.google.com/.well-known/openid-configuration'):
-        return cls.get('GOOGLE_DISCOVERY_URL', default)
-
-    @classmethod
-    def LOGIN_WHITELIST(cls, default=''):
-        return cls.get('LOGIN_WHITELIST', default)

@@ -1,6 +1,6 @@
 import os
 import json
-from www.core import ParamStore
+from www.core import WWWEnv
 
 
 class Envs:
@@ -18,8 +18,8 @@ def load_local_if_applicable():
 
     :return: True if the correct environment is set and the config file was found and loaded else False.
     """
-    if ParamStore.FLASK_ENV() in Envs.ALLOWED_LOCAL_ENVS:
-        return load_local(ParamStore.FLASK_ENV())
+    if WWWEnv.FLASK_ENV() in Envs.ALLOWED_LOCAL_ENVS:
+        return load_local(WWWEnv.FLASK_ENV())
 
 
 def load_local(flask_env):

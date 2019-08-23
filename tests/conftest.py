@@ -11,9 +11,9 @@ config.load_local(config.Envs.TEST)
 from www import server
 from www.server import app
 from tests.synapse_test_helper import SynapseTestHelper
-from www.core import Synapse, ParamStore
+from www.core import Synapse, WWWEnv
 
-assert ParamStore.FLASK_ENV() == config.Envs.TEST
+assert WWWEnv.FLASK_ENV() == config.Envs.TEST
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def login_enabled(test_app):
     test_app.config['LOGIN_DISABLED'] = False
     server.init_all()
     yield
-    test_app.config['LOGIN_DISABLED'] = ParamStore.FLASK_LOGIN_DISABLED()
+    test_app.config['LOGIN_DISABLED'] = WWWEnv.FLASK_LOGIN_DISABLED()
     server.init_all()
 
 

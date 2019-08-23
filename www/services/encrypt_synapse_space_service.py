@@ -1,14 +1,15 @@
-from www.core import Synapse, ParamStore
+from www.core import Synapse, WWWEnv
 import synapseclient as syn
 from synapseclient.exceptions import SynapseHTTPError
 
 
-class EncryptSynapseSpaceService(object):
+class EncryptSynapseSpaceService:
     def __init__(self, project_id):
         """
         :param project_id: The Project ID to set the storage location on.
         """
         self.project_id = project_id
+        self.errors = []
 
     def execute(self):
         """
@@ -17,77 +18,83 @@ class EncryptSynapseSpaceService(object):
 
         :return: List of error messages or an empty list.
         """
-        errors = []
+        self.errors = []
 
         try:
-            storage_location_id = ParamStore.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
-            Synapse.client().setStorageLocation(self.project_id, storage_location_id)
+            storage_location_id = WWWEnv.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
+            if storage_location_id:
+                Synapse.client().setStorageLocation(self.project_id, storage_location_id)
+            else:
+                self.errors.append(
+                    'Environment variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Storage location cannot be set.')
         except Exception as ex:
             # TODO: log this.
-            errors.append('Unknown error setting storage location.')
+            self.errors.append('Error setting storage location: {0}'.format(ex))
 
-        return errors
+        return self
 
-    def validate(self):
-        """
-        Validates that the Project can have its storage setting changed.
+    class Validations:
 
-        :return: Project (or None) and error message (or None)
-        """
-        project = None
-        error = None
+        @classmethod
+        def validate(cls, project_id):
+            """
+            Validates that the Project can have its storage setting changed.
 
-        project, error = self._get_project()
-        if not error:
-            storage_setting, error = self._get_project_storage_setting()
+            :return: Project (or None) and error message (or None)
+            """
+            project, error = cls._get_project(project_id)
+            if not error:
+                storage_setting, error = cls._get_project_storage_setting(project_id)
 
-        return project, error
+            return project, error
 
-    def _get_project(self):
-        """
-        Gets the Project from Synapse.
+        @classmethod
+        def _get_project(cls, project_id):
+            """
+            Gets the Project from Synapse.
 
-        :return: Project (or None) and error message (or None)
-        """
-        project = None
-        error = None
-        try:
-            project = Synapse.client().get(syn.Project(id=self.project_id))
-        except SynapseHTTPError as ex:
-            if ex.response.status_code == 404:
-                error = 'Synapse project ID: {0} does not exist.'.format(self.project_id)
-            elif ex.response.status_code == 403:
-                error = 'This service (Synapse user: {0}) does not have access to Synapse project ID: {1}'.format(
-                    ParamStore.SYNAPSE_USERNAME(), self.project_id)
-            else:
-                error = 'Unknown error getting synapse project.'
+            :return: Project (or None) and error message (or None)
+            """
+            project = None
+            error = None
+            try:
+                project = Synapse.client().get(syn.Project(id=project_id))
+            except SynapseHTTPError as ex:
+                if ex.response.status_code == 404:
+                    error = 'Synapse project ID: {0} does not exist.'.format(project_id)
+                elif ex.response.status_code == 403:
+                    error = 'This service (Synapse user: {0}) does not have access to Synapse project ID: {1}'.format(
+                        WWWEnv.SYNAPSE_USERNAME(), project_id)
+                else:
+                    error = 'Error getting synapse project: {0}'.format(ex)
 
-        return project, error
+            return project, error
 
-    def _get_project_storage_setting(self):
-        """
-        Gets the storage setting for the Project.
+        @classmethod
+        def _get_project_storage_setting(cls, project_id):
+            """
+            Gets the storage setting for the Project.
 
-        :param project: The Project to get storage settings for.
-        :return: Storage setting (or None) and error message (or None)
-        """
-        storage_setting = None
-        error = None
+            :param project: The Project to get storage settings for.
+            :return: Storage setting (or None) and error message (or None)
+            """
+            storage_setting = None
+            error = None
 
-        # Check if the project is already encrypted.
-        try:
-            storage_id = ParamStore.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
-            storage_setting = Synapse.client().getProjectSetting(self.project_id, 'upload')
+            # Check if the project is already encrypted.
+            try:
+                storage_id = WWWEnv.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
+                storage_setting = Synapse.client().getProjectSetting(project_id, 'upload')
 
-            if storage_setting is not None:
-                storage_ids = storage_setting.get('locations')
-                if storage_id in storage_ids:
-                    error = 'Storage location already set for Synapse project: {0}'.format(self.project_id)
-        except SynapseHTTPError as ex:
-            if ex.response.status_code == 403:
-                error = 'This service (Synapse user: {0}) does not have administrator access to Synapse project: {0}'.format(
-                    ParamStore.SYNAPSE_USERNAME(), self.project_id)
-            else:
-                error = 'Unknown error getting storage settings.'
+                if storage_setting is not None:
+                    storage_ids = storage_setting.get('locations')
+                    if storage_id in storage_ids:
+                        error = 'Storage location already set for Synapse project: {0}'.format(project_id)
+            except SynapseHTTPError as ex:
+                if ex.response.status_code == 403:
+                    error = 'This service (Synapse user: {0}) does not have administrator access to Synapse project: {0}'.format(
+                        WWWEnv.SYNAPSE_USERNAME(), project_id)
+                else:
+                    error = 'Error getting storage settings: {0}'.format(ex)
 
-        return storage_setting, error
+            return storage_setting, error

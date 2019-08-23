@@ -1,7 +1,4 @@
-from www.core import ParamStore
-
-
-class User(object):
+class User:
     def __init__(self, id, email=None):
         self.id = id
         self.email = email

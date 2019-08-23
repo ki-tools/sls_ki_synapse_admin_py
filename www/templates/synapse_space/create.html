@@ -3,16 +3,6 @@
 {% block body %}
 <div class="row">
   <div class="col">
-    <h1>Create Synapse Space</h1>
-    <div class="alert alert-danger" role="alert">
-      <div>This does not create anything on Synapse yet.</div>
-      <div>This form will only do validation of the input fields against Synapse.</div>
-      <div>Feel free to play with it and click the button.</div>
-    </div>
-  </div>
-</div>
-<div class="row">
-  <div class="col">
     <form method="POST" action="">
       {{ form.csrf_token }}
 
@@ -43,27 +33,42 @@
       {% endif %}
 
       <div class="form-group">
-        {{ form.institution_name.label }}
-        {{ form.institution_name(class_='form-control') }}
-        {% for error in form.institution_name.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
+        {{ form.field_institution_name.label }}
+        {{ form.field_institution_name(class_='form-control') }}
+        {% if form.field_institution_name.errors %}
+        <div>
+          {% for error in form.field_institution_name.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
       <div class="form-group">
-        {{ form.pi_name.label }}
-        {{ form.pi_name(class_='form-control') }}
-        {% for error in form.pi_name.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
+        {{ form.field_pi_name.label }}
+        {{ form.field_pi_name(class_='form-control') }}
+        {% if form.field_pi_name.errors %}
+        <div>
+          {% for error in form.field_pi_name.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
       <div class="form-group">
-        {{ form.emails.label }}
-        {{ form.emails(class_='form-control') }}
-        {% for error in form.emails.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
+        {{ form.field_emails.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_emails(class_='form-control') }}
+        <small class="text-muted">
+          Comma separated list of email addresses. These emails will be invited to join the Synapse project.
+        </small>
+        {% if form.field_emails.errors %}
+        <div>
+          {% for error in form.field_emails.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
-      {{ form.submit(class_='btn btn-primary') }}
+      {{ form.field_submit(class_='btn btn-primary') }}
     </form>
   </div>
 </div>

@@ -1,11 +1,10 @@
-from .param_store import ParamStore
+from . import WWWEnv
 import os
 import tempfile
 import synapseclient
 
 
 class Synapse:
-
     _synapse_client = None
 
     ADMIN_PERMS = [
@@ -53,8 +52,8 @@ class Synapse:
             synapseclient.cache.CACHE_ROOT_DIR = os.path.join(
                 tempfile.gettempdir(), 'synapseCache')
 
-            syn_user = ParamStore.SYNAPSE_USERNAME()
-            syn_pass = ParamStore.SYNAPSE_PASSWORD()
+            syn_user = WWWEnv.SYNAPSE_USERNAME()
+            syn_pass = WWWEnv.SYNAPSE_PASSWORD()
             cls._synapse_client = synapseclient.Synapse()
             cls._synapse_client.login(syn_user, syn_pass, silent=True)
 
