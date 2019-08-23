@@ -49,8 +49,11 @@ def import_into_ssm(service_name, stage):
     ssm_config = load_json(os.path.join(
         script_dir, '..', 'private.ssm.env.json')).get(stage)
     for key, value in ssm_config.items():
-        print('{0}: {1}'.format(key, value))
-        ParamStore._set_ssm_parameter(key, value)
+        if value:
+            print('{0}: {1}'.format(key, value))
+            ParamStore._set_ssm_parameter(key, value)
+        else:
+            print('Value not set for key: {0}, key will not be set.'.format(key))
 
     print('')
 
