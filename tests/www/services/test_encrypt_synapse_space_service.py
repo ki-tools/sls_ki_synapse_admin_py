@@ -1,5 +1,5 @@
 import pytest
-from www.core import WWWEnv
+from www.core import Env
 from www.services import EncryptSynapseSpaceService
 
 
@@ -22,7 +22,7 @@ def test_execute(syn_test_helper):
     after, _ = EncryptSynapseSpaceService.Validations._get_project_storage_setting(project.id)
     assert after is not None
     assert after != before
-    assert WWWEnv.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID() in after.get('locations')
+    assert Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID() in after.get('locations')
 
 
 def test_execute_errors(syn_client, fake_synapse_id, mocker):

@@ -1,8 +1,9 @@
 import pytest
 import json
-from www.core import WWWEnv, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
+from www.core import Env, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
 from www.services import AuthService
 import responses
+from moto import mock_ssm
 
 
 @pytest.fixture
@@ -33,6 +34,7 @@ def google_userinfo_url():
     return 'https://www.test.com/google_userinfo'
 
 
+@mock_ssm
 @pytest.fixture
 def mk_stub_google_endpoints(request_base_url, google_provider_config_url, google_token_url, google_userinfo_url,
                              mocker, monkeypatch):
@@ -52,7 +54,7 @@ def mk_stub_google_endpoints(request_base_url, google_provider_config_url, googl
                 'token_endpoint': google_token_url,
                 'userinfo_endpoint': google_userinfo_url
             }
-            res_mock.add(responses.GET, WWWEnv.GOOGLE_DISCOVERY_URL(), status=200, body=json.dumps(body))
+            res_mock.add(responses.GET, Env.GOOGLE_DISCOVERY_URL(), status=200, body=json.dumps(body))
 
         # google_token_endpoint
         if with_token or with_all:
@@ -87,12 +89,14 @@ def mk_stub_google_endpoints(request_base_url, google_provider_config_url, googl
     yield _mk
 
 
+@mock_ssm
 @pytest.fixture
 def expected_redirect_uri(google_provider_config_url):
     return '{0}?response_type=code&client_id={1}&redirect_uri=https%3A%2F%2Fwww.test.com%2Fbase_url%2Fcallback&scope=openid+email+profile'.format(
-        google_provider_config_url, WWWEnv.GOOGLE_CLIENT_ID())
+        google_provider_config_url, Env.GOOGLE_CLIENT_ID())
 
 
+@mock_ssm
 def test_get_redirect_uri(mk_stub_google_endpoints, request_base_url, expected_redirect_uri):
     with responses.RequestsMock() as res_mock:
         mk_stub_google_endpoints(res_mock, with_provider_config=True)
@@ -100,16 +104,18 @@ def test_get_redirect_uri(mk_stub_google_endpoints, request_base_url, expected_r
         assert redirect_uri == expected_redirect_uri
 
 
+@mock_ssm
 def test_handle_callback_and_login(mk_stub_google_endpoints, call_handle_callback_and_login, monkeypatch):
     with responses.RequestsMock() as res_mock:
         email = 'random.user@test.com'
         mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email': email}, login_whitelist=True)
-        assert email in WWWEnv.LOGIN_WHITELIST()
+        assert email in Env.LOGIN_WHITELIST()
         user = call_handle_callback_and_login()
         assert user is not None
         assert user.email == email
 
 
+@mock_ssm
 def test_callback_raises_email_not_verified_error(mk_stub_google_endpoints, call_handle_callback_and_login):
     with responses.RequestsMock() as res_mock:
         mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email_verified': False})
@@ -118,6 +124,7 @@ def test_callback_raises_email_not_verified_error(mk_stub_google_endpoints, call
             call_handle_callback_and_login()
 
 
+@mock_ssm
 def test_callback_raises_forbidden_error(mk_stub_google_endpoints, call_handle_callback_and_login):
     with responses.RequestsMock() as res_mock:
         email = 'user.not.in.whitelist@test.com'
@@ -127,6 +134,7 @@ def test_callback_raises_forbidden_error(mk_stub_google_endpoints, call_handle_c
             call_handle_callback_and_login()
 
 
+@mock_ssm
 def test_callback_raises_login_failure_error(mk_stub_google_endpoints, call_handle_callback_and_login):
     with responses.RequestsMock() as res_mock:
         mk_stub_google_endpoints(res_mock,
@@ -138,6 +146,7 @@ def test_callback_raises_login_failure_error(mk_stub_google_endpoints, call_hand
             call_handle_callback_and_login()
 
 
+@mock_ssm
 def test_user_allowed_login(monkeypatch):
     emails = ['user1@test.com', 'user2@test.com', 'user3@test.com']
 

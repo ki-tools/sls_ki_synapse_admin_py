@@ -1,5 +1,5 @@
 from www import server
-from www.core import WWWEnv, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
+from www.core import Env, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
 from www.models import User
 import json
 import requests
@@ -57,7 +57,7 @@ class AuthService:
             token_url,
             headers=headers,
             data=body,
-            auth=(WWWEnv.GOOGLE_CLIENT_ID(), WWWEnv.GOOGLE_CLIENT_SECRET()),
+            auth=(Env.GOOGLE_CLIENT_ID(), Env.GOOGLE_CLIENT_SECRET()),
         )
 
         # Parse the tokens
@@ -96,7 +96,7 @@ class AuthService:
         :param email: The email address to check against the whitelist of emails.
         :return: True or False
         """
-        return email in WWWEnv.LOGIN_WHITELIST(default=[])
+        return email in Env.LOGIN_WHITELIST(default=[])
 
     @classmethod
     def login_user(cls, user):
@@ -124,4 +124,4 @@ class AuthService:
 
         :return: Google config has a hash.
         """
-        return requests.get(WWWEnv.GOOGLE_DISCOVERY_URL()).json()
+        return requests.get(Env.GOOGLE_DISCOVERY_URL()).json()

@@ -1,7 +1,6 @@
 .PHONY: reqs
 reqs:
-	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
+	pipenv install --dev
 
 
 .PHONY: devserve

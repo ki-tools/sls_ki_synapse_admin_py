@@ -1,4 +1,4 @@
-from www.core import Synapse, WWWEnv
+from www.core import Synapse, Env
 from www.core.log import logger
 import synapseclient as syn
 from synapseclient.exceptions import SynapseHTTPError
@@ -22,7 +22,7 @@ class EncryptSynapseSpaceService:
         self.errors = []
 
         try:
-            storage_location_id = WWWEnv.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
+            storage_location_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
             if storage_location_id:
                 Synapse.client().setStorageLocation(self.project_id, storage_location_id)
             else:
@@ -66,7 +66,7 @@ class EncryptSynapseSpaceService:
                     error = 'Synapse project ID: {0} does not exist.'.format(project_id)
                 elif ex.response.status_code == 403:
                     error = 'This service (Synapse user: {0}) does not have access to Synapse project ID: {1}'.format(
-                        WWWEnv.SYNAPSE_USERNAME(), project_id)
+                        Env.SYNAPSE_USERNAME(), project_id)
                 else:
                     error = 'Error getting synapse project: {0}'.format(ex)
 
@@ -85,7 +85,7 @@ class EncryptSynapseSpaceService:
 
             # Check if the project is already encrypted.
             try:
-                storage_id = WWWEnv.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
+                storage_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
                 storage_setting = Synapse.client().getProjectSetting(project_id, 'upload')
 
                 if storage_setting is not None:
@@ -96,7 +96,7 @@ class EncryptSynapseSpaceService:
                 logger.exception(ex)
                 if ex.response.status_code == 403:
                     error = 'This service (Synapse user: {0}) does not have administrator access to Synapse project: {0}'.format(
-                        WWWEnv.SYNAPSE_USERNAME(), project_id)
+                        Env.SYNAPSE_USERNAME(), project_id)
                 else:
                     error = 'Error getting storage settings: {0}'.format(ex)
 

@@ -1,4 +1,4 @@
-from . import WWWEnv
+from . import Env
 import os
 import tempfile
 import synapseclient
@@ -52,8 +52,8 @@ class Synapse:
             synapseclient.cache.CACHE_ROOT_DIR = os.path.join(
                 tempfile.gettempdir(), 'synapseCache')
 
-            syn_user = WWWEnv.SYNAPSE_USERNAME()
-            syn_pass = WWWEnv.SYNAPSE_PASSWORD()
+            syn_user = Env.SYNAPSE_USERNAME()
+            syn_pass = Env.SYNAPSE_PASSWORD()
             cls._synapse_client = synapseclient.Synapse()
             cls._synapse_client.login(syn_user, syn_pass, silent=True)
 

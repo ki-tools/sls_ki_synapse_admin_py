@@ -39,6 +39,7 @@ custom:
     pythonBin: python3
   pythonRequirements:
     dockerizePip: non-linux
+    usePipenv: true
     slim: true
     noDeploy:
       - pytest

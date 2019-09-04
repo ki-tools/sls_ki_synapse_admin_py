@@ -8,7 +8,7 @@ import yaml
 script_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(script_dir, '..'))
 try:
-    from www.core.param_store import ParamStore
+    from sls_tools.param_store import ParamStore
     import www.config as config
 except Exception as ex:
     print('WARNING: Failed to load param_store: {0}'.format(ex))
@@ -49,11 +49,18 @@ def import_into_ssm(service_name, stage):
     ssm_config = load_json(os.path.join(
         script_dir, '..', 'private.ssm.env.json')).get(stage)
     for key, value in ssm_config.items():
+        print('')
+        print(key)
+
         if value:
-            print('{0}: {1}'.format(key, value))
-            ParamStore._set_ssm_parameter(key, value)
+            current_value = ParamStore.get(key, store=ParamStore.Stores.SSM).value
+            if current_value != value:
+                ParamStore.set(key, value, store=ParamStore.Stores.SSM)
+                print('  - Value has been set to: {0}'.format(value))
+            else:
+                print('  - Key/value already set.')
         else:
-            print('Value not set for key: {0}, key will not be set.'.format(key))
+            print('  - WARNING: Key value not set in configuration file. Key/value NOT set in SSM.')
 
     print('')
 

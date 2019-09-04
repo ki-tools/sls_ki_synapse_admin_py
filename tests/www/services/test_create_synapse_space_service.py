@@ -1,5 +1,5 @@
 import pytest
-from www.core import Synapse, WWWEnv
+from www.core import Synapse, Env
 from www.services import CreateSynapseSpaceService
 
 
@@ -32,7 +32,7 @@ def test_it_sets_the_storage_location(syn_test_helper, syn_client):
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
-    storage_id = WWWEnv.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
+    storage_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
     storage_setting = syn_client.getProjectSetting(service.project.id, 'upload')
     storage_ids = storage_setting.get('locations')
     assert storage_id in storage_ids

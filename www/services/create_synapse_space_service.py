@@ -1,4 +1,4 @@
-from www.core import WWWEnv
+from www.core import Env
 from www.core.log import logger
 from www.core.synapse import Synapse
 import synapseclient as syn
@@ -73,7 +73,7 @@ class CreateSynapseSpaceService:
 
     def _set_storage_location(self):
         try:
-            storage_location_id = WWWEnv.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
+            storage_location_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
 
             if storage_location_id:
                 Synapse.client().setStorageLocation(self.project, storage_location_id)
@@ -124,7 +124,7 @@ class CreateSynapseSpaceService:
 
     def _assign_admin_teams_to_project(self):
         try:
-            team_ids = WWWEnv.CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS()
+            team_ids = Env.CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS()
 
             if team_ids:
                 for team_id in team_ids:
@@ -152,7 +152,7 @@ class CreateSynapseSpaceService:
 
     def _create_wiki(self):
         try:
-            source_wiki_project_id = WWWEnv.CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID()
+            source_wiki_project_id = Env.CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID()
 
             if source_wiki_project_id:
                 source_wiki = Synapse.client().getWiki(source_wiki_project_id)

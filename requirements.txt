@@ -1,9 +1,0 @@
-Flask==1.1.1
-Flask-WTF==0.14.2
-Flask-Login==0.4.1
-Werkzeug==0.15.5
-oauthlib==3.0.2
-pyOpenSSL==19.0.0
-requests==2.22.0
-synapseclient==1.9.3
-boto3==1.9.113
