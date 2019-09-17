@@ -1,6 +1,7 @@
 import pytest
 from www.core import Synapse, Env
 from www.services import CreateSynapseSpaceService
+import synapseclient as syn
 
 
 def assert_basic_service_success(syn_test_helper, service):
@@ -9,6 +10,14 @@ def assert_basic_service_success(syn_test_helper, service):
     assert len(service.errors) == 0
     syn_test_helper.dispose_of(service.project)
     syn_test_helper.dispose_of(service.team)
+
+
+def assert_basic_service_errors(syn_test_helper, service):
+    assert len(service.errors) > 0
+    if service.project:
+        syn_test_helper.dispose_of(service.project)
+    if service.team:
+        syn_test_helper.dispose_of(service.team)
 
 
 def test_it_creates_the_project(syn_test_helper):
@@ -22,6 +31,7 @@ def test_it_does_not_create_a_duplicate_project(syn_test_helper, temp_file):
     existing_project = syn_test_helper.create_project()
     service = CreateSynapseSpaceService(existing_project.name, existing_project.name)
     assert service.execute() == service
+    assert_basic_service_errors(syn_test_helper, service)
 
     assert service.project is None
     assert len(service.errors) == 1
@@ -125,6 +135,63 @@ def test_it_creates_the_wiki(syn_test_helper, syn_client, monkeypatch):
     syn_wiki = syn_client.getWiki(service.project)
     assert syn_wiki.title == template_wiki.title
     assert syn_wiki.markdown == template_wiki.markdown
+
+
+def test_it_updates_the_contribution_agreement_table(syn_test_helper, syn_client, monkeypatch):
+    # Create a project with a table to update.
+    table_project = syn_test_helper.create_project()
+    cols = [
+        syn.Column(name='Organization', columnType='STRING', maximumSize=200),
+        syn.Column(name='Contact', columnType='STRING', maximumSize=200),
+        syn.Column(name='Agreement_Link', columnType='LINK', maximumSize=1000),
+        syn.Column(name='Synapse_Project_ID', columnType='ENTITYID'),
+        syn.Column(name='Synapse_Team_ID', columnType='INTEGER')
+    ]
+    schema = syn.Schema(name='KiData_Contribution_Agreements', columns=cols, parent=table_project)
+    syn_table = syn_client.store(schema)
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID', syn_table.id)
+
+    emails = [
+        syn_test_helper.uniq_name(postfix='@test.com'),
+        syn_test_helper.uniq_name(postfix='@test.com')
+    ]
+
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name, emails=emails)
+    assert service.execute() == service
+    assert_basic_service_success(syn_test_helper, service)
+
+    rows = list(syn_client.tableQuery("select * from {0}".format(syn_table.id)))
+    assert len(rows) == 1
+    row = rows[0]
+    assert row[2] == inst_name
+    assert row[3] == emails[0]
+    assert row[4] is None
+    assert row[5] == service.project.id
+    assert str(row[6]) == str(service.team.id)
+
+
+def test_it_fails_if_the_contribution_agreement_table_schema_does_not_match(syn_test_helper, syn_client, monkeypatch):
+    # Create a project with a table to update.
+    table_project = syn_test_helper.create_project()
+    cols = [
+        syn.Column(name='Synapse_Project_ID', columnType='ENTITYID'),
+        syn.Column(name='Contact', columnType='STRING', maximumSize=200),
+        syn.Column(name='Organization', columnType='STRING', maximumSize=200),
+        syn.Column(name='Agreement_Link', columnType='LINK', maximumSize=1000),
+        syn.Column(name='Synapse_Team_ID', columnType='INTEGER')
+    ]
+    schema = syn.Schema(name='KiData_Contribution_Agreements', columns=cols, parent=table_project)
+    syn_table = syn_client.store(schema)
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID', syn_table.id)
+
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
+    assert service.execute() == service
+    assert_basic_service_errors(syn_test_helper, service)
+    assert service.errors
+    assert len(service.errors) == 1
+    assert 'does not match expected schema:' in service.errors[0]
 
 
 ###############################################################################

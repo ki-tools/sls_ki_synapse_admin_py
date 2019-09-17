@@ -55,7 +55,8 @@ class CreateSynapseSpaceService:
             return self
 
         # Update tracking table(s)
-        # TODO: implement this...
+        if not self._update_tracking_tables():
+            return self
 
         return self
 
@@ -171,6 +172,53 @@ class CreateSynapseSpaceService:
         except Exception as ex:
             logger.exception(ex)
             self.errors.append('Error creating wiki: {0}'.format(ex))
+
+        return not self.errors
+
+    def _update_tracking_tables(self):
+        if not self._update_contribution_agreement_table():
+            return False
+
+        return not self.errors
+
+    CONTRIBUTION_AGREEMENT_TABLE_COLUMNS = [
+        'Organization',
+        'Contact',
+        'Agreement_Link',
+        'Synapse_Project_ID',
+        'Synapse_Team_ID'
+    ]
+
+    def _update_contribution_agreement_table(self):
+        try:
+            table_id = Env.CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID()
+
+            if table_id:
+                # Validate the table schema matches what we are expecting.
+                table_columns = [c['name'] for c in list(Synapse.client().getTableColumns(table_id))]
+
+                if table_columns != self.CONTRIBUTION_AGREEMENT_TABLE_COLUMNS:
+                    raise Exception(
+                        'Contribution agreement table ({0}) does not match expected schema: {1}'.format(table_id,
+                                                                                                        ','.join(
+                                                                                                            self.CONTRIBUTION_AGREEMENT_TABLE_COLUMNS)))
+
+                # Add a new row to the table.
+                organization = self.institution_name
+                contact = self.emails[0] if self.emails else None
+                agreement_link = None  # Not set via this service.
+                synapse_project_id = self.project.id
+                synapse_team_id = self.team.id
+
+                rows = [[organization, contact, agreement_link, synapse_project_id, synapse_team_id]]
+
+                Synapse.client().store(syn.Table(table_id, rows))
+            else:
+                self.warnings.append(
+                    'Environment variable: CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
+        except Exception as ex:
+            logger.exception(ex)
+            self.errors.append('Error updating contribution agreement table: {0}'.format(ex))
 
         return not self.errors
 

@@ -62,10 +62,6 @@ class Env:
         return ParamStore.get('SYNAPSE_PASSWORD', default).value
 
     @staticmethod
-    def SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(default=None):
-        return ParamStore.get('SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID', default).to_int()
-
-    @staticmethod
     def GOOGLE_CLIENT_ID(default=None):
         return ParamStore.get('GOOGLE_CLIENT_ID', default).value
 
@@ -82,9 +78,17 @@ class Env:
         return ParamStore.get('LOGIN_WHITELIST', default).to_list(delimiter=',')
 
     @staticmethod
+    def SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(default=None):
+        return ParamStore.get('SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID', default).to_int()
+
+    @staticmethod
     def CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS(default=[]):
         return ParamStore.get('CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS', default).to_list(delimiter=',')
 
     @staticmethod
     def CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID(default=None):
         return ParamStore.get('CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID', default).value
+
+    @staticmethod
+    def CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID(default=None):
+        return ParamStore.get('CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID', default).value
