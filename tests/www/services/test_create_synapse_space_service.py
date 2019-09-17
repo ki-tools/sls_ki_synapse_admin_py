@@ -12,14 +12,15 @@ def assert_basic_service_success(syn_test_helper, service):
 
 
 def test_it_creates_the_project(syn_test_helper):
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name())
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
 
 def test_it_does_not_create_a_duplicate_project(syn_test_helper, temp_file):
     existing_project = syn_test_helper.create_project()
-    service = CreateSynapseSpaceService(existing_project.name)
+    service = CreateSynapseSpaceService(existing_project.name, existing_project.name)
     assert service.execute() == service
 
     assert service.project is None
@@ -28,7 +29,8 @@ def test_it_does_not_create_a_duplicate_project(syn_test_helper, temp_file):
 
 
 def test_it_sets_the_storage_location(syn_test_helper, syn_client):
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name())
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
@@ -39,7 +41,8 @@ def test_it_sets_the_storage_location(syn_test_helper, syn_client):
 
 
 def test_it_creates_the_team(syn_test_helper):
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name())
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
@@ -47,7 +50,8 @@ def test_it_creates_the_team(syn_test_helper):
 
 
 def test_it_assigns_the_team_to_the_project(syn_test_helper, syn_client):
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name())
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
@@ -62,7 +66,8 @@ def test_it_invites_the_emails_to_the_team(syn_test_helper, syn_client):
         syn_test_helper.uniq_name(postfix='@test.com')
     ]
 
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name(), emails=emails)
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name, emails=emails)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
@@ -84,7 +89,8 @@ def test_it_adds_the_admin_teams_to_the_project(syn_test_helper, syn_client, mon
     syn_admin_team_ids = list(map(lambda t: t.id, syn_admin_teams))
     monkeypatch.setenv('CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS', ','.join(syn_admin_team_ids))
 
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name())
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
@@ -95,7 +101,8 @@ def test_it_adds_the_admin_teams_to_the_project(syn_test_helper, syn_client, mon
 
 
 def test_it_creates_the_folders(syn_test_helper, syn_client):
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name())
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 
@@ -110,7 +117,8 @@ def test_it_creates_the_wiki(syn_test_helper, syn_client, monkeypatch):
     template_wiki = syn_test_helper.create_wiki(owner=wiki_project)
     monkeypatch.setenv('CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID', wiki_project.id)
 
-    service = CreateSynapseSpaceService(syn_test_helper.uniq_name())
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
     assert_basic_service_success(syn_test_helper, service)
 

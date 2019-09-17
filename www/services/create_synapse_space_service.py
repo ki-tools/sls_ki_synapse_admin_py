@@ -8,8 +8,9 @@ import json
 class CreateSynapseSpaceService:
     DEFAULT_FOLDER_NAMES = ['Research Data', 'Metadata', 'Supporting Documentation']
 
-    def __init__(self, project_name, emails=None):
+    def __init__(self, project_name, institution_name, emails=None):
         self.project_name = project_name
+        self.institution_name = institution_name
         self.emails = emails
         self.project = None
         self.team = None

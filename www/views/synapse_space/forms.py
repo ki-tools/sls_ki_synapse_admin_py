@@ -9,7 +9,8 @@ from www.services import EncryptSynapseSpaceService, CreateSynapseSpaceService
 class CreateSynapseSpaceForm(FlaskForm):
     # Form Fields
     field_institution_name = StringField('Institution Name', validators=[DataRequired()])
-    field_pi_name = StringField('PI Name', validators=[DataRequired()])
+    field_institution_short_name = StringField('Institution Short Name', validators=[DataRequired()])
+    field_pi_name = StringField('Principal Investigator Name', validators=[DataRequired()])
     field_emails = TextAreaField('Emails to add to the project')
     field_submit = SubmitField('Create')
 
@@ -19,7 +20,7 @@ class CreateSynapseSpaceForm(FlaskForm):
     invalid_emails = []
 
     # Validation Methods
-    def validate_field_institution_name(self, field):
+    def validate_field_institution_short_name(self, field):
         self.try_set_project_name()
         self.try_validate_project_name()
 
@@ -50,8 +51,8 @@ class CreateSynapseSpaceForm(FlaskForm):
 
     def try_set_project_name(self):
         self.project_name = None
-        if self.field_institution_name.data and self.field_pi_name.data:
-            self.project_name = 'KiContributor_{0}_{1}'.format(self.field_institution_name.data,
+        if self.field_institution_short_name.data and self.field_pi_name.data:
+            self.project_name = 'KiContributor_{0}_{1}'.format(self.field_institution_short_name.data,
                                                                self.field_pi_name.data)
 
     def try_validate_project_name(self):

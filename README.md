@@ -41,4 +41,4 @@ A [Serverless](https://serverless.com/framework/docs/getting-started) applicatio
 ## Authentication
 
 - Authentication will be done via Google OAuth.
-- A whitelist of email address will be stored in an environment variable (on SSM) to restrict access to the site.
+- A whitelist of email addresses will be stored in an environment variable (on SSM) to restrict access to the site.

@@ -44,6 +44,17 @@
         {% endif %}
       </div>
       <div class="form-group">
+        {{ form.field_institution_short_name.label }}
+        {{ form.field_institution_short_name(class_='form-control') }}
+        {% if form.field_institution_short_name.errors %}
+        <div>
+          {% for error in form.field_institution_short_name.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
         {{ form.field_pi_name.label }}
         {{ form.field_pi_name(class_='form-control') }}
         {% if form.field_pi_name.errors %}
