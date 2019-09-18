@@ -29,8 +29,8 @@ def import_into_ssm(service_name, stage):
     Imports the key/values from private.ssm.env.json into SSM.
     """
     # Set the service variables so ParamStore works correctly.
-    os.environ['SERVICE_NAME'] = service_name
-    os.environ['SERVICE_STAGE'] = stage
+    ParamStore.set('SERVICE_NAME', service_name, store=ParamStore.Stores.OS)
+    ParamStore.set('SERVICE_STAGE', stage, store=ParamStore.Stores.OS)
 
     print('Setting SSM Values for: {0}'.format(stage))
     print('')
