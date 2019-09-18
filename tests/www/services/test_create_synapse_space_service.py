@@ -145,7 +145,9 @@ def test_it_updates_the_contribution_agreement_table(syn_test_helper, syn_client
         syn.Column(name='Contact', columnType='STRING', maximumSize=200),
         syn.Column(name='Agreement_Link', columnType='LINK', maximumSize=1000),
         syn.Column(name='Synapse_Project_ID', columnType='ENTITYID'),
-        syn.Column(name='Synapse_Team_ID', columnType='INTEGER')
+        syn.Column(name='Synapse_Team_ID', columnType='INTEGER'),
+        syn.Column(name='Test_Col_One', columnType='STRING', maximumSize=50),
+        syn.Column(name='Test_Col_Two', columnType='STRING', maximumSize=50)
     ]
     schema = syn.Schema(name='KiData_Contribution_Agreements', columns=cols, parent=table_project)
     syn_table = syn_client.store(schema)
@@ -171,15 +173,15 @@ def test_it_updates_the_contribution_agreement_table(syn_test_helper, syn_client
     assert str(row[6]) == str(service.team.id)
 
 
-def test_it_fails_if_the_contribution_agreement_table_schema_does_not_match(syn_test_helper, syn_client, monkeypatch):
+def test_it_fails_if_the_contribution_agreement_table_does_not_have_the_required_columns(syn_test_helper,
+                                                                                         syn_client,
+                                                                                         monkeypatch):
     # Create a project with a table to update.
     table_project = syn_test_helper.create_project()
     cols = [
-        syn.Column(name='Synapse_Project_ID', columnType='ENTITYID'),
-        syn.Column(name='Contact', columnType='STRING', maximumSize=200),
-        syn.Column(name='Organization', columnType='STRING', maximumSize=200),
-        syn.Column(name='Agreement_Link', columnType='LINK', maximumSize=1000),
-        syn.Column(name='Synapse_Team_ID', columnType='INTEGER')
+        syn.Column(name=syn_test_helper.uniq_name(), columnType='STRING', maximumSize=200),
+        syn.Column(name=syn_test_helper.uniq_name(), columnType='STRING', maximumSize=200),
+        syn.Column(name=syn_test_helper.uniq_name(), columnType='STRING', maximumSize=200)
     ]
     schema = syn.Schema(name='KiData_Contribution_Agreements', columns=cols, parent=table_project)
     syn_table = syn_client.store(schema)
@@ -191,7 +193,7 @@ def test_it_fails_if_the_contribution_agreement_table_schema_does_not_match(syn_
     assert_basic_service_errors(syn_test_helper, service)
     assert service.errors
     assert len(service.errors) == 1
-    assert 'does not match expected schema:' in service.errors[0]
+    assert 'Column: Organization does not exist in table' in service.errors[0]
 
 
 ###############################################################################

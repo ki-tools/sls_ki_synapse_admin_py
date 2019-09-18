@@ -181,38 +181,19 @@ class CreateSynapseSpaceService:
 
         return not self.errors
 
-    CONTRIBUTION_AGREEMENT_TABLE_COLUMNS = [
-        'Organization',
-        'Contact',
-        'Agreement_Link',
-        'Synapse_Project_ID',
-        'Synapse_Team_ID'
-    ]
-
     def _update_contribution_agreement_table(self):
         try:
             table_id = Env.CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID()
 
             if table_id:
-                # Validate the table schema matches what we are expecting.
-                table_columns = [c['name'] for c in list(Synapse.client().getTableColumns(table_id))]
+                row = self._build_syn_table_row(table_id, {
+                    'Organization': self.institution_name,
+                    'Contact': self.emails[0] if self.emails else None,
+                    'Synapse_Project_ID': self.project.id,
+                    'Synapse_Team_ID': self.team.id
+                })
 
-                if table_columns != self.CONTRIBUTION_AGREEMENT_TABLE_COLUMNS:
-                    raise Exception(
-                        'Contribution agreement table ({0}) does not match expected schema: {1}'.format(table_id,
-                                                                                                        ','.join(
-                                                                                                            self.CONTRIBUTION_AGREEMENT_TABLE_COLUMNS)))
-
-                # Add a new row to the table.
-                organization = self.institution_name
-                contact = self.emails[0] if self.emails else None
-                agreement_link = None  # Not set via this service.
-                synapse_project_id = self.project.id
-                synapse_team_id = self.team.id
-
-                rows = [[organization, contact, agreement_link, synapse_project_id, synapse_team_id]]
-
-                Synapse.client().store(syn.Table(table_id, rows))
+                Synapse.client().store(syn.Table(table_id, [row]))
             else:
                 self.warnings.append(
                     'Environment variable: CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
@@ -221,6 +202,34 @@ class CreateSynapseSpaceService:
             self.errors.append('Error updating contribution agreement table: {0}'.format(ex))
 
         return not self.errors
+
+    def _build_syn_table_row(self, syn_table_id, row_data):
+        """Builds an array of row values for a Synapse Table.
+
+        Args:
+            syn_table_id: The ID of the Synapse table to add a row to.
+            row_data: Dictionary of field names and values.
+
+        Returns:
+            Array
+        """
+        table_columns = [c['name'] for c in list(Synapse.client().getTableColumns(syn_table_id))]
+
+        # Make sure the specified fields exist in the table.
+        for column in row_data:
+            if column not in table_columns:
+                raise Exception('Column: {0} does not exist in table: {1}'.format(column, syn_table_id))
+
+        # Build the row data.
+        new_row = []
+
+        for column in table_columns:
+            if column in row_data:
+                new_row.append(row_data[column])
+            else:
+                new_row.append(None)
+
+        return new_row
 
     class Validations:
         @classmethod
