@@ -24,30 +24,20 @@ def load_yaml(path):
         return yaml.load(f)
 
 
-def import_into_ssm(service_name, stage):
-    """
-    Imports the key/values from private.ssm.env.json into SSM.
-    """
-    # Set the service variables so ParamStore works correctly.
-    ParamStore.set('SERVICE_NAME', service_name, store=ParamStore.Stores.OS)
-    ParamStore.set('SERVICE_STAGE', stage, store=ParamStore.Stores.OS)
+def import_into_ssm(stage):
+    """Imports the key/values from private.ssm.env.json into SSM.
 
+    Args:
+        stage: The service stage to configure.
+
+    Returns:
+        None
+    """
     print('Setting SSM Values for: {0}'.format(stage))
     print('')
 
-    # Load the deploy variables so the AWS connection is available.
-    deploy_config = load_json(os.path.join(
-        script_dir, '..', 'private.sls.deploy.json')).get(stage)
-    for key, value in deploy_config.items():
-        if isinstance(value, bool):
-            value = str(value).lower()
-        elif not isinstance(value, str):
-            value = str(value)
-        os.environ[key] = value
+    ssm_config = load_json(os.path.join(script_dir, '..', 'private.ssm.env.json')).get(stage)
 
-    # Set the key/values.
-    ssm_config = load_json(os.path.join(
-        script_dir, '..', 'private.ssm.env.json')).get(stage)
     for key, value in ssm_config.items():
         print('')
         print(key)
@@ -66,8 +56,10 @@ def import_into_ssm(service_name, stage):
 
 
 def get_service_name():
-    """
-    Gets the service name from serverless.yml
+    """Gets the service name from serverless.yml
+
+    Returns:
+        The service name.
     """
     service_name = None
     yml = load_yaml(os.path.join(script_dir, '..', 'serverless.yml'))
@@ -80,6 +72,32 @@ def get_service_name():
     return service_name
 
 
+def init_env(service_name, service_stage):
+    """Initializes environment variables so 3rd party credentials/secrets are available.
+
+    Args:
+        service_name: The name of the service.
+        service_stage: The stage of the service.
+
+    Returns:
+        None
+    """
+
+    # Set the service variables so ParamStore works correctly.
+    ParamStore.set('SERVICE_NAME', service_name, store=ParamStore.Stores.OS)
+    ParamStore.set('SERVICE_STAGE', service_stage, store=ParamStore.Stores.OS)
+
+    # Load the deploy variables so the AWS connection is available.
+    deploy_config = load_json(os.path.join(script_dir, '..', 'private.sls.deploy.json')).get(service_stage)
+
+    for key, value in deploy_config.items():
+        if isinstance(value, bool):
+            value = str(value).lower()
+        elif not isinstance(value, str):
+            value = str(value)
+        ParamStore.set(key, value, store=ParamStore.Stores.OS)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--stage',
@@ -89,8 +107,9 @@ def main():
     args = parser.parse_args()
 
     service_name = get_service_name()
-
-    import_into_ssm(service_name, args.stage)
+    service_stage = args.stage
+    init_env(service_name, service_stage)
+    import_into_ssm(service_stage)
 
 
 if __name__ == "__main__":
