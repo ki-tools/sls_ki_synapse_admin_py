@@ -41,4 +41,38 @@ A [Serverless](https://serverless.com/framework/docs/getting-started) applicatio
 ## Authentication
 
 - Authentication will be done via Google OAuth.
-- A whitelist of email addresses will be stored in an environment variable (on SSM) to restrict access to the site.
+- A whitelist of email addresses will be stored in an environment variable (in SSM) to restrict access to the site.
+
+
+## Functionality
+
+### Create Synapse Space
+
+This will create a new project in Synapse and configure it for ki contribution.
+
+The steps are:
+
+- Create a new Synapse project.
+  - The format of the project name will be: `KiContributor_<INSTITUTION-SHORT-NAME>_<PRINCIPAL-INVESTIGATOR-NAME>`.
+- Set the project's storage location to a specific (encrypted) S3 bucket.
+- Create a new Synapse team and add it to the project.
+  - The name of the team will be the same as the project's name.
+- Invite user supplied email addresses to the team.
+- Add a specific set of teams to the project.
+- Create a specific set of folders in the project.
+- Copy a wiki into the project from another Synapse project.
+- Update a table with certain details about the project that was just created.
+
+The contribution agreement table must have the following columns (at a minimum):
+
+| Name | Type | Maximum Length | Description |
+| :--- | :--- | :---           | :---        |
+| Organization | `STRING` | 200 | The institution name provided by the user. |
+| Contact | `STRING` | 200 | The first email address provided by the user. |
+| Synapse_Project_ID | `ENTITYID` | | The ID of the Synapse project that was created. |
+| Synapse_Team_ID | `INTEGER` | | The ID of the Synapse team that was created. |
+| Agreement_Link | `LINK` | 1000 | Not populated by this service. |
+
+### Encrypt Synapse Space
+
+This will set the storage location of a Synapse project to the value of `SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID`.
