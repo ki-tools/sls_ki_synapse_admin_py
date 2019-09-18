@@ -4,45 +4,60 @@ from www.services import CreateSynapseSpaceService
 import synapseclient as syn
 
 
-def assert_basic_service_success(syn_test_helper, service):
-    assert service.project is not None
-    assert service.team is not None
-    assert len(service.errors) == 0
-    syn_test_helper.dispose_of(service.project)
-    syn_test_helper.dispose_of(service.team)
-
-
-def assert_basic_service_errors(syn_test_helper, service):
-    assert len(service.errors) > 0
+@pytest.fixture
+def service(syn_test_helper):
+    inst_name = syn_test_helper.uniq_name()
+    service = CreateSynapseSpaceService(inst_name, inst_name)
+    yield service
     if service.project:
         syn_test_helper.dispose_of(service.project)
     if service.team:
         syn_test_helper.dispose_of(service.team)
 
 
-def test_it_creates_the_project(syn_test_helper):
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
+@pytest.fixture
+def assert_basic_service_success(syn_test_helper):
+    def _fn(service):
+        assert service.project is not None
+        assert service.team is not None
+        assert len(service.errors) == 0
+        syn_test_helper.dispose_of(service.project)
+        syn_test_helper.dispose_of(service.team)
+
+    yield _fn
+
+
+@pytest.fixture
+def assert_basic_service_errors(syn_test_helper):
+    def _fn(service):
+        assert len(service.errors) > 0
+        if service.project:
+            syn_test_helper.dispose_of(service.project)
+        if service.team:
+            syn_test_helper.dispose_of(service.team)
+
+    yield _fn
+
+
+def test_it_creates_the_project(service, assert_basic_service_success):
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
 
-def test_it_does_not_create_a_duplicate_project(syn_test_helper, temp_file):
+def test_it_does_not_create_a_duplicate_project(syn_test_helper, temp_file, assert_basic_service_errors):
     existing_project = syn_test_helper.create_project()
     service = CreateSynapseSpaceService(existing_project.name, existing_project.name)
     assert service.execute() == service
-    assert_basic_service_errors(syn_test_helper, service)
+    assert_basic_service_errors(service)
 
     assert service.project is None
     assert len(service.errors) == 1
     assert service.errors[0] == 'Project with name: "{0}" already exists.'.format(existing_project.name)
 
 
-def test_it_sets_the_storage_location(syn_test_helper, syn_client):
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
+def test_it_sets_the_storage_location(service, assert_basic_service_success, syn_client):
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     storage_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
     storage_setting = syn_client.getProjectSetting(service.project.id, 'upload')
@@ -50,27 +65,23 @@ def test_it_sets_the_storage_location(syn_test_helper, syn_client):
     assert storage_id in storage_ids
 
 
-def test_it_creates_the_team(syn_test_helper):
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
+def test_it_creates_the_team(service, assert_basic_service_success):
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     assert service.team.name == service.project.name
 
 
-def test_it_assigns_the_team_to_the_project(syn_test_helper, syn_client):
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
+def test_it_assigns_the_team_to_the_project(service, assert_basic_service_success, syn_client):
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     syn_perms = syn_client.getPermissions(service.project, principalId=service.team.id)
     assert syn_perms
     syn_perms.sort() == Synapse.CAN_EDIT_AND_DELETE_PERMS.sort()
 
 
-def test_it_invites_the_emails_to_the_team(syn_test_helper, syn_client):
+def test_it_invites_the_emails_to_the_team(syn_test_helper, syn_client, assert_basic_service_success):
     emails = [
         syn_test_helper.uniq_name(postfix='@test.com'),
         syn_test_helper.uniq_name(postfix='@test.com')
@@ -79,7 +90,7 @@ def test_it_invites_the_emails_to_the_team(syn_test_helper, syn_client):
     inst_name = syn_test_helper.uniq_name()
     service = CreateSynapseSpaceService(inst_name, inst_name, emails=emails)
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     syn_invites = syn_client.restGET('/team/{0}/openInvitation'.format(service.team.id))
     assert syn_invites
@@ -90,7 +101,11 @@ def test_it_invites_the_emails_to_the_team(syn_test_helper, syn_client):
         assert email in emails
 
 
-def test_it_adds_the_admin_teams_to_the_project(syn_test_helper, syn_client, monkeypatch):
+def test_it_adds_the_admin_teams_to_the_project(service,
+                                                syn_test_helper,
+                                                syn_client,
+                                                monkeypatch,
+                                                assert_basic_service_success):
     # Create some teams to test with
     syn_admin_teams = [
         syn_test_helper.create_team(),
@@ -99,10 +114,8 @@ def test_it_adds_the_admin_teams_to_the_project(syn_test_helper, syn_client, mon
     syn_admin_team_ids = list(map(lambda t: t.id, syn_admin_teams))
     monkeypatch.setenv('CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS', ','.join(syn_admin_team_ids))
 
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     for syn_admin_team_id in syn_admin_team_ids:
         syn_perms = syn_client.getPermissions(service.project, principalId=syn_admin_team_id)
@@ -110,34 +123,33 @@ def test_it_adds_the_admin_teams_to_the_project(syn_test_helper, syn_client, mon
         syn_perms.sort() == Synapse.CAN_EDIT_AND_DELETE_PERMS.sort()
 
 
-def test_it_creates_the_folders(syn_test_helper, syn_client):
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
+def test_it_creates_the_folders(service, assert_basic_service_success, syn_client):
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     syn_children = list(syn_client.getChildren(service.project, includeTypes=['folder']))
     syn_folders = list(map(lambda f: f.get('name'), syn_children))
     assert syn_folders.sort() == CreateSynapseSpaceService.DEFAULT_FOLDER_NAMES.sort()
 
 
-def test_it_creates_the_wiki(syn_test_helper, syn_client, monkeypatch):
+def test_it_creates_the_wiki(service, syn_test_helper, syn_client, monkeypatch, assert_basic_service_success):
     # Create a project with a wiki to copy.
     wiki_project = syn_test_helper.create_project()
     template_wiki = syn_test_helper.create_wiki(owner=wiki_project)
     monkeypatch.setenv('CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID', wiki_project.id)
 
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     syn_wiki = syn_client.getWiki(service.project)
     assert syn_wiki.title == template_wiki.title
     assert syn_wiki.markdown == template_wiki.markdown
 
 
-def test_it_updates_the_contribution_agreement_table(syn_test_helper, syn_client, monkeypatch):
+def test_it_updates_the_contribution_agreement_table(syn_test_helper,
+                                                     syn_client,
+                                                     monkeypatch,
+                                                     assert_basic_service_success):
     # Create a project with a table to update.
     table_project = syn_test_helper.create_project()
     cols = [
@@ -161,7 +173,7 @@ def test_it_updates_the_contribution_agreement_table(syn_test_helper, syn_client
     inst_name = syn_test_helper.uniq_name()
     service = CreateSynapseSpaceService(inst_name, inst_name, emails=emails)
     assert service.execute() == service
-    assert_basic_service_success(syn_test_helper, service)
+    assert_basic_service_success(service)
 
     rows = list(syn_client.tableQuery("select * from {0}".format(syn_table.id)))
     assert len(rows) == 1
@@ -173,9 +185,11 @@ def test_it_updates_the_contribution_agreement_table(syn_test_helper, syn_client
     assert str(row[6]) == str(service.team.id)
 
 
-def test_it_fails_if_the_contribution_agreement_table_does_not_have_the_required_columns(syn_test_helper,
+def test_it_fails_if_the_contribution_agreement_table_does_not_have_the_required_columns(service,
+                                                                                         syn_test_helper,
                                                                                          syn_client,
-                                                                                         monkeypatch):
+                                                                                         monkeypatch,
+                                                                                         assert_basic_service_errors):
     # Create a project with a table to update.
     table_project = syn_test_helper.create_project()
     cols = [
@@ -187,10 +201,8 @@ def test_it_fails_if_the_contribution_agreement_table_does_not_have_the_required
     syn_table = syn_client.store(schema)
     monkeypatch.setenv('CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID', syn_table.id)
 
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
     assert service.execute() == service
-    assert_basic_service_errors(syn_test_helper, service)
+    assert_basic_service_errors(service)
     assert service.errors
     assert len(service.errors) == 1
     assert 'Column: Organization does not exist in table' in service.errors[0]

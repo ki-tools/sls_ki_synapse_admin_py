@@ -19,61 +19,46 @@ class CreateSynapseSpaceService:
 
     def execute(self):
         self.project = None
+        self.team = None
         self.errors = []
         self.warnings = []
 
-        # Create the Project
         if not self._create_project():
             return self
 
-        # Set the storage location
-        if not self._set_storage_location():
-            return self
+        self._set_storage_location()
 
-        # Create the Team
-        if not self._create_team():
-            return self
+        if self._create_team():
+            self._assign_team_to_project()
+            self._invite_emails_to_team()
 
-        # Add the Team to the Project with Edit/Delete permissions.
-        if not self._assign_team_to_project():
-            return self
+        self._assign_admin_teams_to_project()
 
-        # Invite all the emails to the team.
-        if not self._invite_emails_to_team():
-            return self
+        self._create_folders()
 
-        # Add the admin teams to the Project with Edit/Delete permissions.
-        if not self._assign_admin_teams_to_project():
-            return self
+        self._create_wiki()
 
-        # Create Folders
-        if not self._create_folders():
-            return self
-
-        # Set the Wiki
-        if not self._create_wiki():
-            return self
-
-        # Update tracking table(s)
-        if not self._update_tracking_tables():
-            return self
+        self._update_tracking_tables()
 
         return self
 
     def _create_project(self):
+        errors = []
         error = self.Validations.validate_project_name(self.project_name)
         if error:
-            self.errors.append(error)
-        elif not self.project:
+            errors.append(error)
+        else:
             try:
                 self.project = Synapse.client().store(syn.Project(name=self.project_name))
             except Exception as ex:
                 logger.exception(ex)
-                self.errors.append('Error creating project: {0}'.format(ex))
+                errors.append('Error creating project: {0}'.format(ex))
 
-        return self.project and not self.errors
+        self.errors += errors
+        return self.project and not errors
 
     def _set_storage_location(self):
+        errors = []
         try:
             storage_location_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
 
@@ -84,30 +69,36 @@ class CreateSynapseSpaceService:
                     'Environment variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Cannot set storage location.')
         except Exception as ex:
             logger.exception(ex)
-            self.errors.append('Error setting storage location: {0}'.format(ex))
+            errors.append('Error setting storage location: {0}'.format(ex))
 
-        return not self.errors
+        self.errors += errors
+        return not errors
 
     def _create_team(self):
+        errors = []
         team_name = self.project.name
         try:
             self.team = Synapse.client().store(syn.Team(name=team_name))
         except Exception as ex:
             logger.exception(ex)
-            self.errors.append('Error creating team: {0}'.format(ex))
+            errors.append('Error creating team: {0}'.format(ex))
 
-        return self.team and not self.errors
+        self.errors += errors
+        return self.team and not errors
 
     def _assign_team_to_project(self):
+        errors = []
         try:
             Synapse.client().setPermissions(self.project, self.team.id, accessType=Synapse.CAN_EDIT_AND_DELETE_PERMS)
         except Exception as ex:
             logger.exception(ex)
-            self.errors.append('Error assigning team to project: {0}'.format(ex))
+            errors.append('Error assigning team to project: {0}'.format(ex))
 
-        return not self.errors
+        self.errors += errors
+        return not errors
 
     def _invite_emails_to_team(self):
+        errors = []
         if self.emails:
             try:
                 for email in self.emails:
@@ -118,13 +109,15 @@ class CreateSynapseSpaceService:
                     Synapse.client().restPOST('/membershipInvitation', body=json.dumps(body))
             except Exception as ex:
                 logger.exception(ex)
-                self.errors.append('Error inviting emails to team: {0}'.format(ex))
+                errors.append('Error inviting emails to team: {0}'.format(ex))
         else:
             self.warnings.append('No emails specified. No users will be invited to this project.')
 
-        return not self.errors
+        self.errors += errors
+        return not errors
 
     def _assign_admin_teams_to_project(self):
+        errors = []
         try:
             team_ids = Env.CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS()
 
@@ -138,21 +131,25 @@ class CreateSynapseSpaceService:
                     'Environment variable: CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS not set. Admin teams will not be added to this project.')
         except Exception as ex:
             logger.exception(ex)
-            self.errors.append('Error adding admin teams to project: {0}'.format(ex))
+            errors.append('Error adding admin teams to project: {0}'.format(ex))
 
-        return not self.errors
+        self.errors += errors
+        return not errors
 
     def _create_folders(self):
+        errors = []
         try:
             for folder_name in self.DEFAULT_FOLDER_NAMES:
                 Synapse.client().store(syn.Folder(name=folder_name, parent=self.project))
         except Exception as ex:
             logger.exception(ex)
-            self.errors.append('Error creating folders: {0}'.format(ex))
+            errors.append('Error creating folders: {0}'.format(ex))
 
-        return not self.errors
+        self.errors += errors
+        return not errors
 
     def _create_wiki(self):
+        errors = []
         try:
             source_wiki_project_id = Env.CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID()
 
@@ -171,17 +168,21 @@ class CreateSynapseSpaceService:
                     'Environment variable: CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
-            self.errors.append('Error creating wiki: {0}'.format(ex))
+            errors.append('Error creating wiki: {0}'.format(ex))
 
-        return not self.errors
+        self.errors += errors
+        return not errors
 
     def _update_tracking_tables(self):
-        if not self._update_contribution_agreement_table():
-            return False
+        result = False
 
-        return not self.errors
+        if not self._update_contribution_agreement_table():
+            result = False
+
+        return result
 
     def _update_contribution_agreement_table(self):
+        errors = []
         try:
             table_id = Env.CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID()
 
@@ -190,7 +191,7 @@ class CreateSynapseSpaceService:
                     'Organization': self.institution_name,
                     'Contact': self.emails[0] if self.emails else None,
                     'Synapse_Project_ID': self.project.id,
-                    'Synapse_Team_ID': self.team.id
+                    'Synapse_Team_ID': self.team.id if self.team else None
                 })
 
                 Synapse.client().store(syn.Table(table_id, [row]))
@@ -199,9 +200,10 @@ class CreateSynapseSpaceService:
                     'Environment variable: CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
         except Exception as ex:
             logger.exception(ex)
-            self.errors.append('Error updating contribution agreement table: {0}'.format(ex))
+            errors.append('Error updating contribution agreement table: {0}'.format(ex))
 
-        return not self.errors
+        self.errors += errors
+        return not errors
 
     def _build_syn_table_row(self, syn_table_id, row_data):
         """Builds an array of row values for a Synapse Table.

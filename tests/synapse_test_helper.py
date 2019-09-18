@@ -33,9 +33,8 @@ class SynapseTestHelper:
         Adds a Synapse object to the list of objects to be deleted.
         """
         for syn_object in syn_objects:
-            if syn_object in self._trash:
-                continue
-            self._trash.append(syn_object)
+            if syn_object not in self._trash:
+                self._trash.append(syn_object)
 
     def dispose(self):
         """
