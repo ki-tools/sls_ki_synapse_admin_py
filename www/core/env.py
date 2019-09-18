@@ -86,8 +86,12 @@ class Env:
         return ParamStore.get('CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS', default).to_list(delimiter=',')
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID(default=None):
-        return ParamStore.get('CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID', default).value
+    def CREATE_SYNAPSE_SPACE_FOLDER_NAMES(default=[]):
+        return ParamStore.get('CREATE_SYNAPSE_SPACE_FOLDER_NAMES', default).to_list(delimiter=',')
+
+    @staticmethod
+    def CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID(default=None):
+        return ParamStore.get('CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID', default).value
 
     @staticmethod
     def CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID(default=None):

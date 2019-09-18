@@ -6,8 +6,6 @@ import json
 
 
 class CreateSynapseSpaceService:
-    DEFAULT_FOLDER_NAMES = ['Research Data', 'Metadata', 'Supporting Documentation']
-
     def __init__(self, project_name, institution_name, emails=None):
         self.project_name = project_name
         self.institution_name = institution_name
@@ -66,7 +64,7 @@ class CreateSynapseSpaceService:
                 Synapse.client().setStorageLocation(self.project, storage_location_id)
             else:
                 self.warnings.append(
-                    'Environment variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Cannot set storage location.')
+                    'Environment Variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Cannot set storage location.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error setting storage location: {0}'.format(ex))
@@ -128,7 +126,7 @@ class CreateSynapseSpaceService:
                                                     accessType=Synapse.CAN_EDIT_AND_DELETE_PERMS)
             else:
                 self.warnings.append(
-                    'Environment variable: CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS not set. Admin teams will not be added to this project.')
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS not set. Admin teams will not be added to this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error adding admin teams to project: {0}'.format(ex))
@@ -139,8 +137,14 @@ class CreateSynapseSpaceService:
     def _create_folders(self):
         errors = []
         try:
-            for folder_name in self.DEFAULT_FOLDER_NAMES:
-                Synapse.client().store(syn.Folder(name=folder_name, parent=self.project))
+            folder_names = Env.CREATE_SYNAPSE_SPACE_FOLDER_NAMES()
+
+            if folder_names:
+                for folder_name in folder_names:
+                    Synapse.client().store(syn.Folder(name=folder_name, parent=self.project))
+            else:
+                self.warnings.append(
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_FOLDER_NAMES not set. Folders will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating folders: {0}'.format(ex))
@@ -151,7 +155,7 @@ class CreateSynapseSpaceService:
     def _create_wiki(self):
         errors = []
         try:
-            source_wiki_project_id = Env.CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID()
+            source_wiki_project_id = Env.CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID()
 
             if source_wiki_project_id:
                 source_wiki = Synapse.client().getWiki(source_wiki_project_id)
@@ -165,7 +169,7 @@ class CreateSynapseSpaceService:
                 Synapse.client().store(new_wiki)
             else:
                 self.warnings.append(
-                    'Environment variable: CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating wiki: {0}'.format(ex))
@@ -197,7 +201,7 @@ class CreateSynapseSpaceService:
                 Synapse.client().store(syn.Table(table_id, [row]))
             else:
                 self.warnings.append(
-                    'Environment variable: CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error updating contribution agreement table: {0}'.format(ex))

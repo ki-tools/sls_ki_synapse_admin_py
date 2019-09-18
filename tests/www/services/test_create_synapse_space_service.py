@@ -123,20 +123,23 @@ def test_it_adds_the_admin_teams_to_the_project(service,
         syn_perms.sort() == Synapse.CAN_EDIT_AND_DELETE_PERMS.sort()
 
 
-def test_it_creates_the_folders(service, assert_basic_service_success, syn_client):
+def test_it_creates_the_folders(service, assert_basic_service_success, syn_client, monkeypatch):
+    folder_names = ['one', 'two', 'three', 'four with a space', 'five with a space']
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_FOLDER_NAMES', ','.join(folder_names))
+
     assert service.execute() == service
     assert_basic_service_success(service)
 
     syn_children = list(syn_client.getChildren(service.project, includeTypes=['folder']))
-    syn_folders = list(map(lambda f: f.get('name'), syn_children))
-    assert syn_folders.sort() == CreateSynapseSpaceService.DEFAULT_FOLDER_NAMES.sort()
+    syn_folders = [c.get('name') for c in syn_children]
+    assert syn_folders.sort() == folder_names.sort()
 
 
 def test_it_creates_the_wiki(service, syn_test_helper, syn_client, monkeypatch, assert_basic_service_success):
     # Create a project with a wiki to copy.
     wiki_project = syn_test_helper.create_project()
     template_wiki = syn_test_helper.create_wiki(owner=wiki_project)
-    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_DEFAULT_WIKI_PROJECT_ID', wiki_project.id)
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID', wiki_project.id)
 
     assert service.execute() == service
     assert_basic_service_success(service)

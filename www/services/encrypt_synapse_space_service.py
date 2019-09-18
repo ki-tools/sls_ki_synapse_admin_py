@@ -27,7 +27,7 @@ class EncryptSynapseSpaceService:
                 Synapse.client().setStorageLocation(self.project_id, storage_location_id)
             else:
                 self.errors.append(
-                    'Environment variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Storage location cannot be set.')
+                    'Environment Variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Storage location cannot be set.')
         except Exception as ex:
             logger.exception(ex)
             self.errors.append('Error setting storage location: {0}'.format(ex))
