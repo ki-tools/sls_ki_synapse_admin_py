@@ -173,17 +173,23 @@ def test_it_updates_the_contribution_agreement_table(syn_test_helper,
         syn_test_helper.uniq_name(postfix='@test.com')
     ]
 
+    agreement_url = 'https://www.test.com/agreement.pdf'
+
     inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name, emails=emails)
+    service = CreateSynapseSpaceService(inst_name, inst_name, agreement_url=agreement_url, emails=emails)
     assert service.execute() == service
     assert_basic_service_success(service)
 
-    rows = list(syn_client.tableQuery("select * from {0}".format(syn_table.id)))
+    rows = list(syn_client.tableQuery(
+        "select {0} from {1}".format(', '.join([c['name'] for c in cols]), syn_table.id))
+    )
+
     assert len(rows) == 1
     row = rows[0]
+
     assert row[2] == inst_name
     assert row[3] == emails[0]
-    assert row[4] is None
+    assert row[4] == agreement_url
     assert row[5] == service.project.id
     assert str(row[6]) == str(service.team.id)
 

@@ -11,7 +11,11 @@ def synapse_space_create():
     form = CreateSynapseSpaceForm()
     errors = []
     if form.validate_on_submit():
-        service = CreateSynapseSpaceService(form.project_name, form.field_institution_name.data, form.valid_emails)
+        service = CreateSynapseSpaceService(form.project_name,
+                                            form.field_institution_name.data,
+                                            agreement_url=form.field_agreement_url.data,
+                                            emails=form.valid_emails)
+
         errors = service.execute().errors
         warnings = service.warnings
 

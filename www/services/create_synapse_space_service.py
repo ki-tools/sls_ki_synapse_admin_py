@@ -6,9 +6,10 @@ import json
 
 
 class CreateSynapseSpaceService:
-    def __init__(self, project_name, institution_name, emails=None):
+    def __init__(self, project_name, institution_name, agreement_url=None, emails=None):
         self.project_name = project_name
         self.institution_name = institution_name
+        self.agreement_url = agreement_url
         self.emails = emails
         self.project = None
         self.team = None
@@ -195,7 +196,8 @@ class CreateSynapseSpaceService:
                     'Organization': self.institution_name,
                     'Contact': self.emails[0] if self.emails else None,
                     'Synapse_Project_ID': self.project.id,
-                    'Synapse_Team_ID': self.team.id if self.team else None
+                    'Synapse_Team_ID': self.team.id if self.team else None,
+                    'Agreement_Link': self.agreement_url
                 })
 
                 Synapse.client().store(syn.Table(table_id, [row]))
