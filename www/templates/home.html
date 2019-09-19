@@ -3,14 +3,18 @@
 {% block body %}
 <div class="row">
   <div class="col">
-    <h1>Home</h1>
 
     {% if not current_user.is_authenticated %}
-    <div>
-      <div>Please login to access administrative functions.</div>
+    <div class="mt-4 mb-4">
       <a class="btn btn-primary" href="{{ url_for('login') }}">Login with Google</a>
     </div>
     {% endif %}
+
+    <div class="alert alert-danger" role="alert">
+      This Platform is a members-only web site and access is limited to individuals authorized by or under contract with
+      the Bill & Melinda Gates Foundation --if you are not a member you are not authorized to use the Platform.
+    </div>
+
 
   </div>
 </div>
