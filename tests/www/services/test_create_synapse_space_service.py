@@ -1,13 +1,42 @@
 import pytest
+import json
 from www.core import Synapse, Env
 from www.services import CreateSynapseSpaceService
 import synapseclient as syn
 
 
 @pytest.fixture
-def service(syn_test_helper):
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name)
+def institution_name(syn_test_helper):
+    return syn_test_helper.uniq_name()
+
+
+@pytest.fixture
+def user_identifier(syn_test_helper):
+    return '{0}@test.com'.format(syn_test_helper.uniq_name())
+
+
+@pytest.fixture
+def agreement_url(syn_test_helper):
+    return 'https://{0}/doc.pdf'.format(syn_test_helper.uniq_name())
+
+
+@pytest.fixture
+def emails(syn_test_helper):
+    return [
+        syn_test_helper.uniq_name(postfix='@test.com'),
+        syn_test_helper.uniq_name(postfix='@test.com'),
+        syn_test_helper.uniq_name(postfix='@test.com')
+    ]
+
+
+@pytest.fixture
+def service(syn_test_helper, institution_name, user_identifier, agreement_url, emails):
+    service = CreateSynapseSpaceService(institution_name,
+                                        institution_name,
+                                        user_identifier,
+                                        agreement_url=agreement_url,
+                                        emails=emails)
+
     yield service
     if service.project:
         syn_test_helper.dispose_of(service.project)
@@ -44,9 +73,12 @@ def test_it_creates_the_project(service, assert_basic_service_success):
     assert_basic_service_success(service)
 
 
-def test_it_does_not_create_a_duplicate_project(syn_test_helper, temp_file, assert_basic_service_errors):
+def test_it_does_not_create_a_duplicate_project(syn_test_helper,
+                                                temp_file,
+                                                user_identifier,
+                                                assert_basic_service_errors):
     existing_project = syn_test_helper.create_project()
-    service = CreateSynapseSpaceService(existing_project.name, existing_project.name)
+    service = CreateSynapseSpaceService(existing_project.name, existing_project.name, user_identifier)
     assert service.execute() == service
     assert_basic_service_errors(service)
 
@@ -81,14 +113,12 @@ def test_it_assigns_the_team_to_the_project(service, assert_basic_service_succes
     syn_perms.sort() == Synapse.CAN_EDIT_AND_DELETE_PERMS.sort()
 
 
-def test_it_invites_the_emails_to_the_team(syn_test_helper, syn_client, assert_basic_service_success):
-    emails = [
-        syn_test_helper.uniq_name(postfix='@test.com'),
-        syn_test_helper.uniq_name(postfix='@test.com')
-    ]
-
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name, emails=emails)
+def test_it_invites_the_emails_to_the_team(syn_client,
+                                           institution_name,
+                                           user_identifier,
+                                           emails,
+                                           assert_basic_service_success):
+    service = CreateSynapseSpaceService(institution_name, institution_name, user_identifier, emails=emails)
     assert service.execute() == service
     assert_basic_service_success(service)
 
@@ -149,8 +179,59 @@ def test_it_creates_the_wiki(service, syn_test_helper, syn_client, monkeypatch, 
     assert syn_wiki.markdown == template_wiki.markdown
 
 
+def test_it_writes_the_log_file_on_success(service,
+                                           syn_test_helper,
+                                           syn_client,
+                                           monkeypatch,
+                                           user_identifier,
+                                           assert_basic_service_success):
+    project = syn_test_helper.create_project()
+    folder = syn_client.store(syn.Folder(name='Synapse Admin Log', parent=project))
+
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID', folder.id)
+
+    assert service.execute() == service
+    assert_basic_service_success(service)
+
+    files = list(Synapse.client().getChildren(folder))
+    assert len(files) == 1
+
+    file = Synapse.client().get(files[0]['id'])
+    assert file.name.endswith('_create_space.json')
+    with open(file.path, mode='r') as f:
+        jdata = json.loads(f.read())
+
+    jparms = jdata['parameters']
+    assert jparms['project_name'] == service.project_name
+    assert jparms['institution_name'] == service.institution_name
+    assert jparms['agreement_url'] == service.agreement_url
+    assert jparms['emails'] == service.emails
+    assert jparms['user'] == user_identifier
+
+    jproject = jdata['project']
+    assert jproject['id'] == service.project.id
+    assert jproject['name'] == service.project.name
+
+    jteam = jdata['team']
+    assert jteam['id'] == service.team.id
+    assert jteam['name'] == service.team.name
+
+
+def test_it_writes_the_log_file_on_failure(service,
+                                           syn_test_helper,
+                                           syn_client,
+                                           monkeypatch,
+                                           assert_basic_service_success):
+    # TODO:
+    pass
+
+
 def test_it_updates_the_contribution_agreement_table(syn_test_helper,
                                                      syn_client,
+                                                     institution_name,
+                                                     user_identifier,
+                                                     agreement_url,
+                                                     emails,
                                                      monkeypatch,
                                                      assert_basic_service_success):
     # Create a project with a table to update.
@@ -168,15 +249,11 @@ def test_it_updates_the_contribution_agreement_table(syn_test_helper,
     syn_table = syn_client.store(schema)
     monkeypatch.setenv('CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID', syn_table.id)
 
-    emails = [
-        syn_test_helper.uniq_name(postfix='@test.com'),
-        syn_test_helper.uniq_name(postfix='@test.com')
-    ]
-
-    agreement_url = 'https://www.test.com/agreement.pdf'
-
-    inst_name = syn_test_helper.uniq_name()
-    service = CreateSynapseSpaceService(inst_name, inst_name, agreement_url=agreement_url, emails=emails)
+    service = CreateSynapseSpaceService(institution_name,
+                                        institution_name,
+                                        user_identifier,
+                                        agreement_url=agreement_url,
+                                        emails=emails)
     assert service.execute() == service
     assert_basic_service_success(service)
 
@@ -187,7 +264,7 @@ def test_it_updates_the_contribution_agreement_table(syn_test_helper,
     assert len(rows) == 1
     row = rows[0]
 
-    assert row[2] == inst_name
+    assert row[2] == institution_name
     assert row[3] == emails[0]
     assert row[4] == agreement_url
     assert row[5] == service.project.id

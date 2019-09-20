@@ -96,3 +96,7 @@ class Env:
     @staticmethod
     def CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID(default=None):
         return ParamStore.get('CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID', default).value
+
+    @staticmethod
+    def CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID(default=None):
+        return ParamStore.get('CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID', default).value

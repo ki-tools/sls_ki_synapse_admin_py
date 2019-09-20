@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, TextAreaField
-from wtforms.validators import DataRequired, ValidationError, URL
+from wtforms.validators import DataRequired, ValidationError, URL, Optional
 import re
 
 from www.services import EncryptSynapseSpaceService, CreateSynapseSpaceService
@@ -11,8 +11,8 @@ class CreateSynapseSpaceForm(FlaskForm):
     field_institution_name = StringField('Institution Name', validators=[DataRequired()])
     field_institution_short_name = StringField('Institution Short Name', validators=[DataRequired()])
     field_pi_surname = StringField('Principal Investigator Surname', validators=[DataRequired()])
-    field_emails = TextAreaField('Emails to add to the project')
-    field_agreement_url = StringField('Contribution Agreement URL', validators=[URL()])
+    field_emails = TextAreaField('Emails to invite to the project')
+    field_agreement_url = StringField('Contribution Agreement URL', validators=[URL(), Optional()])
     field_submit = SubmitField('Create')
 
     # Validated form data

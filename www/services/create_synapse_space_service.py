@@ -1,12 +1,18 @@
+import os
+import json
+import shutil
+import tempfile
+from datetime import datetime
 from www.core import Env
 from www.core.log import logger
 from www.core.synapse import Synapse
 import synapseclient as syn
-import json
 
 
 class CreateSynapseSpaceService:
-    def __init__(self, project_name, institution_name, agreement_url=None, emails=None):
+    def __init__(self, project_name, institution_name, user_identifier, agreement_url=None, emails=None):
+        self.start_time = datetime.now()
+        self.user_identifier = user_identifier
         self.project_name = project_name
         self.institution_name = institution_name
         self.agreement_url = agreement_url
@@ -15,6 +21,7 @@ class CreateSynapseSpaceService:
         self.team = None
         self.errors = []
         self.warnings = []
+        self.log_data = {}
 
     def execute(self):
         self.project = None
@@ -23,6 +30,7 @@ class CreateSynapseSpaceService:
         self.warnings = []
 
         if not self._create_project():
+            self._write_synapse_log_file()
             return self
 
         self._set_storage_location()
@@ -39,7 +47,65 @@ class CreateSynapseSpaceService:
 
         self._update_tracking_tables()
 
+        self._write_synapse_log_file()
+
         return self
+
+    def _write_synapse_log_file(self):
+        errors = []
+        try:
+            folder_id = Env.CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID()
+
+            if folder_id:
+                tmp_dir = tempfile.mkdtemp()
+
+                try:
+                    data = {
+                        'parameters': {
+                            'user': self.user_identifier,
+                            'project_name': self.project_name,
+                            'institution_name': self.institution_name,
+                            'agreement_url': self.agreement_url,
+                            'emails': self.emails,
+                            'storage_location_id': Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(),
+                            'admin_team_ids': Env.CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS(),
+                            'folder_names': Env.CREATE_SYNAPSE_SPACE_FOLDER_NAMES(),
+                            'wiki_project_id': Env.CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID(),
+                            'contribution_agreement_table_id': Env.CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID(),
+                            'log_folder_id': Env.CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID()
+                        },
+                        'project': {
+                            'id': self.project.id if self.project else None,
+                            'name': self.project.name if self.project else None
+                        },
+                        'team': {
+                            'id': self.team.id if self.team else None,
+                            'name': self.team.name if self.team else None
+                        },
+                        'warnings': self.warnings,
+                        'errors': self.errors
+                    }
+
+                    logger.info('CREATE_SPACE_RESULT: {0}'.format(data))
+
+                    file_name = '{0}_create_space.json'.format(self.start_time.strftime('%Y%m%d_%H%M%S_%f'))
+                    file_path = os.path.join(tmp_dir, file_name)
+
+                    with open(file_path, 'w') as file:
+                        file.write(json.dumps(data))
+
+                    Synapse.client().store(syn.File(file_path, parent=folder_id))
+                finally:
+                    shutil.rmtree(tmp_dir, ignore_errors=True)
+            else:
+                self.warnings.append(
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID not set. Log files will not be created.')
+        except Exception as ex:
+            logger.exception(ex)
+            errors.append('Error creating log file: {0}'.format(ex))
+
+        self.errors += errors
+        return not errors
 
     def _create_project(self):
         errors = []

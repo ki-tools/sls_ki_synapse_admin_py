@@ -14,6 +14,7 @@ app = Flask(__name__)
 # User session management setup.
 login_manager = LoginManager()
 login_manager.login_view = 'login'
+login_manager.refresh_view = 'login'
 login_manager.session_protection = "strong"
 
 # OAuth 2 client setup.
