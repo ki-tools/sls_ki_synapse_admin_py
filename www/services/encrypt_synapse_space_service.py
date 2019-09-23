@@ -6,25 +6,31 @@ from synapseclient.exceptions import SynapseHTTPError
 
 class EncryptSynapseSpaceService:
     def __init__(self, project_id):
-        """
-        :param project_id: The Project ID to set the storage location on.
+        """Instantiates a new instance.
+
+        Args:
+            project_id: The Project ID to set the storage location on.
         """
         self.project_id = project_id
         self.errors = []
 
     def execute(self):
-        """
-        Sets the storage location of the Project.
+        """Sets the storage location of the Project.
+
         This method does not due validation. It expects all validation to have been done and passed already.
 
-        :return: List of error messages or an empty list.
+        Returns:
+            Self
         """
         self.errors = []
 
         try:
             storage_location_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
             if storage_location_id:
+                logger.info(
+                    'Setting storage location on project: {0} to: {1}'.format(self.project_id, storage_location_id))
                 Synapse.client().setStorageLocation(self.project_id, storage_location_id)
+                logger.info('Storage location set on project: {0}'.format(self.project_id))
             else:
                 self.errors.append(
                     'Environment Variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Storage location cannot be set.')
@@ -38,10 +44,13 @@ class EncryptSynapseSpaceService:
 
         @classmethod
         def validate(cls, project_id):
-            """
-            Validates that the Project can have its storage setting changed.
+            """Validates that the Project can have its storage setting changed.
 
-            :return: Project (or None) and error message (or None)
+            Args:
+                project_id: Project (or None) and error message (or None)
+
+            Returns:
+                Project (or None) and error message (or None)
             """
             project, error = cls._get_project(project_id)
             if not error:
@@ -51,10 +60,13 @@ class EncryptSynapseSpaceService:
 
         @classmethod
         def _get_project(cls, project_id):
-            """
-            Gets the Project from Synapse.
+            """Gets the Project from Synapse.
 
-            :return: Project (or None) and error message (or None)
+            Args:
+                project_id:
+
+            Returns:
+                Project (or None) and error message (or None)
             """
             project = None
             error = None
@@ -74,11 +86,13 @@ class EncryptSynapseSpaceService:
 
         @classmethod
         def _get_project_storage_setting(cls, project_id):
-            """
-            Gets the storage setting for the Project.
+            """Gets the storage setting for the Project.
 
-            :param project: The Project to get storage settings for.
-            :return: Storage setting (or None) and error message (or None)
+            Args:
+                project_id: The Project to get storage settings for.
+
+            Returns:
+                Storage setting (or None) and error message (or None)
             """
             storage_setting = None
             error = None

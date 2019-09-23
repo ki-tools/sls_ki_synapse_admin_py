@@ -1,6 +1,7 @@
 from www import server
 from www.core import Env, AuthEmailNotVerifiedError, AuthForbiddenError, AuthLoginFailureError
 from www.models import User
+from www.core.log import logger
 import json
 import requests
 from flask_login import login_user, logout_user
@@ -10,12 +11,15 @@ class AuthService:
 
     @classmethod
     def get_redirect_uri(cls, request_base_url):
-        """
-        Gets the Google auth sign in URI.
+        """Gets the Google auth sign in URI.
+
         This is the URI that the app will redirect the user to so they can sign into Google.
 
-        :param request_base_url: The login request.base_url
-        :return: URL
+        Args:
+            request_base_url: The login request.base_url
+
+        Returns:
+            URL
         """
         # Find out what URL to hit for Google login
         google_provider_cfg = cls.get_google_provider_config()
@@ -32,14 +36,18 @@ class AuthService:
 
     @classmethod
     def handle_callback_and_login(cls, code, request_url, request_base_url):
-        """
-        Handles the Google oauth callback and logs the user in, or raises an exception.
+        """Handles the Google oauth callback and logs the user in, or raises an exception.
 
-        :param code: Authorization code Google sent back.
-        :param request_url: The callback request.url
-        :param request_base_url: The callback request.base_url
-        :return: The logged in user.
-        :raises AuthEmailNotVerifiedError, AuthForbiddenError
+        Args:
+            code: Authorization code Google sent back.
+            request_url: The callback request.url
+            request_base_url: The callback request.base_url
+
+        Returns:
+            The logged in user.
+
+        Raises:
+           AuthEmailNotVerifiedError, AuthForbiddenError
         """
         # Find out what URL to hit to get tokens that allow you to ask for
         # things on behalf of a user.
@@ -63,8 +71,8 @@ class AuthService:
         # Parse the tokens
         server.auth_client.parse_request_body_response(json.dumps(token_response.json()))
 
-        # Now that you have tokens let's find and hit the URL
-        # from Google that gives you the user's profile information,
+        # Now that we have tokens let's find and hit the URL
+        # from Google that gives the user's profile information,
         # including their Google profile image and email.
         userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
         uri, headers, body = server.auth_client.add_token(userinfo_endpoint)
@@ -77,10 +85,14 @@ class AuthService:
         users_email = res_json.get("email", None)
 
         if not email_verified:
-            raise AuthEmailNotVerifiedError()
+            err_str = 'Email not verified by Google: {0}'.format(users_email)
+            logger.info(err_str)
+            raise AuthEmailNotVerifiedError(err_str)
 
         if not cls.user_allowed_login(users_email):
-            raise AuthForbiddenError('Email: {0} not allowed to login.'.format(users_email))
+            err_str = 'Email not allowed to login: {0}'.format(users_email)
+            logger.info(err_str)
+            raise AuthForbiddenError(err_str)
 
         user = User(unique_id, users_email)
         if cls.login_user(user):
@@ -90,38 +102,43 @@ class AuthService:
 
     @classmethod
     def user_allowed_login(cls, email):
-        """
-        Gets if an email address is allowed to login into the site.
+        """Gets if an email address is allowed to login to the site.
 
-        :param email: The email address to check against the whitelist of emails.
-        :return: True or False
+        Args:
+            email: The email address to check against the whitelist of emails.
+
+        Returns:
+            True or False
         """
         return email in Env.LOGIN_WHITELIST(default=[])
 
     @classmethod
     def login_user(cls, user):
-        """
-        Logs in a user.
+        """Logs a user in.
 
-        :param user: The user to login.
-        :return: True
+        Args:
+            user: The user to login.
+
+        Returns:
+            True
         """
+        logger.info('Logging user in: {0} ({1})'.format(user.email, user.id))
         return login_user(user)
 
     @classmethod
     def logout_user(cls):
-        """
-        Logs out the current user.
+        """Logs the current user out.
 
-        :return: True
+        Returns:
+            True
         """
         return logout_user()
 
     @classmethod
     def get_google_provider_config(cls):
-        """
-        Gets the Google auth provider configuration.
+        """Gets the Google auth provider configuration.
 
-        :return: Google config has a hash.
+        Returns:
+            Google config has a hash.
         """
         return requests.get(Env.GOOGLE_DISCOVERY_URL()).json()

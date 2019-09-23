@@ -11,6 +11,16 @@ import synapseclient as syn
 
 class CreateSynapseSpaceService:
     def __init__(self, project_name, institution_name, user_identifier, agreement_url=None, emails=None):
+        """Instantiates a new instance.
+
+        Args:
+            project_name: The name of the Synapse project to create.
+            institution_name: The name of the institution the space is for.
+            user_identifier: The identifier (id, email, etc.) of the user creating the space.
+            agreement_url: The URL of the data contribution agreement.
+            emails: The emails to invite to the team that is created for the project.
+        """
+
         self.start_time = datetime.now()
         self.user_identifier = user_identifier
         self.project_name = project_name
@@ -24,6 +34,14 @@ class CreateSynapseSpaceService:
         self.log_data = {}
 
     def execute(self):
+        """Creates a new Synapse space for data contribution.
+
+        This method does not due validation. It expects all validation to have been done and passed already.
+
+        Returns:
+            Self
+        """
+
         self.project = None
         self.team = None
         self.errors = []
@@ -114,7 +132,9 @@ class CreateSynapseSpaceService:
             errors.append(error)
         else:
             try:
+                logger.info('Creating project with name: {0}'.format(self.project_name))
                 self.project = Synapse.client().store(syn.Project(name=self.project_name))
+                logger.info('Project: {0} created with name: {1}'.format(self.project.id, self.project_name))
             except Exception as ex:
                 logger.exception(ex)
                 errors.append('Error creating project: {0}'.format(ex))
@@ -128,7 +148,10 @@ class CreateSynapseSpaceService:
             storage_location_id = Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID()
 
             if storage_location_id:
+                logger.info(
+                    'Setting storage location on project: {0} to: {1}'.format(self.project.id, storage_location_id))
                 Synapse.client().setStorageLocation(self.project, storage_location_id)
+                logger.info('Storage location set on project: {0}'.format(self.project.id))
             else:
                 self.warnings.append(
                     'Environment Variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Cannot set storage location.')
@@ -143,7 +166,9 @@ class CreateSynapseSpaceService:
         errors = []
         team_name = self.project.name
         try:
+            logger.info('Creating team with name: {0}'.format(team_name))
             self.team = Synapse.client().store(syn.Team(name=team_name))
+            logger.info('Team created with name: {0}'.format(team_name))
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating team: {0}'.format(ex))
@@ -154,7 +179,9 @@ class CreateSynapseSpaceService:
     def _assign_team_to_project(self):
         errors = []
         try:
+            logger.info('Assigning team: {0} to project: {1}'.format(self.team.id, self.project.id))
             Synapse.client().setPermissions(self.project, self.team.id, accessType=Synapse.CAN_EDIT_AND_DELETE_PERMS)
+            logger.info('Team: {0} assigned to project: {1}'.format(self.team.id, self.project.id))
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error assigning team to project: {0}'.format(ex))
@@ -167,11 +194,13 @@ class CreateSynapseSpaceService:
         if self.emails:
             try:
                 for email in self.emails:
+                    logger.info('Inviting email: {0} to team: {1}'.format(email, self.team.id))
                     body = {
                         'teamId': self.team.id,
                         'inviteeEmail': email
                     }
                     Synapse.client().restPOST('/membershipInvitation', body=json.dumps(body))
+                    logger.info('Email: {0} invited to team: {1}'.format(email, self.team.id))
             except Exception as ex:
                 logger.exception(ex)
                 errors.append('Error inviting emails to team: {0}'.format(ex))
@@ -188,9 +217,11 @@ class CreateSynapseSpaceService:
 
             if team_ids:
                 for team_id in team_ids:
+                    logger.info('Assigning team: {0} to project: {1}'.format(team_id, self.project.id))
                     Synapse.client().setPermissions(self.project,
                                                     principalId=team_id,
                                                     accessType=Synapse.CAN_EDIT_AND_DELETE_PERMS)
+                    logger.info('Team: {0} assigned to project: {1}'.format(team_id, self.project.id))
             else:
                 self.warnings.append(
                     'Environment Variable: CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS not set. Admin teams will not be added to this project.')
@@ -208,7 +239,9 @@ class CreateSynapseSpaceService:
 
             if folder_names:
                 for folder_name in folder_names:
+                    logger.info('Creating folder: {0} in project: {1}'.format(folder_name, self.project.id))
                     Synapse.client().store(syn.Folder(name=folder_name, parent=self.project))
+                    logger.info('Folder: {0} created in project: {1}'.format(folder_name, self.project.id))
             else:
                 self.warnings.append(
                     'Environment Variable: CREATE_SYNAPSE_SPACE_FOLDER_NAMES not set. Folders will not be created in this project.')
@@ -233,7 +266,11 @@ class CreateSynapseSpaceService:
                     title=source_wiki.get('title'),
                     markdown=source_wiki.get('markdown')
                 )
+                logger.info('Importing wiki from project: {0} into project: {1}'.format(source_wiki_project_id,
+                                                                                        self.project.id))
                 Synapse.client().store(new_wiki)
+                logger.info('Wiki imported from project: {0} into project: {1}'.format(source_wiki_project_id,
+                                                                                       self.project.id))
             else:
                 self.warnings.append(
                     'Environment Variable: CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
@@ -266,7 +303,11 @@ class CreateSynapseSpaceService:
                     'Agreement_Link': self.agreement_url
                 })
 
+                logger.info(
+                    'Updating contribution agreement table: {0} for project: {1}'.format(table_id, self.project.id))
                 Synapse.client().store(syn.Table(table_id, [row]))
+                logger.info(
+                    'Contribution agreement table: {0} updated for project: {1}'.format(table_id, self.project.id))
             else:
                 self.warnings.append(
                     'Environment Variable: CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
@@ -308,6 +349,15 @@ class CreateSynapseSpaceService:
     class Validations:
         @classmethod
         def validate_project_name(cls, project_name):
+            """Validates that a project name is available.
+
+            Args:
+                project_name: The project name to check.
+
+            Returns:
+                An error string or None.
+            """
+
             error = None
             try:
                 syn_project_id = Synapse.client().findEntityId(project_name)
