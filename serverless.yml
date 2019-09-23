@@ -26,6 +26,9 @@ provider:
       Action:
         - "ssm:GetParameter"
       Resource: { "Fn::Join": ["", ["arn:aws:ssm:${self:provider.region}:", { "Ref": "AWS::AccountId" }, ":parameter/${self:service}/${self:provider.stage}/*" ] ]  }
+  iamManagedPolicies:
+    # TODO: Remove this policy when this is fixed:  https://github.com/serverless/serverless/issues/6241
+    - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 
 functions:
   www:
