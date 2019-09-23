@@ -165,6 +165,29 @@ def test_it_creates_the_folders(service, assert_basic_service_success, syn_clien
     assert syn_folders.sort() == folder_names.sort()
 
 
+def test_it_creates_sub_folders(service, assert_basic_service_success, syn_client, monkeypatch):
+    folder_names = ['one/two/three']
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_FOLDER_NAMES', ','.join(folder_names))
+
+    assert service.execute() == service
+    assert_basic_service_success(service)
+
+    syn_children = list(syn_client.getChildren(service.project, includeTypes=['folder']))
+    assert len(syn_children) == 1
+    assert syn_children[0]['name'] == 'one'
+
+    syn_children = list(syn_client.getChildren(syn_children[0]['id'], includeTypes=['folder']))
+    assert len(syn_children) == 1
+    assert syn_children[0]['name'] == 'two'
+
+    syn_children = list(syn_client.getChildren(syn_children[0]['id'], includeTypes=['folder']))
+    assert len(syn_children) == 1
+    assert syn_children[0]['name'] == 'three'
+
+    syn_children = list(syn_client.getChildren(syn_children[0]['id'], includeTypes=['folder']))
+    assert len(syn_children) == 0
+
+
 def test_it_creates_the_wiki(service, syn_test_helper, syn_client, monkeypatch, assert_basic_service_success):
     # Create a project with a wiki to copy.
     wiki_project = syn_test_helper.create_project()

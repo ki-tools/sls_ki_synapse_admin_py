@@ -238,10 +238,14 @@ class CreateSynapseSpaceService:
             folder_names = Env.CREATE_SYNAPSE_SPACE_FOLDER_NAMES()
 
             if folder_names:
-                for folder_name in folder_names:
-                    logger.info('Creating folder: {0} in project: {1}'.format(folder_name, self.project.id))
-                    Synapse.client().store(syn.Folder(name=folder_name, parent=self.project))
-                    logger.info('Folder: {0} created in project: {1}'.format(folder_name, self.project.id))
+                for folder_path in folder_names:
+                    folder_path_parts = list(filter(None, folder_path.split('/')))
+                    parent = self.project
+
+                    for folder_name in folder_path_parts:
+                        logger.info('Creating folder: {0} in project: {1}'.format(folder_name, self.project.id))
+                        parent = Synapse.client().store(syn.Folder(name=folder_name, parent=parent))
+                        logger.info('Folder: {0} created in project: {1}'.format(folder_name, self.project.id))
             else:
                 self.warnings.append(
                     'Environment Variable: CREATE_SYNAPSE_SPACE_FOLDER_NAMES not set. Folders will not be created in this project.')
