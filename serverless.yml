@@ -18,6 +18,9 @@ provider:
     SERVICE_STAGE: ${self:provider.stage}
     FLASK_ENV: ${self:provider.stage}
     FLASK_DEBUG: ${self:custom.slsDeploy}.FLASK_DEBUG}
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
   iamRoleStatements:
     - Effect: "Allow"
       Action:
