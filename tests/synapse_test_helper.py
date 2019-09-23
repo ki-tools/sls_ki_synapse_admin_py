@@ -4,15 +4,14 @@ from synapseclient import Project, Folder, File, Team, Wiki
 
 
 class SynapseTestHelper:
-    """
-    Test helper for working with Synapse.
-    """
+    """Test helper for working with Synapse."""
+
     _test_id = uuid.uuid4().hex
     _trash = []
 
     def test_id(self):
-        """
-        Gets a unique value to use as a test identifier.
+        """Gets a unique value to use as a test identifier.
+
         This string can be used to help identify the test instance that created the object.
         """
         return self._test_id
@@ -21,24 +20,22 @@ class SynapseTestHelper:
         return "{0}{1}_{2}{3}".format(prefix, self.test_id(), uuid.uuid4().hex, postfix)
 
     def fake_synapse_id(self):
-        """
-        Gets a Synapse entity ID that does not exist in Synapse.
+        """Gets a Synapse entity ID that does not exist in Synapse.
 
-        :return: String
+        Returns:
+            String
         """
         return 'syn000'
 
     def dispose_of(self, *syn_objects):
-        """
-        Adds a Synapse object to the list of objects to be deleted.
-        """
+        """Adds a Synapse object to the list of objects to be deleted."""
         for syn_object in syn_objects:
             if syn_object not in self._trash:
                 self._trash.append(syn_object)
 
     def dispose(self):
-        """
-        Cleans up any Synapse objects that were created during testing.
+        """Cleans up any Synapse objects that were created during testing.
+
         This method needs to be manually called after each or all tests are done.
         """
         projects = []
@@ -102,9 +99,7 @@ class SynapseTestHelper:
             self._trash.remove(obj)
 
     def create_project(self, **kwargs):
-        """
-        Creates a new Project and adds it to the trash queue.
-        """
+        """Creates a new Project and adds it to the trash queue."""
         if 'name' not in kwargs:
             kwargs['name'] = self.uniq_name(prefix=kwargs.get('prefix', ''))
 
@@ -115,9 +110,7 @@ class SynapseTestHelper:
         return project
 
     def create_file(self, **kwargs):
-        """
-        Creates a new File and adds it to the trash queue.
-        """
+        """Creates a new File and adds it to the trash queue."""
         if 'name' not in kwargs:
             kwargs['name'] = self.uniq_name(prefix=kwargs.get('prefix', ''))
 
@@ -128,9 +121,7 @@ class SynapseTestHelper:
         return file
 
     def create_team(self, **kwargs):
-        """
-        Creates a new Team and adds it to the trash queue.
-        """
+        """Creates a new Team and adds it to the trash queue."""
         if 'name' not in kwargs:
             kwargs['name'] = self.uniq_name(prefix=kwargs.get('prefix', ''))
 
@@ -141,9 +132,7 @@ class SynapseTestHelper:
         return team
 
     def create_wiki(self, **kwargs):
-        """
-        Creates a new Wiki and adds it to the trash queue.
-        """
+        """Creates a new Wiki and adds it to the trash queue."""
         if 'title' not in kwargs:
             kwargs['title'] = self.uniq_name(prefix=kwargs.get('prefix', ''))
         kwargs.pop('prefix', None)

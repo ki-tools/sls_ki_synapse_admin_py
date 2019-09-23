@@ -13,23 +13,26 @@ class Envs:
 
 
 def load_local_if_applicable():
-    """
-    Load the local environment variables if an applicable environment is set.
+    """Load the local environment variables if an applicable environment is set.
 
-    :return: True if the correct environment is set and the config file was found and loaded else False.
+    Returns:
+        True if the correct environment is set and the config file was found and loaded else False.
     """
     if Env.FLASK_ENV() in Envs.ALLOWED_LOCAL_ENVS:
         return load_local(Env.FLASK_ENV())
 
 
 def load_local(flask_env):
-    """
-    Loads environment variables from a local config file.
+    """Loads environment variables from a local config file.
+
     This should only be called when locally developing or running tests.
     In production or CI all variables must be set in the environment.
 
-    :param flask_env: Which environment to load from the config file.
-    :return: True if the file was found and loaded else False.
+    Args:
+        flask_env: Which environment to load from the config file.
+
+    Returns:
+        True if the file was found and loaded else False.
     """
     if flask_env not in Envs.ALLOWED_LOCAL_ENVS:
         raise ValueError('FLASK_ENV not allowed: {0}'.format(flask_env))

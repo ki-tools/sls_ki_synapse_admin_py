@@ -1,9 +1,7 @@
 import logging
 from . import Env
 
-"""
-Setup the logger.
-"""
+# Setup the logger.
 logger = logging.getLogger()
 
 if logger.handlers:

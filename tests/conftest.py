@@ -44,9 +44,7 @@ def syn_client():
 
 @pytest.fixture
 def syn_test_helper():
-    """
-    Provides the SynapseTestHelper as a fixture per function.
-    """
+    """Provides the SynapseTestHelper as a fixture per function."""
     helper = SynapseTestHelper()
     yield helper
     helper.dispose()
@@ -54,17 +52,13 @@ def syn_test_helper():
 
 @pytest.fixture
 def fake_synapse_id(syn_test_helper):
-    """
-    Provides a Synapse entity ID that does not exist.
-    """
+    """Provides a Synapse entity ID that does not exist."""
     return syn_test_helper.fake_synapse_id()
 
 
 @pytest.fixture
 def temp_file(syn_test_helper):
-    """
-    Generates a temp file containing the SynapseTestHelper.uniq_name per function.
-    """
+    """Generates a temp file containing the SynapseTestHelper.uniq_name per function."""
     fd, tmp_filename = tempfile.mkstemp()
     with os.fdopen(fd, 'w') as tmp:
         tmp.write(syn_test_helper.uniq_name())

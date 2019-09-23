@@ -5,44 +5,32 @@ import uuid
 class Env:
     @staticmethod
     def FLASK_ENV(default='development'):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
+        """This variable must be set on the OS (not on SSM)"""
         return ParamStore.get('FLASK_ENV', default=default, store=ParamStore.Stores.OS).value
 
     @staticmethod
     def FLASK_DEBUG(default=False):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
+        """This variable must be set on the OS (not on SSM)"""
         return ParamStore.get('FLASK_DEBUG', default=default, store=ParamStore.Stores.OS).to_bool()
 
     @staticmethod
     def FLASK_TESTING(default=False):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
+        """This variable must be set on the OS (not on SSM)"""
         return ParamStore.get('FLASK_TESTING', default=default, store=ParamStore.Stores.OS).to_bool()
 
     @staticmethod
     def FLASK_LOGIN_DISABLED(default=False):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
+        """This variable must be set on the OS (not on SSM)"""
         return ParamStore.get('FLASK_LOGIN_DISABLED', default=default, store=ParamStore.Stores.OS).to_bool()
 
     @staticmethod
     def SERVICE_NAME(default=None):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
+        """This variable must be set on the OS (not on SSM)"""
         return ParamStore.get('SERVICE_NAME', default=default, store=ParamStore.Stores.OS).value
 
     @staticmethod
     def SERVICE_STAGE(default=None):
-        """
-        This variable must be set on the OS (not on SSM)
-        """
+        """This variable must be set on the OS (not on SSM)"""
         return ParamStore.get('SERVICE_STAGE', default=default, store=ParamStore.Stores.OS).value
 
     @staticmethod

@@ -44,9 +44,7 @@ class Synapse:
 
     @classmethod
     def client(cls):
-        """
-        Gets a logged in instance of the synapseclient.
-        """
+        """Gets a logged in instance of the synapseclient."""
         if not cls._synapse_client:
             # Lambda can only write to /tmp so update the CACHE_ROOT_DIR.
             synapseclient.cache.CACHE_ROOT_DIR = os.path.join(tempfile.gettempdir(), 'synapseCache')
