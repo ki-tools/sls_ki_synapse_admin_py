@@ -32,6 +32,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route("/login/login_forbidden")
+@app.route("/login/forbidden")
 def login_forbidden():
-    return render_template('login/login_forbidden.html')
+    return render_template('login/forbidden.html')
