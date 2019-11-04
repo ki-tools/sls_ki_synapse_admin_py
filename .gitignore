@@ -26,6 +26,7 @@ jspm_packages
 .coverage
 htmlcov
 .idea
+.python-version
 
 .serverless-wsgi
 wsgi_handler.py
