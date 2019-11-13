@@ -70,8 +70,9 @@ class Env:
         return ParamStore.get('SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID', default).to_int()
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS(default=[]):
-        return ParamStore.get('CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS', default).to_list(delimiter=',')
+    def CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS(default=[]):
+        """Grant these principal IDs (User or Team) access to the project."""
+        return Env._get_principal_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS')
 
     @staticmethod
     def CREATE_SYNAPSE_SPACE_FOLDER_NAMES(default=[]):
@@ -88,3 +89,29 @@ class Env:
     @staticmethod
     def CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID(default=None):
         return ParamStore.get('CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID', default).value
+
+    @staticmethod
+    def _get_principal_permissions_var(env_var, default=[]):
+        """Gets principal (User or Team) IDs and permission codes from an ENV variable.
+
+                The format of this is: <principal-id>:<permission-code>
+                Example: 123456:ADMIN,654321:CAN_EDIT_AND_DELETE
+
+                Args:
+                    default:
+
+                Returns:
+                    List of dicts (id and permission).
+                """
+        val = ParamStore.get(env_var, default).to_list(delimiter=',')
+        if val:
+            results = []
+            for item in val:
+                split = item.split(':')
+                if len(split) == 2:
+                    results.append({'id': int(split[0]), 'permission': split[1]})
+                else:
+                    raise Exception('Invalid format for {0}: {1}'.format(env_var, item))
+            return results
+        else:
+            return val

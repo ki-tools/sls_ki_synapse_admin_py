@@ -7,6 +7,8 @@ import synapseclient
 class Synapse:
     _synapse_client = None
 
+    ALL_PERM_CODES = ['ADMIN', 'CAN_EDIT_AND_DELETE', 'CAN_EDIT', 'CAN_DOWNLOAD', 'CAN_VIEW']
+
     ADMIN_PERMS = [
         'UPDATE',
         'DELETE',
@@ -41,6 +43,13 @@ class Synapse:
     CAN_VIEW_PERMS = [
         'READ'
     ]
+
+    @classmethod
+    def get_perms_by_code(cls, code):
+        code = code.upper() if code else None
+        if code not in cls.ALL_PERM_CODES:
+            raise Exception('Invalid permissions code: {0}'.format(code))
+        return getattr(cls, '{0}_PERMS'.format(code))
 
     @classmethod
     def client(cls):
