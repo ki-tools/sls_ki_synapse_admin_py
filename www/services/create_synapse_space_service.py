@@ -55,7 +55,6 @@ class CreateSynapseSpaceService:
 
         if self._create_team():
             self._assign_team_to_project()
-            self._add_admins_to_team()
             self._invite_emails_to_team()
 
         self._grant_principals_access_to_project()
@@ -187,17 +186,6 @@ class CreateSynapseSpaceService:
             logger.exception(ex)
             errors.append('Error assigning team to project: {0}'.format(ex))
 
-        self.errors += errors
-        return not errors
-
-    def _add_admins_to_team(self):
-        errors = []
-        try:
-            # TODO: implement this.
-            pass
-        except Exception as ex:
-            logger.exception(ex)
-            errors.append('Error inviting emails to team: {0}'.format(ex))
         self.errors += errors
         return not errors
 
