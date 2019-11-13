@@ -57,7 +57,7 @@ class CreateSynapseSpaceService:
             self._assign_team_to_project()
             self._invite_emails_to_team()
 
-        self._assign_admin_teams_to_project()
+        self._grant_principals_access_to_project()
 
         self._create_folders()
 
@@ -86,7 +86,7 @@ class CreateSynapseSpaceService:
                             'agreement_url': self.agreement_url,
                             'emails': self.emails,
                             'storage_location_id': Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(),
-                            'admin_team_ids': Env.CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS(),
+                            'grant_project_access': Env.CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS(),
                             'folder_names': Env.CREATE_SYNAPSE_SPACE_FOLDER_NAMES(),
                             'wiki_project_id': Env.CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID(),
                             'contribution_agreement_table_id': Env.CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID(),
@@ -210,24 +210,29 @@ class CreateSynapseSpaceService:
         self.errors += errors
         return not errors
 
-    def _assign_admin_teams_to_project(self):
+    def _grant_principals_access_to_project(self):
         errors = []
         try:
-            team_ids = Env.CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS()
+            config = Env.CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS()
 
-            if team_ids:
-                for team_id in team_ids:
-                    logger.info('Assigning team: {0} to project: {1}'.format(team_id, self.project.id))
-                    Synapse.client().setPermissions(self.project,
-                                                    principalId=team_id,
-                                                    accessType=Synapse.CAN_EDIT_AND_DELETE_PERMS)
-                    logger.info('Team: {0} assigned to project: {1}'.format(team_id, self.project.id))
+            if config:
+                for item in config:
+                    principal_id = item['id']
+                    permission_code = item['permission']
+                    access_type = Synapse.get_perms_by_code(permission_code)
+
+                    logger.info('Assigning principal: {0} to project: {1} with permission: {2}'.format(principal_id,
+                                                                                                       self.project.id,
+                                                                                                       permission_code))
+
+                    Synapse.client().setPermissions(self.project, principalId=principal_id, accessType=access_type)
+                    logger.info('Principal: {0} assigned to project: {1}'.format(principal_id, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS not set. Admin teams will not be added to this project.')
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS not set. Principals will not be added to this project.')
         except Exception as ex:
             logger.exception(ex)
-            errors.append('Error adding admin teams to project: {0}'.format(ex))
+            errors.append('Error adding principals to project: {0}'.format(ex))
 
         self.errors += errors
         return not errors

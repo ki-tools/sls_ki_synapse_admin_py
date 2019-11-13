@@ -1,5 +1,6 @@
 import pytest
 import json
+import os
 from www.core import Synapse, Env
 from www.services import CreateSynapseSpaceService
 import synapseclient as syn
@@ -131,26 +132,36 @@ def test_it_invites_the_emails_to_the_team(syn_client,
         assert email in emails
 
 
-def test_it_adds_the_admin_teams_to_the_project(service,
-                                                syn_test_helper,
-                                                syn_client,
-                                                monkeypatch,
-                                                assert_basic_service_success):
-    # Create some teams to test with
-    syn_admin_teams = [
-        syn_test_helper.create_team(),
-        syn_test_helper.create_team()
+def test_it_grants_principals_access_to_the_project(service,
+                                                    syn_test_helper,
+                                                    syn_client,
+                                                    monkeypatch,
+                                                    assert_basic_service_success):
+    test_user_id = os.environ.get('TEST_OTHER_SYNAPSE_USER_ID', None)
+
+    config = [
+        {'id': test_user_id, 'permission': 'CAN_VIEW'},
+        {'id': syn_test_helper.create_team().id, 'permission': 'ADMIN'},
+        {'id': syn_test_helper.create_team().id, 'permission': 'CAN_EDIT'}
     ]
-    syn_admin_team_ids = list(map(lambda t: t.id, syn_admin_teams))
-    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_ADMIN_TEAM_IDS', ','.join(syn_admin_team_ids))
+
+    config_str = '{0}:{1},{2}:{3},{4}:{5}'.format(
+        config[0]['id'],
+        config[0]['permission'],
+        config[1]['id'],
+        config[1]['permission'],
+        config[2]['id'],
+        config[2]['permission']
+    )
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS', config_str)
 
     assert service.execute() == service
     assert_basic_service_success(service)
 
-    for syn_admin_team_id in syn_admin_team_ids:
-        syn_perms = syn_client.getPermissions(service.project, principalId=syn_admin_team_id)
+    for item in config:
+        syn_perms = syn_client.getPermissions(service.project, principalId=item['id'])
         assert syn_perms
-        syn_perms.sort() == Synapse.CAN_EDIT_AND_DELETE_PERMS.sort()
+        syn_perms.sort() == Synapse.get_perms_by_code(item['permission']).sort()
 
 
 def test_it_creates_the_folders(service, assert_basic_service_success, syn_client, monkeypatch):
