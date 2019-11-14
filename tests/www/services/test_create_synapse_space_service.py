@@ -114,6 +114,34 @@ def test_it_assigns_the_team_to_the_project(service, assert_basic_service_succes
     syn_perms.sort() == Synapse.CAN_EDIT_AND_DELETE_PERMS.sort()
 
 
+def test_it_adds_managers_to_the_team(syn_client,
+                                      monkeypatch,
+                                      institution_name,
+                                      user_identifier,
+                                      emails,
+                                      assert_basic_service_success):
+    user_ids = [Env.Test.TEST_OTHER_SYNAPSE_USER_ID()]
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS', ','.join([str(u) for u in user_ids]))
+
+    service = CreateSynapseSpaceService(institution_name, institution_name, user_identifier)
+    assert service.execute() == service
+    assert_basic_service_success(service)
+
+    syn_invites = syn_client.restGET('/team/{0}/openInvitation'.format(service.team.id))
+    invite_results = syn_invites.get('results')
+
+    assert len(invite_results) == len(user_ids)
+    for result in invite_results:
+        user_id = int(result.get('inviteeId'))
+        assert user_id in user_ids
+
+    team_acl = syn_client.restGET('/team/{0}/acl'.format(service.team.id))
+    acl_accesses = team_acl.get('resourceAccess')
+    for user_id in user_ids:
+        resource = next((r for r in acl_accesses if r['principalId'] == user_id))
+        assert resource.get('accessType').sort() == Synapse.TEAM_MANAGER_PERMISSIONS.sort()
+
+
 def test_it_invites_the_emails_to_the_team(syn_client,
                                            institution_name,
                                            user_identifier,
@@ -137,7 +165,7 @@ def test_it_grants_principals_access_to_the_project(service,
                                                     syn_client,
                                                     monkeypatch,
                                                     assert_basic_service_success):
-    test_user_id = os.environ.get('TEST_OTHER_SYNAPSE_USER_ID', None)
+    test_user_id = Env.Test.TEST_OTHER_SYNAPSE_USER_ID()
 
     config = [
         {'id': test_user_id, 'permission': 'CAN_VIEW'},

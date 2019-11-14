@@ -21,7 +21,7 @@ def synapse_space_create():
         warnings = service.warnings
 
         if not errors:
-            flash('Synapse project {0} has been created.'.format(service.project.id))
+            flash('Synapse project created successfully: {0} ({1})'.format(service.project.name, service.project.id))
             for warning in (warnings or []):
                 flash('WARNING: {0}'.format(warning))
             return redirect(url_for('synapse_space_create'))

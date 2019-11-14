@@ -44,6 +44,14 @@ class Synapse:
         'READ'
     ]
 
+    TEAM_MANAGER_PERMISSIONS = [
+        'SEND_MESSAGE',
+        'READ',
+        'UPDATE',
+        'TEAM_MEMBERSHIP_UPDATE',
+        'DELETE'
+    ]
+
     @classmethod
     def get_perms_by_code(cls, code):
         code = code.upper() if code else None
@@ -63,7 +71,7 @@ class Synapse:
 
             syn_user = Env.SYNAPSE_USERNAME()
             syn_pass = Env.SYNAPSE_PASSWORD()
-            cls._synapse_client = synapseclient.Synapse()
+            cls._synapse_client = synapseclient.Synapse(skip_checks=True)
             cls._synapse_client.login(syn_user, syn_pass, silent=True)
 
         return cls._synapse_client

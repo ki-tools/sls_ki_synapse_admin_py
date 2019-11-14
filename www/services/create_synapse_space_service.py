@@ -55,6 +55,7 @@ class CreateSynapseSpaceService:
 
         if self._create_team():
             self._assign_team_to_project()
+            self._add_team_managers()
             self._invite_emails_to_team()
 
         self._grant_principals_access_to_project()
@@ -185,6 +186,37 @@ class CreateSynapseSpaceService:
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error assigning team to project: {0}'.format(ex))
+
+        self.errors += errors
+        return not errors
+
+    def _add_team_managers(self):
+        errors = []
+        try:
+            user_ids = Env.CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS()
+
+            if user_ids:
+                for user_id in user_ids:
+                    logger.info('Inviting user: {0} to team: {1}.'.format(user_id, self.team.id))
+                    body = {
+                        'teamId': self.team.id,
+                        'inviteeId': user_id
+                    }
+                    Synapse.client().restPOST('/membershipInvitation', body=json.dumps(body))
+                    logger.info('User: {0} invited to team: {1}'.format(user_id, self.team.id))
+
+                    logger.info('Setting user: {0} as manager on team: {1}.'.format(user_id, self.team.id))
+                    new_acl = {'principalId': user_id, 'accessType': Synapse.TEAM_MANAGER_PERMISSIONS}
+                    acl = Synapse.client().restGET('/team/{0}/acl'.format(self.team.id))
+                    acl['resourceAccess'].append(new_acl)
+                    Synapse.client().restPUT("/team/acl", body=json.dumps(acl))
+                    logger.info('User: {0} has been given manager access on team: {1}.'.format(user_id, self.team.id))
+            else:
+                self.warnings.append(
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS not set. Team managers will not be added to the project team.')
+        except Exception as ex:
+            logger.exception(ex)
+            errors.append('Error adding managers to the project team: {0}'.format(ex))
 
         self.errors += errors
         return not errors
