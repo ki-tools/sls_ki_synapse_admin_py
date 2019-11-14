@@ -44,7 +44,7 @@ class Synapse:
         'READ'
     ]
 
-    TEAM_MANAGER_PERMISSIONS = [
+    TEAM_MANAGER_PERMS = [
         'SEND_MESSAGE',
         'READ',
         'UPDATE',

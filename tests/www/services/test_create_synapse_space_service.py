@@ -139,7 +139,7 @@ def test_it_adds_managers_to_the_team(syn_client,
     acl_accesses = team_acl.get('resourceAccess')
     for user_id in user_ids:
         resource = next((r for r in acl_accesses if r['principalId'] == user_id))
-        assert resource.get('accessType').sort() == Synapse.TEAM_MANAGER_PERMISSIONS.sort()
+        assert resource.get('accessType').sort() == Synapse.TEAM_MANAGER_PERMS.sort()
 
 
 def test_it_invites_the_emails_to_the_team(syn_client,

@@ -206,7 +206,7 @@ class CreateSynapseSpaceService:
                     logger.info('User: {0} invited to team: {1}'.format(user_id, self.team.id))
 
                     logger.info('Setting user: {0} as manager on team: {1}.'.format(user_id, self.team.id))
-                    new_acl = {'principalId': user_id, 'accessType': Synapse.TEAM_MANAGER_PERMISSIONS}
+                    new_acl = {'principalId': user_id, 'accessType': Synapse.TEAM_MANAGER_PERMS}
                     acl = Synapse.client().restGET('/team/{0}/acl'.format(self.team.id))
                     acl['resourceAccess'].append(new_acl)
                     Synapse.client().restPUT("/team/acl", body=json.dumps(acl))
