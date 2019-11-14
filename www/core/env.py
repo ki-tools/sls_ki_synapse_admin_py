@@ -70,6 +70,11 @@ class Env:
         return ParamStore.get('SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID', default).to_int()
 
     @staticmethod
+    def CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS(default=[]):
+        """These user IDs will be invited to the team and given manager access of the team."""
+        return ParamStore.get('CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS', default).to_list(delimiter=',')
+
+    @staticmethod
     def CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS(default=[]):
         """Grant these principal IDs (User or Team) access to the project."""
         return Env._get_principal_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS')
@@ -115,3 +120,8 @@ class Env:
             return results
         else:
             return val
+
+    class Test:
+        @staticmethod
+        def TEST_OTHER_SYNAPSE_USER_ID(default=None):
+            return ParamStore.get('TEST_OTHER_SYNAPSE_USER_ID', default=default).to_int()
