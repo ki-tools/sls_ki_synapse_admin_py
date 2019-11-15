@@ -35,7 +35,7 @@ def google_userinfo_url():
 
 @pytest.fixture
 def mk_stub_google_endpoints(request_base_url, google_provider_config_url, google_token_url, google_userinfo_url,
-                             mocker, monkeypatch):
+                             mk_uniq_real_email, mocker, monkeypatch):
     def _mk(res_mock,
             with_all=False,
             with_provider_config=False,
@@ -71,7 +71,7 @@ def mk_stub_google_endpoints(request_base_url, google_provider_config_url, googl
             user_info_body = {
                 'email_verified': userinfo.get('email_verified', True),
                 'sub': userinfo.get('user_id', 1),
-                'email': userinfo.get('email', 'user@test.com'),
+                'email': userinfo.get('email', mk_uniq_real_email()),
             }
             res_mock.add(responses.GET, google_userinfo_url, status=200, body=json.dumps(user_info_body))
 
@@ -100,9 +100,12 @@ def test_get_redirect_uri(mk_stub_google_endpoints, request_base_url, expected_r
         assert redirect_uri == expected_redirect_uri
 
 
-def test_handle_callback_and_login(mk_stub_google_endpoints, call_handle_callback_and_login, monkeypatch):
+def test_handle_callback_and_login(mk_stub_google_endpoints,
+                                   mk_uniq_real_email,
+                                   call_handle_callback_and_login,
+                                   monkeypatch):
     with responses.RequestsMock() as res_mock:
-        email = 'random.user@test.com'
+        email = mk_uniq_real_email()
         mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email': email}, login_whitelist=True)
         assert email in Env.LOGIN_WHITELIST()
         user = call_handle_callback_and_login()
@@ -118,9 +121,9 @@ def test_callback_raises_email_not_verified_error(mk_stub_google_endpoints, call
             call_handle_callback_and_login()
 
 
-def test_callback_raises_forbidden_error(mk_stub_google_endpoints, call_handle_callback_and_login):
+def test_callback_raises_forbidden_error(mk_stub_google_endpoints, mk_uniq_real_email, call_handle_callback_and_login):
     with responses.RequestsMock() as res_mock:
-        email = 'user.not.in.whitelist@test.com'
+        email = mk_uniq_real_email()
         mk_stub_google_endpoints(res_mock, with_all=True, userinfo={'email': email}, login_whitelist=False)
 
         with pytest.raises(AuthForbiddenError):

@@ -66,3 +66,14 @@ def temp_file(syn_test_helper):
 
     if os.path.isfile(tmp_filename):
         os.remove(tmp_filename)
+
+
+@pytest.fixture
+def mk_uniq_real_email(syn_test_helper):
+    def _mk():
+        test_email = Env.Test.TEST_EMAIL()
+        name, domain = test_email.split('@')
+        plus = '' if '+' in name else '+'
+        return '{0}{1}{2}@{3}'.format(name, plus, syn_test_helper.uniq_name(), domain)
+
+    yield _mk

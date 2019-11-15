@@ -125,3 +125,7 @@ class Env:
         @staticmethod
         def TEST_OTHER_SYNAPSE_USER_ID(default=None):
             return ParamStore.get('TEST_OTHER_SYNAPSE_USER_ID', default=default).to_int()
+
+        @staticmethod
+        def TEST_EMAIL(default=None):
+            return ParamStore.get('TEST_EMAIL', default=default).value

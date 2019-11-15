@@ -1,6 +1,5 @@
 import pytest
 import json
-import os
 from www.core import Synapse, Env
 from www.services import CreateSynapseSpaceService
 import synapseclient as syn
@@ -12,8 +11,8 @@ def institution_name(syn_test_helper):
 
 
 @pytest.fixture
-def user_identifier(syn_test_helper):
-    return '{0}@test.com'.format(syn_test_helper.uniq_name())
+def user_identifier(mk_uniq_real_email):
+    return mk_uniq_real_email()
 
 
 @pytest.fixture
@@ -22,11 +21,11 @@ def agreement_url(syn_test_helper):
 
 
 @pytest.fixture
-def emails(syn_test_helper):
+def emails(mk_uniq_real_email):
     return [
-        syn_test_helper.uniq_name(postfix='@test.com'),
-        syn_test_helper.uniq_name(postfix='@test.com'),
-        syn_test_helper.uniq_name(postfix='@test.com')
+        mk_uniq_real_email(),
+        mk_uniq_real_email(),
+        mk_uniq_real_email()
     ]
 
 
