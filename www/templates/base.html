@@ -34,6 +34,7 @@
         {% endif %}
       </ul>
       {% if current_user.is_authenticated %}
+      <span>{{user}}</span>
       <a class="btn btn-outline-primary btn-outline-login-out" href="{{ url_for('logout') }}">Logout</a>
       {% else %}
       <a class="btn btn-outline-primary btn-outline-login-out" href="{{ url_for('login') }}">Login with Google</a>

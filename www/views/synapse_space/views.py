@@ -1,8 +1,9 @@
-from flask import current_app as app
+from flask import current_app as app, request
 from flask import render_template, redirect, url_for, flash
 from flask_login import fresh_login_required, current_user
 from www.services import CreateSynapseSpaceService, EncryptSynapseSpaceService
 from .forms import CreateSynapseSpaceForm, EncryptSynapseSpaceForm
+from ...core import Cookies
 
 
 @app.route("/synapse_space/create", methods=('GET', 'POST'))
@@ -26,7 +27,10 @@ def synapse_space_create():
                 flash('WARNING: {0}'.format(warning))
             return redirect(url_for('synapse_space_create'))
 
-    return render_template('synapse_space/create.html', form=form, errors=errors)
+    return render_template('synapse_space/create.html',
+                           user=Cookies.user_email_get(request),
+                           form=form,
+                           errors=errors)
 
 
 @app.route("/synapse_space/encrypt", methods=('GET', 'POST'))
@@ -42,4 +46,7 @@ def synapse_space_encrypt():
             flash('Synapse project {0} has been encrypted.'.format(service.project_id))
             return redirect(url_for('synapse_space_encrypt'))
 
-    return render_template('synapse_space/encrypt.html', form=form, errors=errors)
+    return render_template('synapse_space/encrypt.html',
+                           user=Cookies.user_email_get(request),
+                           form=form,
+                           errors=errors)
