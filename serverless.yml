@@ -12,7 +12,7 @@ provider:
   stage: ${opt:stage, "development"}
   profile: ${self:custom.slsDeploy}.AWS_PROFILE}
   region: ${self:custom.slsDeploy}.AWS_REGION}
-  timeout: 30
+  timeout: 180 # NOTE: API Gateway has a hard limit of 29 seconds so API Gateway will kill the request but the Lambda will continue for 180 seconds.
   environment:
     SERVICE_NAME: ${self:service}
     SERVICE_STAGE: ${self:provider.stage}
