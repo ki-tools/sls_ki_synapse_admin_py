@@ -33,7 +33,7 @@ class CreateSynapseSpaceForm(FlaskForm):
         self.valid_emails = []
         self.invalid_emails = []
 
-        pattern = re.compile(r"\"?([-a-zA-Z0-9.`?{}]+@\w+\.\w+)\"?")
+        pattern = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 
         for email in self.parse_emails(field.data):
             if not re.match(pattern, email):
