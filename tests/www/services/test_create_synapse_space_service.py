@@ -159,6 +159,40 @@ def test_it_invites_the_emails_to_the_team(syn_client,
         assert email in emails
 
 
+def test_it_grants_the_project_team_access_to_other_entities(service,
+                                                             syn_test_helper,
+                                                             syn_client,
+                                                             monkeypatch,
+                                                             assert_basic_service_success):
+    project = syn_test_helper.create_project()
+    folder1 = syn_client.store(syn.Folder(name='shared_folder1', parent=project))
+    folder2 = syn_client.store(syn.Folder(name='shared_folder2', parent=project))
+
+    config = [
+        {'id': folder1.id, 'permission': 'CAN_VIEW'},
+        {'id': folder2.id, 'permission': 'CAN_DOWNLOAD'}
+    ]
+
+    config_str = '{0}:{1},{2}:{3}'.format(
+        config[0]['id'],
+        config[0]['permission'],
+        config[1]['id'],
+        config[1]['permission']
+    )
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_GRANT_TEAM_ACCESS', config_str)
+
+    # Disable emails
+    service.emails = []
+
+    assert service.execute() == service
+    assert_basic_service_success(service)
+
+    for item in config:
+        syn_perms = syn_client.getPermissions(item['id'], principalId=service.team.id)
+        assert syn_perms
+        syn_perms.sort() == Synapse.get_perms_by_code(item['permission']).sort()
+
+
 def test_it_grants_principals_access_to_the_project(service,
                                                     syn_test_helper,
                                                     syn_client,
