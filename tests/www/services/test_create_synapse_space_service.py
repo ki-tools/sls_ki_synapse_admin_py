@@ -179,7 +179,7 @@ def test_it_grants_the_project_team_access_to_other_entities(service,
         config[1]['id'],
         config[1]['permission']
     )
-    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_GRANT_TEAM_ACCESS', config_str)
+    monkeypatch.setenv('CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS', config_str)
 
     # Disable emails
     service.emails = []

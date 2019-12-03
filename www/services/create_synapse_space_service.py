@@ -88,7 +88,7 @@ class CreateSynapseSpaceService:
                             'agreement_url': self.agreement_url,
                             'emails': self.emails,
                             'storage_location_id': Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(),
-                            'grant_team_access': Env.CREATE_SYNAPSE_SPACE_GRANT_TEAM_ACCESS(),
+                            'grant_team_access': Env.CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS(),
                             'grant_project_access': Env.CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS(),
                             'folder_names': Env.CREATE_SYNAPSE_SPACE_FOLDER_NAMES(),
                             'wiki_project_id': Env.CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID(),
@@ -247,7 +247,7 @@ class CreateSynapseSpaceService:
     def _grant_team_access_to_entities(self):
         errors = []
         try:
-            config = Env.CREATE_SYNAPSE_SPACE_GRANT_TEAM_ACCESS()
+            config = Env.CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS()
 
             if config:
                 for item in config:
@@ -263,7 +263,7 @@ class CreateSynapseSpaceService:
                     logger.info('Team: {0} granted access to entity: {1}'.format(self.team.name, entity_id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_GRANT_TEAM_ACCESS not set. Project team will not be shared on other entities.')
+                    'Environment Variable: CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS not set. Project team will not be shared on other entities.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error sharing project team with entities: {0}'.format(ex))

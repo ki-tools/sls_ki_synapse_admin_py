@@ -80,9 +80,9 @@ class Env:
         return Env._get_id_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS', int)
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_GRANT_TEAM_ACCESS(default=[]):
+    def CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS(default=[]):
         """Grant the project team access to other entities."""
-        return Env._get_id_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_TEAM_ACCESS', str)
+        return Env._get_id_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS', str)
 
     @staticmethod
     def CREATE_SYNAPSE_SPACE_FOLDER_NAMES(default=[]):
