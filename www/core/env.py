@@ -77,7 +77,12 @@ class Env:
     @staticmethod
     def CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS(default=[]):
         """Grant these principal IDs (User or Team) access to the project."""
-        return Env._get_principal_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS')
+        return Env._get_id_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS', int)
+
+    @staticmethod
+    def CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS(default=[]):
+        """Grant the project team access to other entities."""
+        return Env._get_id_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS', str)
 
     @staticmethod
     def CREATE_SYNAPSE_SPACE_FOLDER_NAMES(default=[]):
@@ -96,14 +101,16 @@ class Env:
         return ParamStore.get('CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID', default).value
 
     @staticmethod
-    def _get_principal_permissions_var(env_var, default=[]):
-        """Gets principal (User or Team) IDs and permission codes from an ENV variable.
+    def _get_id_permissions_var(env_var, id_type, default=[]):
+        """Gets IDs and permission codes from an ENV variable.
 
-                The format of this is: <principal-id>:<permission-code>
+                The format of this is: <id>:<permission-code>
                 Example: 123456:ADMIN,654321:CAN_EDIT_AND_DELETE
 
                 Args:
-                    default:
+                    env_var: The Environment variable to get from.
+                    id_type: The type of the ID value (int or str). The ID will be case to this type.
+                    default: The default value to return if the variable is empty or not found.
 
                 Returns:
                     List of dicts (id and permission).
@@ -114,7 +121,12 @@ class Env:
             for item in val:
                 split = item.split(':')
                 if len(split) == 2:
-                    results.append({'id': int(split[0]), 'permission': split[1]})
+                    item = {'id': split[0], 'permission': split[1]}
+
+                    if id_type is int:
+                        item['id'] = int(item['id'])
+
+                    results.append(item)
                 else:
                     raise Exception('Invalid format for {0}: {1}'.format(env_var, item))
             return results
