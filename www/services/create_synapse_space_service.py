@@ -167,7 +167,7 @@ class CreateSynapseSpaceService:
 
     def _create_team(self):
         errors = []
-        team_name = self.project.name
+        team_name = 'KiContributor_{0}'.format(self.project.name)
         try:
             logger.info('Creating team with name: {0}'.format(team_name))
             self.team = Synapse.client().store(syn.Team(name=team_name))

@@ -53,10 +53,10 @@ This will create a new project in Synapse and configure it for ki contribution.
 The steps are:
 
 - Create a new Synapse project.
-  - The format of the project name will be: `KiContributor_<INSTITUTION-SHORT-NAME>_<PRINCIPAL-INVESTIGATOR-NAME>`.
+  - The format of the project name will be: `<INSTITUTION-SHORT-NAME>_<PRINCIPAL-INVESTIGATOR-NAME>`.
 - Set the project's storage location to a specific (encrypted) S3 bucket.
 - Create a new Synapse team and add it to the project.
-  - The name of the team will be the same as the project's name.
+  - The format of the team name will be: `KiContributor_<INSTITUTION-SHORT-NAME>_<PRINCIPAL-INVESTIGATOR-NAME>`.
 - Invite user supplied email addresses to the team.
 - Add a specific set of teams to the project.
 - Create a specific set of folders in the project.

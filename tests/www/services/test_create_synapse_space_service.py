@@ -101,7 +101,7 @@ def test_it_creates_the_team(service, assert_basic_service_success):
     assert service.execute() == service
     assert_basic_service_success(service)
 
-    assert service.team.name == service.project.name
+    assert service.team.name == 'KiContributor_{0}'.format(service.project.name)
 
 
 def test_it_assigns_the_team_to_the_project(service, assert_basic_service_success, syn_client):

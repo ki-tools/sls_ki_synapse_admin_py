@@ -56,7 +56,7 @@ class CreateSynapseSpaceForm(FlaskForm):
         surname = self.field_pi_surname.data
 
         if short_name and surname:
-            self.project_name = 'KiContributor_{0}_{1}'.format(short_name, surname)
+            self.project_name = '{0}_{1}'.format(short_name, surname)
 
     def try_validate_project_name(self):
         if self.project_name:
