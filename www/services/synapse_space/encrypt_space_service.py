@@ -4,7 +4,7 @@ import synapseclient as syn
 from synapseclient.exceptions import SynapseHTTPError
 
 
-class EncryptSynapseSpaceService:
+class EncryptSpaceService:
     def __init__(self, project_id):
         """Instantiates a new instance.
 
@@ -17,7 +17,7 @@ class EncryptSynapseSpaceService:
     def execute(self):
         """Sets the storage location of the Project.
 
-        This method does not due validation. It expects all validation to have been done and passed already.
+        This method does not do validation. It expects all validation to have been done and passed already.
 
         Returns:
             Self

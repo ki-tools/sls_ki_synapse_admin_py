@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Create Synapse Space{% endblock %}
+{% block title %}Grant Synapse Access (DAA){% endblock %}
 {% block body %}
 <div class="row">
   <div class="col">
-    <h1>Create Synapse Space
+    <h1>Grant Synapse Access (DAA)
       <button class="btn" type="button" data-toggle="collapse" data-target="#helpSection" aria-expanded="false"
               aria-controls="helpSection">
         <i class="far fa-question-circle" title="Help"></i>
@@ -11,21 +11,15 @@
     </h1>
     <div class="card collapse mb-3" id="helpSection">
       <div class="card-header">
-        Help
+        Help - Data Access Agreements
       </div>
       <div class="card-body">
         <p>This process will do the following:</p>
         <ul>
-          <li>Create a new Synapse project.</li>
-          <li>Set the project to use an encrypted storage location.</li>
-          <li>Create a new Synapse team and add it to the project with edit/delete permission.</li>
+          <li>Create a new Synapse team and give the team download access to the selected data collection.</li>
           <li>Add specific users to the team as managers of the team.</li>
           <li>Add a specific set of users and/or teams to the project.</li>
           <li>Invite all the email addresses to the team.</li>
-          <li>Give the team access to specific projects and/or folders.</li>
-          <li>Create a default set of folders in the project.</li>
-          <li>Copy a wiki into the project from another Synapse project.</li>
-          <li>Update a Synapse table with details about the project that was created.</li>
         </ul>
       </div>
       <div class="card-footer">
@@ -72,7 +66,7 @@
         {{ form.field_institution_name.label }}
         {{ form.field_institution_name(class_='form-control') }}
         <small class="text-muted">
-          The name of the institution the space is being created for.
+          The name of the institution to grant access.
         </small>
         {% if form.field_institution_name.errors %}
         <div>
@@ -86,7 +80,7 @@
         {{ form.field_institution_short_name.label }}
         {{ form.field_institution_short_name(class_='form-control') }}
         <small class="text-muted">
-          A short name or code to identify the institution. This is used to build part of the project name.
+          A short name or code to identify the institution. This is used to build part of the team name.
         </small>
         {% if form.field_institution_short_name.errors %}
         <div>
@@ -97,14 +91,14 @@
         {% endif %}
       </div>
       <div class="form-group">
-        {{ form.field_pi_surname.label }}
-        {{ form.field_pi_surname(class_='form-control') }}
+        {{ form.field_data_collection.label }}
+        {{ form.field_data_collection(class_='form-control') }}
         <small class="text-muted">
-          The surname of the principal investigator. This is used to build part of the project name.
+          The data collection to grant access to.
         </small>
-        {% if form.field_pi_surname.errors %}
+        {% if form.field_data_collection.errors %}
         <div>
-          {% for error in form.field_pi_surname.errors %}
+          {% for error in form.field_data_collection.errors %}
           <span class="field-error">[{{ error }}]</span>
           {% endfor %}
         </div>
@@ -114,7 +108,7 @@
         {{ form.field_agreement_url.label }} <small class="text-muted">(optional)</small>
         {{ form.field_agreement_url(class_='form-control') }}
         <small class="text-muted">
-          The URL of the data contribution agreement document.
+          The URL of the data access agreement document.
         </small>
         {% if form.field_agreement_url.errors %}
         <div>
@@ -128,7 +122,7 @@
         {{ form.field_emails.label }} <small class="text-muted">(optional)</small>
         {{ form.field_emails(class_='form-control') }}
         <small class="text-muted">
-          Comma separated list of email addresses. These emails will be invited to join the Synapse project.
+          Comma separated list of email addresses. These emails will be invited to join the Synapse team.
         </small>
         {% if form.field_emails.errors %}
         <div>

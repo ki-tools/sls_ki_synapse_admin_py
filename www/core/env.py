@@ -1,5 +1,6 @@
 from sls_tools.param_store import ParamStore
 import uuid
+import json
 
 
 class Env:
@@ -66,39 +67,62 @@ class Env:
         return ParamStore.get('LOGIN_WHITELIST', default).to_list(delimiter=',')
 
     @staticmethod
+    def SYNAPSE_SPACE_LOG_FOLDER_ID(default=None):
+        return ParamStore.get('SYNAPSE_SPACE_LOG_FOLDER_ID', default).value
+
+    @staticmethod
     def SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(default=None):
         return ParamStore.get('SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID', default).to_int()
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS(default=[]):
+    def SYNAPSE_SPACE_DCA_CREATE_TEAM_MANAGER_USER_IDS(default=[]):
         """These user IDs will be invited to the team and given manager access of the team."""
-        return ParamStore.get('CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS', default).to_list(delimiter=',')
+        return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_TEAM_MANAGER_USER_IDS', default).to_list(delimiter=',')
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS(default=[]):
+    def SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS(default=[]):
         """Grant these principal IDs (User or Team) access to the project."""
-        return Env._get_id_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS', int)
+        return Env._get_id_permissions_var('SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS', int, default=default)
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS(default=[]):
+    def SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS(default=[]):
         """Grant the project team access to other entities."""
-        return Env._get_id_permissions_var('CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS', str)
+        return Env._get_id_permissions_var('SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS', str, default=default)
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_FOLDER_NAMES(default=[]):
-        return ParamStore.get('CREATE_SYNAPSE_SPACE_FOLDER_NAMES', default).to_list(delimiter=',')
+    def SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES(default=[]):
+        return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES', default).to_list(delimiter=',')
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID(default=None):
-        return ParamStore.get('CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID', default).value
+    def SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID(default=None):
+        return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID', default).value
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID(default=None):
-        return ParamStore.get('CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID', default).value
+    def SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID(default=None):
+        return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID', default).value
 
     @staticmethod
-    def CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID(default=None):
-        return ParamStore.get('CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID', default).value
+    def SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS(default='[]'):
+        """Gets the Data Collection configs.
+
+        JSON Format: [ {"name": "", "ids": [""]} ]
+
+        Args:
+            default: Default return value.
+
+        Returns:
+            Deserialized JSON or default value.
+        """
+        return ParamStore.get('SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS', default=default).to_json()
+
+    @staticmethod
+    def SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID(default=None):
+        return ParamStore.get('SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID', default).value
+
+    @staticmethod
+    def SYNAPSE_SPACE_DAA_GRANT_ACCESS_TEAM_MANAGER_USER_IDS(default=[]):
+        """These user IDs will be invited to the team and given manager access of the team."""
+        return ParamStore.get('SYNAPSE_SPACE_DAA_GRANT_ACCESS_TEAM_MANAGER_USER_IDS', default).to_list(delimiter=',')
 
     @staticmethod
     def _get_id_permissions_var(env_var, id_type, default=[]):

@@ -75,3 +75,38 @@ class Synapse:
             cls._synapse_client.login(syn_user, syn_pass, silent=True)
 
         return cls._synapse_client
+
+    TABLE_COL_CACHE = {}
+
+    @classmethod
+    def build_syn_table_row(cls, syn_table_id, row_data):
+        """Builds an array of row values for a Synapse Table.
+
+        Args:
+            syn_table_id: The ID of the Synapse table to add a row to.
+            row_data: Dictionary of field names and values.
+
+        Returns:
+            Array
+        """
+        if syn_table_id not in cls.TABLE_COL_CACHE:
+            cls.TABLE_COL_CACHE[syn_table_id] = [c['name'] for c in
+                                                 list(Synapse.client().getTableColumns(syn_table_id))]
+
+        table_columns = cls.TABLE_COL_CACHE[syn_table_id]
+
+        # Make sure the specified fields exist in the table.
+        for column in row_data:
+            if column not in table_columns:
+                raise Exception('Column: {0} does not exist in table: {1}'.format(column, syn_table_id))
+
+        # Build the row data.
+        new_row = []
+
+        for column in table_columns:
+            if column in row_data:
+                new_row.append(row_data[column])
+            else:
+                new_row.append(None)
+
+        return new_row

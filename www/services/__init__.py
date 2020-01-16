@@ -1,3 +1,2 @@
 from .auth_service import AuthService
-from .create_synapse_space_service import CreateSynapseSpaceService
-from .encrypt_synapse_space_service import EncryptSynapseSpaceService
+from www.services.synapse_space.encrypt_space_service import EncryptSpaceService

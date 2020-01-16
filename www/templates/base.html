@@ -27,7 +27,8 @@
           <a class="nav-link dropdown-toggle" href="#" id="dropdowncreate" data-toggle="dropdown" aria-haspopup="true"
              aria-expanded="false">Actions</a>
           <div class="dropdown-menu" aria-labelledby="dropdowncreate">
-            <a class="dropdown-item" href="{{ url_for('synapse_space_create') }}">Create Synapse Space</a>
+            <a class="dropdown-item" href="{{ url_for('synapse_space_dca_create') }}">Create Synapse Space (DCA)</a>
+            <a class="dropdown-item" href="{{ url_for('synapse_space_daa_grant') }}">Grant Synapse Access (DAA)</a>
             <a class="dropdown-item" href="{{ url_for('synapse_space_encrypt') }}">Encrypt Synapse Space</a>
           </div>
         </li>

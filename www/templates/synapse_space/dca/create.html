@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Create Synapse Space (DCA){% endblock %}
+{% block body %}
+<div class="row">
+  <div class="col">
+    <h1>Create Synapse Space (DCA)
+      <button class="btn" type="button" data-toggle="collapse" data-target="#helpSection" aria-expanded="false"
+              aria-controls="helpSection">
+        <i class="far fa-question-circle" title="Help"></i>
+      </button>
+    </h1>
+    <div class="card collapse mb-3" id="helpSection">
+      <div class="card-header">
+        Help - Data Contribution Agreements
+      </div>
+      <div class="card-body">
+        <p>This process will do the following:</p>
+        <ul>
+          <li>Create a new Synapse project.</li>
+          <li>Set the project to use an encrypted storage location.</li>
+          <li>Create a new Synapse team and add it to the project with edit/delete permission.</li>
+          <li>Add specific users to the team as managers of the team.</li>
+          <li>Add a specific set of users and/or teams to the project.</li>
+          <li>Invite all the email addresses to the team.</li>
+          <li>Give the team access to specific projects and/or folders.</li>
+          <li>Create a default set of folders in the project.</li>
+          <li>Copy a wiki into the project from another Synapse project.</li>
+          <li>Update a Synapse table with details about the project that was created.</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary" data-toggle="collapse" data-target="#helpSection"
+                aria-expanded="false"
+                aria-controls="helpSection">Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <form method="POST" action="">
+      {{ form.csrf_token }}
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <ul>
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% if errors %}
+      <div class="alert alert-danger" role="alert">
+        <span>Errors:</span>
+        <ul>
+          {% for message in errors %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        {{ form.field_institution_name.label }}
+        {{ form.field_institution_name(class_='form-control') }}
+        <small class="text-muted">
+          The name of the institution the space is being created for.
+        </small>
+        {% if form.field_institution_name.errors %}
+        <div>
+          {% for error in form.field_institution_name.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_institution_short_name.label }}
+        {{ form.field_institution_short_name(class_='form-control') }}
+        <small class="text-muted">
+          A short name or code to identify the institution. This is used to build part of the project name.
+        </small>
+        {% if form.field_institution_short_name.errors %}
+        <div>
+          {% for error in form.field_institution_short_name.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_pi_surname.label }}
+        {{ form.field_pi_surname(class_='form-control') }}
+        <small class="text-muted">
+          The surname of the principal investigator. This is used to build part of the project name.
+        </small>
+        {% if form.field_pi_surname.errors %}
+        <div>
+          {% for error in form.field_pi_surname.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_agreement_url.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_agreement_url(class_='form-control') }}
+        <small class="text-muted">
+          The URL of the data contribution agreement document.
+        </small>
+        {% if form.field_agreement_url.errors %}
+        <div>
+          {% for error in form.field_agreement_url.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_emails.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_emails(class_='form-control') }}
+        <small class="text-muted">
+          Comma separated list of email addresses. These emails will be invited to join the Synapse project.
+        </small>
+        {% if form.field_emails.errors %}
+        <div>
+          {% for error in form.field_emails.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      {{ form.field_submit(class_='btn btn-primary') }}
+    </form>
+  </div>
+</div>
+{% endblock %}
