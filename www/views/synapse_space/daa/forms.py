@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, TextAreaField, SelectField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError, URL, Optional
 from www.services.synapse_space.daa import GrantAccessService
 from www.core import Env
@@ -14,8 +15,12 @@ class GrantSynapseAccessForm(FlaskForm):
     data_collections = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS()
     dc_choices = [(c['name'], c['name']) for c in data_collections]
     field_data_collection = SelectField('Data Collection', choices=dc_choices, validators=[DataRequired()])
-    field_emails = TextAreaField('Emails to invite to the project')
+    field_emails = TextAreaField('Emails to invite to the project', validators=[Optional()])
     field_agreement_url = StringField('Data Access Agreement URL', validators=[URL(), Optional()])
+    field_start_date = DateField('Start Date', validators=[Optional()])
+    field_start_date = DateField('Start Date', validators=[Optional()])
+    field_end_date = DateField('End Date', validators=[Optional()])
+    field_comments = TextAreaField('Comments', validators=[Optional()])
     field_submit = SubmitField('Grant Access')
 
     # Validated form data

@@ -17,7 +17,10 @@ def synapse_space_daa_grant():
                                      form.field_data_collection.data,
                                      current_user.id,
                                      agreement_url=form.field_agreement_url.data,
-                                     emails=form.valid_emails)
+                                     emails=form.valid_emails,
+                                     start_date=form.field_start_date.data,
+                                     end_date=form.field_end_date.data,
+                                     comments=form.field_comments.data)
 
         errors = service.execute().errors
         warnings = service.warnings

@@ -1,6 +1,7 @@
 import pytest
 import time
 import json
+from datetime import date, timedelta
 from www.core import Synapse, Env
 from www.services.synapse_space.daa import GrantAccessService
 import synapseclient as syn
@@ -14,6 +15,9 @@ def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, monkeypatch):
             institution_name=syn_test_helper.uniq_name(prefix='Institution'),
             user_identifier=mk_uniq_real_email(),
             agreement_url='https://{0}/doc.pdf'.format(syn_test_helper.uniq_name()),
+            start_date=date.today(),
+            end_date=date.today() + timedelta(days=30),
+            comments=syn_test_helper.uniq_name(prefix='Comment'),
             with_all=False,
             with_data_collection=False,
             with_emails=False):
@@ -39,7 +43,10 @@ def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, monkeypatch):
                                      data_collection_name,
                                      user_identifier,
                                      agreement_url=agreement_url,
-                                     emails=emails)
+                                     emails=emails,
+                                     start_date=start_date,
+                                     end_date=end_date,
+                                     comments=comments)
         services.append(service)
         return service
 
@@ -157,6 +164,10 @@ def test_it_writes_the_log_file_on_success(mk_service,
     service = mk_service(with_all=True)
     assert service.data_collection_name is not None
     assert len(service.emails) >= 1
+    assert service.agreement_url is not None
+    assert service.start_date is not None
+    assert service.end_date is not None
+    assert service.comments is not None
     assert service.execute() == service
     assert_basic_service_success(service)
 
@@ -173,6 +184,9 @@ def test_it_writes_the_log_file_on_success(mk_service,
     assert jparms['institution_name'] == service.institution_name
     assert jparms['agreement_url'] == service.agreement_url
     assert jparms['emails'] == service.emails
+    assert jparms['start_date'] == service.start_date.strftime('%Y-%m-%d')
+    assert jparms['end_date'] == service.end_date.strftime('%Y-%m-%d')
+    assert jparms['comments'] == service.comments
     assert jparms['user'] == service.user_identifier
 
     jteam = jdata['team']
@@ -206,6 +220,9 @@ def test_it_updates_the_access_agreement_table(mk_service,
         syn.Column(name='Synapse_Team_ID', columnType='INTEGER'),
         syn.Column(name='Granted_Entity_IDs', columnType='STRING', maximumSize=1000),
         syn.Column(name='Agreement_Link', columnType='LINK', maximumSize=1000),
+        syn.Column(name='Start_Date', columnType='DATE'),
+        syn.Column(name='End_Date', columnType='DATE'),
+        syn.Column(name='Comments', columnType='STRING', maximumSize=1000),
         syn.Column(name='Test_Col_One', columnType='STRING', maximumSize=50),
         syn.Column(name='Test_Col_Two', columnType='STRING', maximumSize=50)
     ]
@@ -214,6 +231,12 @@ def test_it_updates_the_access_agreement_table(mk_service,
     monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID', syn_table.id)
 
     service = mk_service(with_all=True)
+    assert service.data_collection_name is not None
+    assert len(service.emails) >= 1
+    assert service.agreement_url is not None
+    assert service.start_date is not None
+    assert service.end_date is not None
+    assert service.comments is not None
     assert service.execute() == service
     assert_basic_service_success(service)
 
@@ -229,6 +252,9 @@ def test_it_updates_the_access_agreement_table(mk_service,
     assert str(row[4]) == str(service.team.id)
     assert row[5] == ','.join(service.data_collection['ids'])
     assert row[6] == service.agreement_url
+    assert row[7].strftime('%Y-%m-%d') == service.start_date.strftime('%Y-%m-%d')
+    assert row[8].strftime('%Y-%m-%d') == service.end_date.strftime('%Y-%m-%d')
+    assert row[9] == service.comments
 
 
 def test_it_fails_if_the_access_agreement_table_does_not_have_the_required_columns(mk_service,

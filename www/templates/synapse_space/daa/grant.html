@@ -132,6 +132,45 @@
         </div>
         {% endif %}
       </div>
+      <div class="form-group">
+        {{ form.field_start_date.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_start_date(class_='form-control') }}
+        <small class="text-muted">
+          The start date of the agreement.
+        </small>
+        {% if form.field_start_date.errors %}
+        <div>
+          {% for error in form.field_start_date.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_end_date.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_end_date(class_='form-control') }}
+        <small class="text-muted">
+          The end date of the agreement.
+        </small>
+        {% if form.field_end_date.errors %}
+        <div>
+          {% for error in form.field_end_date.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_comments.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_comments(class_='form-control') }}
+        {% if form.field_comments.errors %}
+        <div>
+          {% for error in form.field_comments.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
 
       {{ form.field_submit(class_='btn btn-primary') }}
     </form>

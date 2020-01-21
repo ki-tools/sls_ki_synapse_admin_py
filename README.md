@@ -93,6 +93,9 @@ The contribution agreement table must have the following columns (at a minimum):
 | Synapse_Team_ID | `INTEGER` | | The ID of the Synapse team that was created. |
 | Granted_Entity_IDs |`STRING` | 1000 | The IDs of the Projects and/or Folders access was grated to. |
 | Agreement_Link | `LINK` | 1000 | URL to the access agreement document. |
+| Start_Date | `DATE` | | The start date of the agreement. |
+| End_Date | `DATE` | | The end date of the agreement. |
+| Comments | `STRING` | 1000 | Any comments related to the agreement. |
 
 ### Encrypt Synapse Space
 

@@ -11,7 +11,7 @@ import synapseclient as syn
 
 class GrantAccessService:
     def __init__(self, team_name, institution_name, data_collection_name, user_identifier,
-                 agreement_url=None, emails=None):
+                 agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
 
         Args:
@@ -21,6 +21,9 @@ class GrantAccessService:
             user_identifier: The identifier (id, email, etc.) of the user creating the space.
             agreement_url: The URL of the data access agreement.
             emails: The emails to invite to the team that is created for the project.
+            start_date: The start date of the agreement.
+            end_date: The end date of the agreement.
+            comments: Open comments field.
         """
 
         self.start_time = datetime.now()
@@ -30,6 +33,9 @@ class GrantAccessService:
         self.user_identifier = user_identifier
         self.agreement_url = agreement_url
         self.emails = emails
+        self.start_date = start_date
+        self.end_date = end_date
+        self.comments = comments
         self.team = None
         self.data_collection = None
         self.errors = []
@@ -77,6 +83,9 @@ class GrantAccessService:
                             'data_collection_name': self.data_collection_name,
                             'agreement_url': self.agreement_url,
                             'emails': self.emails,
+                            'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date else None,
+                            'end_date': self.end_date.strftime('%Y-%m-%d') if self.end_date else None,
+                            'comments': self.comments,
                             'access_agreement_table_id': Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID(),
                             'log_folder_id': Env.SYNAPSE_SPACE_LOG_FOLDER_ID()
                         },
@@ -221,7 +230,10 @@ class GrantAccessService:
                     'Contact': self.emails[0] if self.emails else None,
                     'Synapse_Team_ID': self.team.id if self.team else None,
                     'Granted_Entity_IDs': ','.join(self.data_collection['ids']) if self.data_collection else None,
-                    'Agreement_Link': self.agreement_url
+                    'Agreement_Link': self.agreement_url,
+                    'Start_Date': self._to_synapse_date_timestamp(self.start_date),
+                    'End_Date': self._to_synapse_date_timestamp(self.end_date),
+                    'Comments': self.comments
                 })
 
                 logger.info('Updating access agreement table: {0} for team: {1}'.format(table_id, self.team.id))
@@ -236,6 +248,12 @@ class GrantAccessService:
 
         self.errors += errors
         return not errors
+
+    def _to_synapse_date_timestamp(self, date):
+        if date:
+            return int(datetime(date.year, date.month, date.day).timestamp()) * 1000
+        else:
+            return None
 
     class Validations:
         @classmethod
