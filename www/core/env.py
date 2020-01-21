@@ -116,6 +116,20 @@ class Env:
         return ParamStore.get('SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS', default=default).to_json()
 
     @staticmethod
+    def SYNAPSE_SPACE_DAA_GRANT_ACCESS_ADDITIONAL_PARTIES(default='[]'):
+        """Gets the Institution Additional Party configs.
+
+        JSON Format: [ {"name": "", "code": ""} ]
+
+        Args:
+            default: Default return value.
+
+        Returns:
+            Deserialized JSON or default value.
+        """
+        return ParamStore.get('SYNAPSE_SPACE_DAA_GRANT_ACCESS_ADDITIONAL_PARTIES', default=default).to_json()
+
+    @staticmethod
     def SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID(default=None):
         return ParamStore.get('SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID', default).value
 

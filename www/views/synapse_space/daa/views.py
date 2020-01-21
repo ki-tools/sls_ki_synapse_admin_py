@@ -1,6 +1,6 @@
 from flask import current_app as app, request
 from flask import render_template, redirect, url_for, flash
-from flask_login import fresh_login_required, current_user
+from flask_login import fresh_login_required
 from www.services.synapse_space.daa import GrantAccessService
 from .forms import GrantSynapseAccessForm
 from ....core import Cookies
@@ -11,11 +11,12 @@ from ....core import Cookies
 def synapse_space_daa_grant():
     form = GrantSynapseAccessForm()
     errors = []
+    user_email = Cookies.user_email_get(request)
     if form.validate_on_submit():
         service = GrantAccessService(form.team_name,
                                      form.field_institution_name.data,
                                      form.field_data_collection.data,
-                                     current_user.id,
+                                     user_email,
                                      agreement_url=form.field_agreement_url.data,
                                      emails=form.valid_emails,
                                      start_date=form.field_start_date.data,
@@ -32,6 +33,6 @@ def synapse_space_daa_grant():
             return redirect(url_for('synapse_space_daa_grant'))
 
     return render_template('synapse_space/daa/grant.html',
-                           user=Cookies.user_email_get(request),
+                           user=user_email,
                            form=form,
                            errors=errors)

@@ -1,6 +1,6 @@
 from flask import current_app as app, request
 from flask import render_template, redirect, url_for, flash
-from flask_login import fresh_login_required, current_user
+from flask_login import fresh_login_required
 from www.services.synapse_space.dca import CreateSpaceService
 from .forms import CreateSynapseSpaceForm
 from ....core import Cookies
@@ -11,10 +11,11 @@ from ....core import Cookies
 def synapse_space_dca_create():
     form = CreateSynapseSpaceForm()
     errors = []
+    user_email = Cookies.user_email_get(request)
     if form.validate_on_submit():
         service = CreateSpaceService(form.project_name,
                                      form.field_institution_name.data,
-                                     current_user.id,
+                                     user_email,
                                      agreement_url=form.field_agreement_url.data,
                                      emails=form.valid_emails)
 
@@ -28,6 +29,6 @@ def synapse_space_dca_create():
             return redirect(url_for('synapse_space_dca_create'))
 
     return render_template('synapse_space/dca/create.html',
-                           user=Cookies.user_email_get(request),
+                           user=user_email,
                            form=form,
                            errors=errors)

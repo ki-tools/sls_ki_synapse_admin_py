@@ -203,3 +203,9 @@ main > .container {
 .btn-outline-login-out:not(:disabled):not(.disabled):active:focus, .btn-outline-login-out:not(:disabled):not(.disabled).active:focus, .show > .btn-outline-login-out.dropdown-toggle:focus {
   box-shadow: none
 }
+
+.nobullet {
+  list-style-type: none;
+  padding: 0;
+  margin: 0px 0px 0px 20px;
+}
