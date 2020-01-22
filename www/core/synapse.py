@@ -1,6 +1,7 @@
 from . import Env
 import os
 import tempfile
+from datetime import datetime
 import synapseclient
 
 
@@ -110,3 +111,18 @@ class Synapse:
                 new_row.append(None)
 
         return new_row
+
+    @classmethod
+    def date_to_synapse_date_timestamp(cls, date):
+        """Converts a Date into a timestamp suitable for a DATE field in a Synapse table.
+
+        Args:
+            date: The date to convert.
+
+        Returns:
+            Integer.
+        """
+        if date:
+            return int(datetime(date.year, date.month, date.day).timestamp()) * 1000
+        else:
+            return None

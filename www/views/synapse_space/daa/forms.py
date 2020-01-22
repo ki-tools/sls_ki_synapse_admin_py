@@ -28,7 +28,6 @@ class GrantSynapseAccessForm(FlaskForm):
     field_emails = TextAreaField('Emails to invite to the project', validators=[Optional()])
     field_agreement_url = StringField('Data Access Agreement URL', validators=[URL(), Optional()])
     field_start_date = DateField('Start Date', validators=[Optional()])
-    field_start_date = DateField('Start Date', validators=[Optional()])
     field_end_date = DateField('End Date', validators=[Optional()])
     field_comments = TextAreaField('Comments', validators=[Optional()])
     field_submit = SubmitField('Grant Access')

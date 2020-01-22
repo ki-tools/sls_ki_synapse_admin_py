@@ -231,8 +231,8 @@ class GrantAccessService:
                     'Synapse_Team_ID': self.team.id if self.team else None,
                     'Granted_Entity_IDs': ','.join(self.data_collection['ids']) if self.data_collection else None,
                     'Agreement_Link': self.agreement_url,
-                    'Start_Date': self._to_synapse_date_timestamp(self.start_date),
-                    'End_Date': self._to_synapse_date_timestamp(self.end_date),
+                    'Start_Date': Synapse.date_to_synapse_date_timestamp(self.start_date),
+                    'End_Date': Synapse.date_to_synapse_date_timestamp(self.end_date),
                     'Comments': self.comments
                 })
 
@@ -248,12 +248,6 @@ class GrantAccessService:
 
         self.errors += errors
         return not errors
-
-    def _to_synapse_date_timestamp(self, date):
-        if date:
-            return int(datetime(date.year, date.month, date.day).timestamp()) * 1000
-        else:
-            return None
 
     class Validations:
         @classmethod

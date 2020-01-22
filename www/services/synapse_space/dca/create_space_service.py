@@ -10,7 +10,8 @@ import synapseclient as syn
 
 
 class CreateSpaceService:
-    def __init__(self, project_name, institution_name, user_identifier, agreement_url=None, emails=None):
+    def __init__(self, project_name, institution_name, user_identifier,
+                 agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
 
         Args:
@@ -19,6 +20,9 @@ class CreateSpaceService:
             user_identifier: The identifier (id, email, etc.) of the user creating the space.
             agreement_url: The URL of the data contribution agreement.
             emails: The emails to invite to the team that is created for the project.
+            start_date: The start date of the agreement.
+            end_date: The end date of the agreement.
+            comments: Open comments field.
         """
 
         self.start_time = datetime.now()
@@ -27,6 +31,9 @@ class CreateSpaceService:
         self.institution_name = institution_name
         self.agreement_url = agreement_url
         self.emails = emails
+        self.start_date = start_date
+        self.end_date = end_date
+        self.comments = comments
         self.project = None
         self.team = None
         self.errors = []
@@ -87,6 +94,9 @@ class CreateSpaceService:
                             'institution_name': self.institution_name,
                             'agreement_url': self.agreement_url,
                             'emails': self.emails,
+                            'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date else None,
+                            'end_date': self.end_date.strftime('%Y-%m-%d') if self.end_date else None,
+                            'comments': self.comments,
                             'storage_location_id': Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(),
                             'grant_team_access': Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS(),
                             'grant_project_access': Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS(),
@@ -370,7 +380,10 @@ class CreateSpaceService:
                     'Contact': self.emails[0] if self.emails else None,
                     'Synapse_Project_ID': self.project.id,
                     'Synapse_Team_ID': self.team.id if self.team else None,
-                    'Agreement_Link': self.agreement_url
+                    'Agreement_Link': self.agreement_url,
+                    'Start_Date': Synapse.date_to_synapse_date_timestamp(self.start_date),
+                    'End_Date': Synapse.date_to_synapse_date_timestamp(self.end_date),
+                    'Comments': self.comments
                 })
 
                 logger.info(
