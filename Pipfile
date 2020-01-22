@@ -17,7 +17,6 @@ coveralls = "*"
 moto = "*"
 responses = "*"
 
-
 [packages]
 sls-tools = "*"
 oauthlib = "*"
@@ -29,6 +28,7 @@ Flask-WTF = "*"
 Flask-Login = "*"
 Werkzeug = "*"
 pyOpenSSL = "*"
+pytz = "*"
 
 [requires]
 python_version = "3.6"

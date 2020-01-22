@@ -2,6 +2,7 @@ from . import Env
 import os
 import tempfile
 from datetime import datetime
+import pytz
 import synapseclient
 
 
@@ -123,6 +124,9 @@ class Synapse:
             Integer.
         """
         if date:
-            return int(datetime(date.year, date.month, date.day).timestamp()) * 1000
+            # For our audience we will always set the timestamp to US/Pacific.
+            timezone = pytz.timezone("US/Pacific")
+            dt = datetime(date.year, date.month, date.day).astimezone(timezone)
+            return int(dt.timestamp()) * 1000
         else:
             return None
