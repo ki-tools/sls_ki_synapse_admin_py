@@ -126,7 +126,7 @@ class Synapse:
         if date:
             # For our audience we will always set the timestamp to US/Pacific.
             timezone = pytz.timezone("US/Pacific")
-            dt = datetime(date.year, date.month, date.day).astimezone(timezone)
+            dt = datetime(date.year, date.month, date.day, tzinfo=timezone)
             return int(dt.timestamp()) * 1000
         else:
             return None
