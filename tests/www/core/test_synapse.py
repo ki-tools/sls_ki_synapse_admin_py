@@ -28,4 +28,5 @@ def test_get_perms_by_code():
 
 def test_date_to_synapse_date_timestamp():
     d = date(year=2020, month=1, day=1)
-    assert Synapse.date_to_synapse_date_timestamp(d) == 1577862000000
+    ts = Synapse.date_to_synapse_date_timestamp(d)
+    assert date.fromtimestamp(ts / 1000) == d
