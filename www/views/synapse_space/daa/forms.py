@@ -23,7 +23,7 @@ class GrantSynapseAccessForm(FlaskForm):
     dc_choices = []
     for collection in data_collections:
         entity_names = ', '.join([e['name'] for e in collection['entities']])
-        display_name = '{0} [{1}]'.format(collection['name'], entity_names)
+        display_name = '{0} - [{1}]'.format(collection['name'], entity_names)
         dc_choices.append((collection['name'], display_name))
     field_data_collection = SelectField('Data Collection',
                                         choices=dc_choices,
