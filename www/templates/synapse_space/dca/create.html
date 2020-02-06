@@ -97,6 +97,20 @@
         {% endif %}
       </div>
       <div class="form-group">
+        {{ form.field_institution_add_party.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_institution_add_party(class_='nobullet') }}
+        <small class="text-muted">
+          Additional parties for this team. This is used to build part of the team name.
+        </small>
+        {% if form.field_institution_add_party.errors %}
+        <div>
+          {% for error in form.field_institution_add_party.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
         {{ form.field_pi_surname.label }}
         {{ form.field_pi_surname(class_='form-control') }}
         <small class="text-muted">

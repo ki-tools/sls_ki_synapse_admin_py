@@ -102,6 +102,20 @@ class Env:
         return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID', default).value
 
     @staticmethod
+    def SYNAPSE_SPACE_DCA_CREATE_ADDITIONAL_PARTIES(default='[]'):
+        """Gets the Institution Additional Party configs for DCA.
+
+        JSON Format: [ {"name": "", "code": ""} ]
+
+        Args:
+            default: Default return value.
+
+        Returns:
+            Deserialized JSON or default value.
+        """
+        return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_ADDITIONAL_PARTIES', default=default).to_json()
+
+    @staticmethod
     def SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS(default='[]'):
         """Gets the Data Collection configs.
 
@@ -117,7 +131,7 @@ class Env:
 
     @staticmethod
     def SYNAPSE_SPACE_DAA_GRANT_ACCESS_ADDITIONAL_PARTIES(default='[]'):
-        """Gets the Institution Additional Party configs.
+        """Gets the Institution Additional Party configs for DAA.
 
         JSON Format: [ {"name": "", "code": ""} ]
 

@@ -2,7 +2,9 @@ from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, TextAreaField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError, URL, Optional
+from ...components import MultiCheckboxField
 from www.services.synapse_space.dca import CreateSpaceService
+from www.core import Env
 import re
 
 
@@ -10,6 +12,13 @@ class CreateSynapseSpaceForm(FlaskForm):
     # Form Fields
     field_institution_name = StringField('Institution Name', validators=[DataRequired()])
     field_institution_short_name = StringField('Institution Short Name', validators=[DataRequired()])
+
+    additional_parties = Env.SYNAPSE_SPACE_DCA_CREATE_ADDITIONAL_PARTIES()
+    ap_choices = [(p['name'], p['code']) for p in additional_parties]
+    field_institution_add_party = MultiCheckboxField('Institution Additional Party',
+                                                     choices=ap_choices,
+                                                     validators=[Optional()])
+
     field_pi_surname = StringField('Principal Investigator Surname', validators=[DataRequired()])
     field_emails = TextAreaField('Emails to invite to the project')
     field_agreement_url = StringField('Contribution Agreement URL', validators=[URL(), Optional()])
@@ -57,9 +66,15 @@ class CreateSynapseSpaceForm(FlaskForm):
         self.project_name = None
         short_name = self.field_institution_short_name.data
         surname = self.field_pi_surname.data
+        add_parties = ''
+        if self.field_institution_add_party.data:
+            party_codes = self.field_institution_add_party.data
+            party_codes.sort()
+            add_parties = '_'.join(party_codes)
+            add_parties = '{0}_'.format(add_parties)
 
         if short_name and surname:
-            self.project_name = '{0}_{1}'.format(short_name, surname)
+            self.project_name = '{0}{1}_{2}'.format(add_parties, short_name, surname)
 
     def try_validate_project_name(self):
         if self.project_name:
