@@ -20,7 +20,11 @@ class GrantSynapseAccessForm(FlaskForm):
                                                      validators=[Optional()])
 
     data_collections = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS()
-    dc_choices = [(c['name'], c['name']) for c in data_collections]
+    dc_choices = []
+    for collection in data_collections:
+        entity_names = ', '.join([e['name'] for e in collection['entities']])
+        display_name = '{0} ({1})'.format(collection['name'], entity_names)
+        dc_choices.append((collection['name'], display_name))
     field_data_collection = SelectField('Data Collection',
                                         choices=dc_choices,
                                         validators=[DataRequired()])

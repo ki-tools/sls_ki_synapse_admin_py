@@ -140,7 +140,7 @@ class GrantAccessService:
             if config:
                 self.data_collection = next((c for c in config if c['name'] == self.data_collection_name), None)
                 name = self.data_collection['name']
-                ids = self.data_collection['ids']
+                ids = [c['id'] for c in self.data_collection['entities']]
                 access_type = Synapse.CAN_DOWNLOAD_PERMS
 
                 for syn_id in ids:
@@ -229,7 +229,8 @@ class GrantAccessService:
                     'Organization': self.institution_name,
                     'Contact': self.emails[0] if self.emails else None,
                     'Synapse_Team_ID': self.team.id if self.team else None,
-                    'Granted_Entity_IDs': ','.join(self.data_collection['ids']) if self.data_collection else None,
+                    'Granted_Entity_IDs': ', '.join('{0} ({1})'.format(c['id'], c['name']) for c in
+                                                    self.data_collection['entities']) if self.data_collection else None,
                     'Agreement_Link': self.agreement_url,
                     'Start_Date': Synapse.date_to_synapse_date_timestamp(self.start_date),
                     'End_Date': Synapse.date_to_synapse_date_timestamp(self.end_date),

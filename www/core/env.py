@@ -105,7 +105,7 @@ class Env:
     def SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS(default='[]'):
         """Gets the Data Collection configs.
 
-        JSON Format: [ {"name": "", "ids": [""]} ]
+        JSON Format: [ {"name": "", "entities": [{"name": "", "id": ""}]} ]
 
         Args:
             default: Default return value.

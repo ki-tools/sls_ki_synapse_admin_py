@@ -29,8 +29,8 @@ def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, monkeypatch):
             project = syn_test_helper.create_project()
             folder = syn_client.store(syn.Folder(name='Folder', parent=project))
             collections = [
-                {"name": "Collection 1", "ids": [project.id]},
-                {"name": "Collection 2", "ids": [folder.id]}
+                {"name": "Collection 1", "entities": [{"name": project.name, "id": project.id}]},
+                {"name": "Collection 2", "entities": [{"name": folder.name, "id": folder.id}]}
             ]
             monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS', json.dumps(collections))
             data_collection_name = collections[0]['name']
@@ -103,7 +103,7 @@ def test_it_assigns_the_team_to_the_synapse_entities_with_can_download_access(mk
 
     assert service.data_collection is not None
 
-    for syn_id in service.data_collection['ids']:
+    for syn_id in [c['id'] for c in service.data_collection['entities']]:
         syn_perms = syn_client.getPermissions(syn_id, principalId=service.team.id)
         assert syn_perms
         syn_perms.sort() == Synapse.CAN_DOWNLOAD_PERMS.sort()
@@ -195,7 +195,7 @@ def test_it_writes_the_log_file_on_success(mk_service,
 
     jdc = jdata['data_collection']
     assert jdc['name'] == service.data_collection['name']
-    assert jdc['ids'] == service.data_collection['ids']
+    assert jdc['entities'] == service.data_collection['entities']
 
 
 def test_it_writes_the_log_file_on_failure(mk_service,
@@ -250,7 +250,7 @@ def test_it_updates_the_access_agreement_table(mk_service,
     assert row[2] == service.institution_name
     assert row[3] == service.emails[0]
     assert str(row[4]) == str(service.team.id)
-    assert row[5] == ','.join(service.data_collection['ids'])
+    assert row[5] == ', '.join('{0} ({1})'.format(c['id'], c['name']) for c in service.data_collection['entities'])
     assert row[6] == service.agreement_url
     assert row[7].strftime('%Y-%m-%d') == service.start_date.strftime('%Y-%m-%d')
     assert row[8].strftime('%Y-%m-%d') == service.end_date.strftime('%Y-%m-%d')
