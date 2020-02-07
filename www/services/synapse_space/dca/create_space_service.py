@@ -9,8 +9,9 @@ from www.core.synapse import Synapse
 import synapseclient as syn
 
 
-class CreateSynapseSpaceService:
-    def __init__(self, project_name, institution_name, user_identifier, agreement_url=None, emails=None):
+class CreateSpaceService:
+    def __init__(self, project_name, institution_name, user_identifier,
+                 agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
 
         Args:
@@ -19,6 +20,9 @@ class CreateSynapseSpaceService:
             user_identifier: The identifier (id, email, etc.) of the user creating the space.
             agreement_url: The URL of the data contribution agreement.
             emails: The emails to invite to the team that is created for the project.
+            start_date: The start date of the agreement.
+            end_date: The end date of the agreement.
+            comments: Open comments field.
         """
 
         self.start_time = datetime.now()
@@ -27,6 +31,9 @@ class CreateSynapseSpaceService:
         self.institution_name = institution_name
         self.agreement_url = agreement_url
         self.emails = emails
+        self.start_date = start_date
+        self.end_date = end_date
+        self.comments = comments
         self.project = None
         self.team = None
         self.errors = []
@@ -36,7 +43,7 @@ class CreateSynapseSpaceService:
     def execute(self):
         """Creates a new Synapse space for data contribution.
 
-        This method does not due validation. It expects all validation to have been done and passed already.
+        This method does not do validation. It expects all validation to have been done and passed already.
 
         Returns:
             Self
@@ -74,7 +81,7 @@ class CreateSynapseSpaceService:
     def _write_synapse_log_file(self):
         errors = []
         try:
-            folder_id = Env.CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID()
+            folder_id = Env.SYNAPSE_SPACE_LOG_FOLDER_ID()
 
             if folder_id:
                 tmp_dir = tempfile.mkdtemp()
@@ -87,13 +94,16 @@ class CreateSynapseSpaceService:
                             'institution_name': self.institution_name,
                             'agreement_url': self.agreement_url,
                             'emails': self.emails,
+                            'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date else None,
+                            'end_date': self.end_date.strftime('%Y-%m-%d') if self.end_date else None,
+                            'comments': self.comments,
                             'storage_location_id': Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(),
-                            'grant_team_access': Env.CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS(),
-                            'grant_project_access': Env.CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS(),
-                            'folder_names': Env.CREATE_SYNAPSE_SPACE_FOLDER_NAMES(),
-                            'wiki_project_id': Env.CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID(),
-                            'contribution_agreement_table_id': Env.CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID(),
-                            'log_folder_id': Env.CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID()
+                            'grant_team_access': Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS(),
+                            'grant_project_access': Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS(),
+                            'folder_names': Env.SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES(),
+                            'wiki_project_id': Env.SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID(),
+                            'contribution_agreement_table_id': Env.SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID(),
+                            'log_folder_id': Env.SYNAPSE_SPACE_LOG_FOLDER_ID()
                         },
                         'project': {
                             'id': self.project.id if self.project else None,
@@ -109,7 +119,7 @@ class CreateSynapseSpaceService:
 
                     logger.info('CREATE_SPACE_RESULT: {0}'.format(data))
 
-                    file_name = '{0}_create_space.json'.format(self.start_time.strftime('%Y%m%d_%H%M%S_%f'))
+                    file_name = '{0}_dca_create_space.json'.format(self.start_time.strftime('%Y%m%d_%H%M%S_%f'))
                     file_path = os.path.join(tmp_dir, file_name)
 
                     with open(file_path, 'w') as file:
@@ -120,7 +130,7 @@ class CreateSynapseSpaceService:
                     shutil.rmtree(tmp_dir, ignore_errors=True)
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_LOG_FOLDER_ID not set. Log files will not be created.')
+                    'Environment Variable: SYNAPSE_SPACE_LOG_FOLDER_ID not set. Log files will not be created.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating log file: {0}'.format(ex))
@@ -195,7 +205,7 @@ class CreateSynapseSpaceService:
     def _add_team_managers(self):
         errors = []
         try:
-            user_ids = Env.CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS()
+            user_ids = Env.SYNAPSE_SPACE_DCA_CREATE_TEAM_MANAGER_USER_IDS()
 
             if user_ids:
                 for user_id in user_ids:
@@ -215,7 +225,7 @@ class CreateSynapseSpaceService:
                     logger.info('User: {0} has been given manager access on team: {1}.'.format(user_id, self.team.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_TEAM_MANAGER_USER_IDS not set. Team managers will not be added to the project team.')
+                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_TEAM_MANAGER_USER_IDS not set. Team managers will not be added to the project team.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error adding managers to the project team: {0}'.format(ex))
@@ -247,7 +257,7 @@ class CreateSynapseSpaceService:
     def _grant_team_access_to_entities(self):
         errors = []
         try:
-            config = Env.CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS()
+            config = Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS()
 
             if config:
                 for item in config:
@@ -263,7 +273,7 @@ class CreateSynapseSpaceService:
                     logger.info('Team: {0} granted access to entity: {1}'.format(self.team.name, entity_id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_GRANT_TEAM_ENTITY_ACCESS not set. Project team will not be shared on other entities.')
+                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS not set. Project team will not be shared on other entities.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error sharing project team with entities: {0}'.format(ex))
@@ -274,7 +284,7 @@ class CreateSynapseSpaceService:
     def _grant_principals_access_to_project(self):
         errors = []
         try:
-            config = Env.CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS()
+            config = Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS()
 
             if config:
                 for item in config:
@@ -290,7 +300,7 @@ class CreateSynapseSpaceService:
                     logger.info('Principal: {0} assigned to project: {1}'.format(principal_id, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_GRANT_PROJECT_ACCESS not set. Principals will not be added to this project.')
+                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS not set. Principals will not be added to this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error adding principals to project: {0}'.format(ex))
@@ -301,7 +311,7 @@ class CreateSynapseSpaceService:
     def _create_folders(self):
         errors = []
         try:
-            folder_names = Env.CREATE_SYNAPSE_SPACE_FOLDER_NAMES()
+            folder_names = Env.SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES()
 
             if folder_names:
                 for folder_path in folder_names:
@@ -314,7 +324,7 @@ class CreateSynapseSpaceService:
                         logger.info('Folder: {0} created in project: {1}'.format(folder_name, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_FOLDER_NAMES not set. Folders will not be created in this project.')
+                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES not set. Folders will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating folders: {0}'.format(ex))
@@ -325,7 +335,7 @@ class CreateSynapseSpaceService:
     def _create_wiki(self):
         errors = []
         try:
-            source_wiki_project_id = Env.CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID()
+            source_wiki_project_id = Env.SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID()
 
             if source_wiki_project_id:
                 source_wiki = Synapse.client().getWiki(source_wiki_project_id)
@@ -343,7 +353,7 @@ class CreateSynapseSpaceService:
                                                                                        self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
+                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating wiki: {0}'.format(ex))
@@ -362,15 +372,18 @@ class CreateSynapseSpaceService:
     def _update_contribution_agreement_table(self):
         errors = []
         try:
-            table_id = Env.CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID()
+            table_id = Env.SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID()
 
             if table_id:
-                row = self._build_syn_table_row(table_id, {
+                row = Synapse.build_syn_table_row(table_id, {
                     'Organization': self.institution_name,
                     'Contact': self.emails[0] if self.emails else None,
                     'Synapse_Project_ID': self.project.id,
                     'Synapse_Team_ID': self.team.id if self.team else None,
-                    'Agreement_Link': self.agreement_url
+                    'Agreement_Link': self.agreement_url,
+                    'Start_Date': Synapse.date_to_synapse_date_timestamp(self.start_date),
+                    'End_Date': Synapse.date_to_synapse_date_timestamp(self.end_date),
+                    'Comments': self.comments
                 })
 
                 logger.info(
@@ -380,41 +393,13 @@ class CreateSynapseSpaceService:
                     'Contribution agreement table: {0} updated for project: {1}'.format(table_id, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: CREATE_SYNAPSE_SPACE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
+                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error updating contribution agreement table: {0}'.format(ex))
 
         self.errors += errors
         return not errors
-
-    def _build_syn_table_row(self, syn_table_id, row_data):
-        """Builds an array of row values for a Synapse Table.
-
-        Args:
-            syn_table_id: The ID of the Synapse table to add a row to.
-            row_data: Dictionary of field names and values.
-
-        Returns:
-            Array
-        """
-        table_columns = [c['name'] for c in list(Synapse.client().getTableColumns(syn_table_id))]
-
-        # Make sure the specified fields exist in the table.
-        for column in row_data:
-            if column not in table_columns:
-                raise Exception('Column: {0} does not exist in table: {1}'.format(column, syn_table_id))
-
-        # Build the row data.
-        new_row = []
-
-        for column in table_columns:
-            if column in row_data:
-                new_row.append(row_data[column])
-            else:
-                new_row.append(None)
-
-        return new_row
 
     class Validations:
         @classmethod

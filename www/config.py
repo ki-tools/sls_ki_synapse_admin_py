@@ -26,7 +26,7 @@ def load_local(flask_env):
     """Loads environment variables from a local config file.
 
     This should only be called when locally developing or running tests.
-    In production or CI all variables must be set in the environment.
+    In production or CI all variables must be set in the OS environment or SSM.
 
     Args:
         flask_env: Which environment to load from the config file.
@@ -47,7 +47,10 @@ def load_local(flask_env):
             config = json.load(f).get(flask_env)
 
             for key, value in config.items():
-                os.environ[key] = value
+                if value is None:
+                    print('WARNING: Environment variable: {0} has no value and will not be set.'.format(key))
+                else:
+                    os.environ[key] = value
         return True
     else:
         print('WARNING: Configuration file not found at: {0}'.format(env_file))

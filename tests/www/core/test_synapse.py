@@ -1,5 +1,6 @@
 import pytest
 from www.core import Env, Synapse
+from datetime import date
 
 
 def test_client():
@@ -23,3 +24,9 @@ def test_get_perms_by_code():
             assert perms == Synapse.CAN_VIEW_PERMS
         else:
             raise Exception('Unexpected perms: {0} for code: {1}'.format(perms, code))
+
+
+def test_date_to_synapse_date_timestamp():
+    d = date(year=2020, month=1, day=1)
+    ts = Synapse.date_to_synapse_date_timestamp(d)
+    assert date.fromtimestamp(ts / 1000) == d

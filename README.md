@@ -46,7 +46,7 @@ A [Serverless](https://serverless.com/framework/docs/getting-started) applicatio
 
 ## Functionality
 
-### Create Synapse Space
+### Create Synapse Space (DCA)
 
 This will create a new project in Synapse and configure it for ki contribution.
 
@@ -72,6 +72,33 @@ The contribution agreement table must have the following columns (at a minimum):
 | Synapse_Project_ID | `ENTITYID` | | The ID of the Synapse project that was created. |
 | Synapse_Team_ID | `INTEGER` | | The ID of the Synapse team that was created. |
 | Agreement_Link | `LINK` | 1000 | URL to the contribution agreement document. |
+| Start_Date | `DATE` | | The start date of the agreement. |
+| End_Date | `DATE` | | The end date of the agreement. |
+| Comments | `STRING` | 1000 | Any comments related to the agreement. |
+
+### Grant Synapse Access Space (DAA)
+
+This will create a new team in Synapse and share it with one or more projects and/or folders with download access.
+
+The steps are:
+
+- Create a new Synapse team.
+  - The format of the team name will be: `<INSTITUTION-SHORT-NAME>_<DATA-COLLECTION-NAME>`.
+- Invite user supplied email addresses to the team.
+- Update a table with certain details about the team that was just created.
+
+The contribution agreement table must have the following columns (at a minimum):
+
+| Name | Type | Maximum Length | Description |
+| :--- | :--- | :---           | :---        |
+| Organization | `STRING` | 200 | The institution name provided by the user. |
+| Contact | `STRING` | 200 | The first email address provided by the user. |
+| Synapse_Team_ID | `INTEGER` | | The ID of the Synapse team that was created. |
+| Granted_Entity_IDs |`STRING` | 1000 | The IDs of the Projects and/or Folders access was grated to. |
+| Agreement_Link | `LINK` | 1000 | URL to the access agreement document. |
+| Start_Date | `DATE` | | The start date of the agreement. |
+| End_Date | `DATE` | | The end date of the agreement. |
+| Comments | `STRING` | 1000 | Any comments related to the agreement. |
 
 ### Encrypt Synapse Space
 

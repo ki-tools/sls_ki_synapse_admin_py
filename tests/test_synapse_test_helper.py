@@ -1,4 +1,5 @@
 import os
+
 import pytest
 import synapseclient
 from synapseclient import Project, Folder, File, Team, Wiki
