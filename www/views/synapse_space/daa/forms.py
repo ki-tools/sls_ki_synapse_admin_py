@@ -83,7 +83,7 @@ class GrantSynapseAccessForm(FlaskForm):
             add_parties = '_{0}'.format(add_parties)
 
         if short_name and collection_name:
-            self.team_name = '{0}{1}_{2}'.format(short_name, add_parties, collection_name)
+            self.team_name = 'KiAccess_{0}{1}_{2}'.format(collection_name, add_parties, short_name)
 
     def try_validate_team_name(self):
         if self.team_name:
