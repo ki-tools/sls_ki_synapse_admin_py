@@ -15,6 +15,7 @@ def synapse_space_dca_create():
     if form.validate_on_submit():
         service = CreateSpaceService(form.project_name,
                                      form.field_institution_name.data,
+                                     form.field_institution_short_name.data,
                                      user_email,
                                      agreement_url=form.field_agreement_url.data,
                                      emails=form.valid_emails,

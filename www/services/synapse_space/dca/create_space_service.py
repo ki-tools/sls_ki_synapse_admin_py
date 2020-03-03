@@ -10,13 +10,14 @@ import synapseclient as syn
 
 
 class CreateSpaceService:
-    def __init__(self, project_name, institution_name, user_identifier,
+    def __init__(self, project_name, institution_name, institution_short_name, user_identifier,
                  agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
 
         Args:
             project_name: The name of the Synapse project to create.
             institution_name: The name of the institution the space is for.
+            institution_short_name: The short name/code for the institution.
             user_identifier: The identifier (id, email, etc.) of the user creating the space.
             agreement_url: The URL of the data contribution agreement.
             emails: The emails to invite to the team that is created for the project.
@@ -29,6 +30,7 @@ class CreateSpaceService:
         self.user_identifier = user_identifier
         self.project_name = project_name
         self.institution_name = institution_name
+        self.institution_short_name = institution_short_name
         self.agreement_url = agreement_url
         self.emails = emails
         self.start_date = start_date
@@ -92,6 +94,7 @@ class CreateSpaceService:
                             'user': self.user_identifier,
                             'project_name': self.project_name,
                             'institution_name': self.institution_name,
+                            'institution_short_name': self.institution_short_name,
                             'agreement_url': self.agreement_url,
                             'emails': self.emails,
                             'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date else None,

@@ -15,6 +15,7 @@ def synapse_space_daa_grant():
     if form.validate_on_submit():
         service = GrantAccessService(form.team_name,
                                      form.field_institution_name.data,
+                                     form.field_institution_short_name.data,
                                      form.field_data_collection.data,
                                      user_email,
                                      agreement_url=form.field_agreement_url.data,

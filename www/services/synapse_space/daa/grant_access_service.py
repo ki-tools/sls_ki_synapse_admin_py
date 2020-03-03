@@ -10,13 +10,14 @@ import synapseclient as syn
 
 
 class GrantAccessService:
-    def __init__(self, team_name, institution_name, data_collection_name, user_identifier,
+    def __init__(self, team_name, institution_name, institution_short_name, data_collection_name, user_identifier,
                  agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
 
         Args:
             team_name: The name of the Synapse project to create.
             institution_name: The name of the institution the space is for.
+            institution_short_name: The short name/code for the institution.
             data_collection_name: The data collection to grant access to.
             user_identifier: The identifier (id, email, etc.) of the user creating the space.
             agreement_url: The URL of the data access agreement.
@@ -29,6 +30,7 @@ class GrantAccessService:
         self.start_time = datetime.now()
         self.team_name = team_name
         self.institution_name = institution_name
+        self.institution_short_name = institution_short_name
         self.data_collection_name = data_collection_name
         self.user_identifier = user_identifier
         self.agreement_url = agreement_url
@@ -80,6 +82,7 @@ class GrantAccessService:
                             'user': self.user_identifier,
                             'team_name': self.team_name,
                             'institution_name': self.institution_name,
+                            'institution_short_name': self.institution_short_name,
                             'data_collection_name': self.data_collection_name,
                             'agreement_url': self.agreement_url,
                             'emails': self.emails,

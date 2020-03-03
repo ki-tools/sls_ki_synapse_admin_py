@@ -12,6 +12,7 @@ def mk_service(syn_test_helper, mk_uniq_real_email):
 
     def _mk(project_name=None,
             institution_name=None,
+            institution_short_name=syn_test_helper.uniq_name(prefix='Institution Short Name'),
             user_identifier=mk_uniq_real_email(),
             agreement_url='https://{0}/doc.pdf'.format(syn_test_helper.uniq_name()),
             start_date=date.today(),
@@ -36,6 +37,7 @@ def mk_service(syn_test_helper, mk_uniq_real_email):
 
         service = CreateSpaceService(project_name,
                                      institution_name,
+                                     institution_short_name,
                                      user_identifier,
                                      agreement_url=agreement_url,
                                      emails=emails,
@@ -295,6 +297,8 @@ def test_it_writes_the_log_file_on_success(mk_service,
 
     service = mk_service(with_all=True)
     assert len(service.emails) >= 1
+    assert service.institution_name is not None
+    assert service.institution_short_name is not None
     assert service.agreement_url is not None
     assert service.start_date is not None
     assert service.end_date is not None
@@ -313,6 +317,7 @@ def test_it_writes_the_log_file_on_success(mk_service,
     jparms = jdata['parameters']
     assert jparms['project_name'] == service.project_name
     assert jparms['institution_name'] == service.institution_name
+    assert jparms['institution_short_name'] == service.institution_short_name
     assert jparms['agreement_url'] == service.agreement_url
     assert jparms['emails'] == service.emails
     assert jparms['start_date'] == service.start_date.strftime('%Y-%m-%d')
