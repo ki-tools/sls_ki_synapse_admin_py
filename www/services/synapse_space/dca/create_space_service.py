@@ -370,6 +370,9 @@ class CreateSpaceService:
         if not self._update_contribution_agreement_table():
             result = False
 
+        if not self._update_contributor_tracking_scope():
+            result = False
+
         return result
 
     def _update_contribution_agreement_table(self):
@@ -400,6 +403,30 @@ class CreateSpaceService:
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error updating contribution agreement table: {0}'.format(ex))
+
+        self.errors += errors
+        return not errors
+
+    def _update_contributor_tracking_scope(self):
+        """Add the project to the KiData_Contributor_Tracking table's scope so the files in the project are included.
+        """
+        errors = []
+        try:
+            view_id = Env.SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID()
+
+            if view_id:
+                view = Synapse.client().get(view_id)
+                view.properties.scopeIds.append(self.project.id)
+
+                logger.info('Updating contributor tracking view: {0} for project: {1}'.format(view_id, self.project.id))
+                Synapse.client().store(view)
+                logger.info('Contributor tracking view: {0} updated for project: {1}'.format(view_id, self.project.id))
+            else:
+                self.warnings.append(
+                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID not set. Contributor tracking view will not be updated.')
+        except Exception as ex:
+            logger.exception(ex)
+            errors.append('Error updating contributor tracking view: {0}'.format(ex))
 
         self.errors += errors
         return not errors

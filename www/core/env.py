@@ -116,6 +116,10 @@ class Env:
         return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_ADDITIONAL_PARTIES', default=default).to_json()
 
     @staticmethod
+    def SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID(default=None):
+        return ParamStore.get('SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID', default=default).value
+
+    @staticmethod
     def SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS(default='[]'):
         """Gets the Data Collection configs.
 
