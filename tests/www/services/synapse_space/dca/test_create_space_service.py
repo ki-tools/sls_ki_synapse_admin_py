@@ -416,6 +416,37 @@ def test_it_fails_if_the_contribution_agreement_table_does_not_have_the_required
     assert 'Column: Organization does not exist in table' in service.errors[0]
 
 
+def test_it_updates_the_scope_on_the_contributor_tracking_view(mk_service,
+                                                               assert_basic_service_success,
+                                                               syn_test_helper,
+                                                               syn_client,
+                                                               monkeypatch):
+    view_project = syn_test_helper.create_project(prefix='Contributor Tracking Project-')
+
+    evs = syn.EntityViewSchema(name=syn_test_helper.uniq_name(prefix='Contributor Tracking View-'),
+                               parent=view_project,
+                               scopes=[],
+                               properties={'viewTypeMask': 1})
+
+    evs.addColumn(syn.Column(name='id', columnType='ENTITYID'))
+
+    view = syn_client.store(evs)
+
+    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID', view.id)
+
+    service1 = mk_service()
+    assert service1.execute() == service1
+    assert_basic_service_success(service1)
+
+    service2 = mk_service()
+    assert service2.execute() == service2
+    assert_basic_service_success(service2)
+
+    view = syn_client.get(view.id)
+    assert service1.project.id.replace('syn', '') in view.properties.scopeIds
+    assert service2.project.id.replace('syn', '') in view.properties.scopeIds
+
+
 ###############################################################################
 # Validations
 ###############################################################################
