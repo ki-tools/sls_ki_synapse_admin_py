@@ -37,22 +37,55 @@ def load_local(flask_env):
     if flask_env not in Envs.ALLOWED_LOCAL_ENVS:
         raise ValueError('FLASK_ENV not allowed: {0}'.format(flask_env))
 
+    env_vars = open_local(flask_env, 'private.dev.env.json')
+
+    for key, value in env_vars.items():
+        if value is None:
+            print('WARNING: Environment variable: {0} has no value and will not be set.'.format(key))
+        else:
+            os.environ[key] = value
+
+    return False
+
+
+def open_local(flask_env, filename):
+    """Opens a local config file and parses it.
+
+    Args:
+        flask_env: Which environment to load from the config file.
+        filename: The full path to the config file to open.
+
+    Returns:
+        Dict of environment variables.
+    """
     module_dir = os.path.dirname(os.path.abspath(__file__))
-    env_file = os.path.join(module_dir, '../private.dev.env.json')
+    src_root_dir = os.path.abspath(os.path.join(module_dir, '..'))
+    env_file = os.path.join(src_root_dir, filename)
+
+    result = {}
 
     if os.path.isfile(env_file):
         print('Loading local configuration from: {0}'.format(env_file))
 
-        with open(env_file) as f:
-            config = json.load(f).get(flask_env)
+        config = json.loads(_read_file(env_file)).get(flask_env)
 
-            for key, value in config.items():
-                if value is None:
-                    print('WARNING: Environment variable: {0} has no value and will not be set.'.format(key))
-                else:
-                    os.environ[key] = value
-        return True
+        for key, value in config.items():
+            if value is None:
+                print('WARNING: Environment variable: {0} has no value and will not be set.'.format(key))
+            else:
+                parsed_value = value
+
+                if str(value).startswith('$ref:'):
+                    filename = value.replace('$ref:', '')
+                    parsed_value = _read_file(filename)
+
+                result[key] = parsed_value
     else:
         print('WARNING: Configuration file not found at: {0}'.format(env_file))
 
-    return False
+    return result
+
+
+def _read_file(path):
+    with open(path, mode='r') as f:
+        return f.read()

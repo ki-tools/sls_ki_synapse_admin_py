@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import argparse
 import sys
 import os
@@ -12,11 +11,6 @@ try:
     import www.config as config
 except Exception as ex:
     print('WARNING: Failed to load param_store: {0}'.format(ex))
-
-
-def load_json(path):
-    with open(path) as f:
-        return json.load(f)
 
 
 def load_yaml(path):
@@ -36,7 +30,7 @@ def import_into_ssm(stage):
     print('Setting SSM Values for: {0}'.format(stage))
     print('')
 
-    ssm_config = load_json(os.path.join(script_dir, '..', 'private.ssm.env.json')).get(stage)
+    ssm_config = config.open_local(stage, 'private.ssm.env.json')
 
     for key, value in ssm_config.items():
         print('')
@@ -61,7 +55,6 @@ def get_service_name():
     Returns:
         The service name.
     """
-    service_name = None
     yml = load_yaml(os.path.join(script_dir, '..', 'serverless.yml'))
 
     if isinstance(yml['service'], dict):
@@ -88,7 +81,7 @@ def init_env(service_name, service_stage):
     ParamStore.set('SERVICE_STAGE', service_stage, store=ParamStore.Stores.OS)
 
     # Load the deploy variables so the AWS connection is available.
-    deploy_config = load_json(os.path.join(script_dir, '..', 'private.sls.deploy.json')).get(service_stage)
+    deploy_config = config.open_local(service_stage, 'private.sls.deploy.json')
 
     for key, value in deploy_config.items():
         if isinstance(value, bool):

@@ -4,7 +4,6 @@ from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError, URL, Optional
 from ...components import MultiCheckboxField
 from www.services.synapse_space.daa import GrantAccessService
-from www.core import Env
 import re
 
 
@@ -13,21 +12,9 @@ class GrantSynapseAccessForm(FlaskForm):
     field_institution_name = StringField('Institution Name', validators=[DataRequired()])
     field_institution_short_name = StringField('Institution Short Name', validators=[DataRequired()])
 
-    additional_parties = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_ADDITIONAL_PARTIES()
-    ap_choices = [(p['name'], p['code']) for p in additional_parties]
-    field_institution_add_party = MultiCheckboxField('Institution Additional Party',
-                                                     choices=ap_choices,
-                                                     validators=[Optional()])
-
-    data_collections = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS()
-    dc_choices = []
-    for collection in data_collections:
-        entity_names = ', '.join([e['name'] for e in collection['entities']])
-        display_name = '{0} - [{1}]'.format(collection['name'], entity_names)
-        dc_choices.append((collection['name'], display_name))
-    field_data_collection = SelectField('Data Collection',
-                                        choices=dc_choices,
-                                        validators=[DataRequired()])
+    # Choices are setup in the view.
+    field_institution_add_party = MultiCheckboxField('Institution Additional Party', validators=[Optional()])
+    field_data_collection = SelectField('Data Collection', validators=[DataRequired()])
 
     field_emails = TextAreaField('Emails to invite to the project', validators=[Optional()])
     field_agreement_url = StringField('Data Access Agreement URL', validators=[URL(), Optional()])

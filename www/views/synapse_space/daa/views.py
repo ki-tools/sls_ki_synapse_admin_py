@@ -3,7 +3,7 @@ from flask import render_template, redirect, url_for, flash
 from flask_login import fresh_login_required
 from www.services.synapse_space.daa import GrantAccessService
 from .forms import GrantSynapseAccessForm
-from ....core import Cookies
+from ....core import Cookies, Env
 
 
 @app.route("/synapse_space/daa/grant", methods=('GET', 'POST'))
@@ -12,8 +12,23 @@ def synapse_space_daa_grant():
     form = GrantSynapseAccessForm()
     errors = []
     user_email = Cookies.user_email_get(request)
+
+    # We only have one config now so hard code this until we have more.
+    config = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()[0]
+
+    add_parties = [(c['code'], c['name']) for c in config.get('additional_parties', [])]
+    form.field_institution_add_party.choices = add_parties
+
+    dc_choices = []
+    for collection in config.get('data_collections', []):
+        entity_names = ', '.join([e['name'] for e in collection['entities']])
+        display_name = '{0} - [{1}]'.format(collection['name'], entity_names)
+        dc_choices.append((collection['name'], display_name))
+    form.field_data_collection.choices = dc_choices
+
     if form.validate_on_submit():
-        service = GrantAccessService(form.team_name,
+        service = GrantAccessService(config['id'],
+                                     form.team_name,
                                      form.field_institution_name.data,
                                      form.field_institution_short_name.data,
                                      form.field_data_collection.data,

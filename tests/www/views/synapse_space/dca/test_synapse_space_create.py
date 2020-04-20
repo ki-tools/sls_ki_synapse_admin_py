@@ -1,9 +1,15 @@
 import pytest
+import json
 
 
 @pytest.fixture
 def url_path():
     return '/synapse_space/dca/create'
+
+
+@pytest.fixture(autouse=True)
+def provide_dca_config(dca_config, monkeypatch):
+    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONFIG', json.dumps([dca_config]))
 
 
 @pytest.mark.usefixtures("login_enabled")

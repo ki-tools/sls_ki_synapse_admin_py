@@ -7,10 +7,11 @@ import synapseclient as syn
 
 
 @pytest.fixture
-def mk_service(syn_test_helper, mk_uniq_real_email):
+def mk_service(syn_test_helper, mk_uniq_real_email, dca_config, monkeypatch):
     services = []
 
-    def _mk(project_name=None,
+    def _mk(config=None,
+            project_name=None,
             institution_name=None,
             institution_short_name=syn_test_helper.uniq_name(prefix='Institution Short Name'),
             user_identifier=mk_uniq_real_email(),
@@ -20,6 +21,9 @@ def mk_service(syn_test_helper, mk_uniq_real_email):
             comments=syn_test_helper.uniq_name(prefix='Comment'),
             with_all=False,
             with_emails=False):
+
+        if not config:
+            config = dca_config
 
         default_inst_name = syn_test_helper.uniq_name(prefix='Institution')
 
@@ -35,7 +39,11 @@ def mk_service(syn_test_helper, mk_uniq_real_email):
         if with_emails or with_all:
             emails = [mk_uniq_real_email(), mk_uniq_real_email()]
 
-        service = CreateSpaceService(project_name,
+        # Set the config in the Env so it's available to the service.
+        monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONFIG', json.dumps([config]))
+
+        service = CreateSpaceService(config['id'],
+                                     project_name,
                                      institution_name,
                                      institution_short_name,
                                      user_identifier,
@@ -130,9 +138,9 @@ def test_it_assigns_the_team_to_the_project(mk_service, assert_basic_service_suc
 def test_it_adds_managers_to_the_team(mk_service,
                                       assert_basic_service_success,
                                       syn_client,
-                                      monkeypatch):
+                                      dca_config):
     user_ids = [Env.Test.TEST_OTHER_SYNAPSE_USER_ID()]
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_TEAM_MANAGER_USER_IDS', ','.join([str(u) for u in user_ids]))
+    dca_config['team_manager_user_ids'] = user_ids
 
     service = mk_service()
     assert service.execute() == service
@@ -172,29 +180,23 @@ def test_it_grants_the_project_team_access_to_other_entities(mk_service,
                                                              assert_basic_service_success,
                                                              syn_test_helper,
                                                              syn_client,
-                                                             monkeypatch):
+                                                             dca_config):
     project = syn_test_helper.create_project()
     folder1 = syn_client.store(syn.Folder(name='shared_folder1', parent=project))
     folder2 = syn_client.store(syn.Folder(name='shared_folder2', parent=project))
 
-    config = [
+    perms_config = [
         {'id': folder1.id, 'permission': 'CAN_VIEW'},
         {'id': folder2.id, 'permission': 'CAN_DOWNLOAD'}
     ]
 
-    config_str = '{0}:{1},{2}:{3}'.format(
-        config[0]['id'],
-        config[0]['permission'],
-        config[1]['id'],
-        config[1]['permission']
-    )
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS', config_str)
+    dca_config['team_entity_access'] = perms_config
 
     service = mk_service()
     assert service.execute() == service
     assert_basic_service_success(service)
 
-    for item in config:
+    for item in perms_config:
         syn_perms = syn_client.getPermissions(item['id'], principalId=service.team.id)
         assert syn_perms
         syn_perms.sort() == Synapse.get_perms_by_code(item['permission']).sort()
@@ -204,30 +206,22 @@ def test_it_grants_principals_access_to_the_project(mk_service,
                                                     assert_basic_service_success,
                                                     syn_test_helper,
                                                     syn_client,
-                                                    monkeypatch):
+                                                    dca_config):
     test_user_id = Env.Test.TEST_OTHER_SYNAPSE_USER_ID()
 
-    config = [
+    perms_config = [
         {'id': test_user_id, 'permission': 'CAN_VIEW'},
         {'id': syn_test_helper.create_team().id, 'permission': 'ADMIN'},
         {'id': syn_test_helper.create_team().id, 'permission': 'CAN_EDIT'}
     ]
 
-    config_str = '{0}:{1},{2}:{3},{4}:{5}'.format(
-        config[0]['id'],
-        config[0]['permission'],
-        config[1]['id'],
-        config[1]['permission'],
-        config[2]['id'],
-        config[2]['permission']
-    )
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS', config_str)
+    dca_config['project_access'] = perms_config
 
     service = mk_service()
     assert service.execute() == service
     assert_basic_service_success(service)
 
-    for item in config:
+    for item in perms_config:
         syn_perms = syn_client.getPermissions(service.project, principalId=item['id'])
         assert syn_perms
         syn_perms.sort() == Synapse.get_perms_by_code(item['permission']).sort()
@@ -246,9 +240,10 @@ def test_it_creates_the_folders(mk_service, assert_basic_service_success, syn_cl
     assert syn_folders.sort() == folder_names.sort()
 
 
-def test_it_creates_sub_folders(mk_service, assert_basic_service_success, syn_client, monkeypatch):
+def test_it_creates_sub_folders(mk_service, assert_basic_service_success, syn_client, dca_config):
     folder_names = ['one/two/three']
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES', ','.join(folder_names))
+
+    dca_config['folder_names'] = folder_names
 
     service = mk_service()
     assert service.execute() == service
@@ -270,11 +265,12 @@ def test_it_creates_sub_folders(mk_service, assert_basic_service_success, syn_cl
     assert len(syn_children) == 0
 
 
-def test_it_creates_the_wiki(mk_service, assert_basic_service_success, syn_test_helper, syn_client, monkeypatch):
+def test_it_creates_the_wiki(mk_service, assert_basic_service_success, syn_test_helper, syn_client, dca_config):
     # Create a project with a wiki to copy.
     wiki_project = syn_test_helper.create_project()
     template_wiki = syn_test_helper.create_wiki(owner=wiki_project)
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID', wiki_project.id)
+
+    dca_config['wiki_project_id'] = wiki_project.id
 
     service = mk_service()
     assert service.execute() == service
@@ -347,7 +343,7 @@ def test_it_updates_the_contribution_agreement_table(mk_service,
                                                      assert_basic_service_success,
                                                      syn_test_helper,
                                                      syn_client,
-                                                     monkeypatch):
+                                                     dca_config):
     # Create a project with a table to update.
     table_project = syn_test_helper.create_project()
     cols = [
@@ -364,7 +360,8 @@ def test_it_updates_the_contribution_agreement_table(mk_service,
     ]
     schema = syn.Schema(name='KiData_Contribution_Agreements', columns=cols, parent=table_project)
     syn_table = syn_client.store(schema)
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID', syn_table.id)
+
+    dca_config['contribution_agreement_table_id'] = syn_table.id
 
     service = mk_service(with_all=True)
     assert len(service.emails) >= 1
@@ -396,7 +393,7 @@ def test_it_fails_if_the_contribution_agreement_table_does_not_have_the_required
                                                                                          assert_basic_service_errors,
                                                                                          syn_test_helper,
                                                                                          syn_client,
-                                                                                         monkeypatch):
+                                                                                         dca_config):
     # Create a project with a table to update.
     table_project = syn_test_helper.create_project()
     cols = [
@@ -406,7 +403,8 @@ def test_it_fails_if_the_contribution_agreement_table_does_not_have_the_required
     ]
     schema = syn.Schema(name='KiData_Contribution_Agreements', columns=cols, parent=table_project)
     syn_table = syn_client.store(schema)
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID', syn_table.id)
+
+    dca_config['contribution_agreement_table_id'] = syn_table.id
 
     service = mk_service()
     assert service.execute() == service
@@ -420,7 +418,7 @@ def test_it_updates_the_scope_on_the_contributor_tracking_view(mk_service,
                                                                assert_basic_service_success,
                                                                syn_test_helper,
                                                                syn_client,
-                                                               monkeypatch):
+                                                               dca_config):
     view_project = syn_test_helper.create_project(prefix='Contributor Tracking Project-')
 
     evs = syn.EntityViewSchema(name=syn_test_helper.uniq_name(prefix='Contributor Tracking View-'),
@@ -432,7 +430,7 @@ def test_it_updates_the_scope_on_the_contributor_tracking_view(mk_service,
 
     view = syn_client.store(evs)
 
-    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID', view.id)
+    dca_config['contributor_tracking_view_id'] = view.id
 
     service1 = mk_service()
     assert service1.execute() == service1

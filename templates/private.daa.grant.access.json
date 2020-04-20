@@ -1,0 +1,27 @@
+[
+  {
+    "id": "1",
+    "name": "",
+    "agreement_table_id": "syn000",
+    "team_manager_user_ids": [
+      0
+    ],
+    "data_collections": [
+      {
+        "name": "",
+        "entities": [
+          {
+            "name": "",
+            "id": ""
+          }
+        ]
+      }
+    ],
+    "additional_parties": [
+      {
+        "name": "",
+        "code": ""
+      }
+    ]
+  }
+]

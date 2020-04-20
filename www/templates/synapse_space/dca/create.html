@@ -69,6 +69,10 @@
       {% endif %}
 
       <div class="form-group">
+        {{ form.field_select_config.label }}
+        {{ form.field_select_config(class_='form-control') }}
+      </div>
+      <div class="form-group">
         {{ form.field_institution_name.label }}
         {{ form.field_institution_name(class_='form-control') }}
         <small class="text-muted">
@@ -194,6 +198,31 @@
 
       {{ form.field_submit(class_='btn btn-primary') }}
     </form>
+    <script>
+      $(function () {
+        let config_select = $('#field_select_config');
+
+        config_select.change(function () {
+          let add_parties_ul = $('#field_institution_add_party')
+          add_parties_ul.html('');
+
+          fetch('/synapse_space/dca/create/additional_parties/' + config_select.val()).then(function (response) {
+            response.json().then(function (data) {
+              let count = 0;
+              for (let ap of data) {
+                let element_id = 'field_institution_add_party-' + count.toString();
+                let elements = '<li>';
+                elements += '<input id="' + element_id + '" name="field_institution_add_party" type="checkbox" value="' + ap.code + '">';
+                elements += '<label for="' + element_id + '"> ' + ap.name + '</label>';
+                elements += '</li>';
+                add_parties_ul.append(elements);
+                count += 1;
+              }
+            })
+          });
+        });
+      });
+    </script>
   </div>
 </div>
 {% endblock %}
