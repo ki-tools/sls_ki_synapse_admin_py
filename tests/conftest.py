@@ -1,5 +1,6 @@
 import pytest
 import os
+import json
 import tempfile
 
 # Load Environment variables.
@@ -77,3 +78,33 @@ def mk_uniq_real_email(syn_test_helper):
         return '{0}{1}{2}@{3}'.format(name, plus, syn_test_helper.uniq_name(), domain)
 
     yield _mk
+
+
+def open_json_config(filename):
+    with open(os.path.join(app.root_path, '..', 'templates', filename), mode='r') as f:
+        config = json.load(f)
+
+    # Clear all the data.
+    id_index = 1
+    for obj in config:
+        for key, value in obj.items():
+            if isinstance(obj[key], str):
+                obj[key] = ''
+            elif isinstance(obj[key], list):
+                obj[key] = []
+        obj['id'] = str(id_index)
+        id_index += 1
+
+    return config
+
+
+@pytest.fixture
+def dca_config():
+    config = open_json_config('private.dca.create.space.json')
+    return config[0]
+
+
+@pytest.fixture
+def daa_config(syn_test_helper, monkeypatch):
+    config = open_json_config('private.daa.grant.access.json')
+    return config[0]

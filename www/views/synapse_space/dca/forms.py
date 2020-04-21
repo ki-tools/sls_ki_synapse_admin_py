@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, TextAreaField
+from wtforms import SubmitField, StringField, TextAreaField, SelectField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError, URL, Optional
 from ...components import MultiCheckboxField
@@ -10,15 +10,17 @@ import re
 
 class CreateSynapseSpaceForm(FlaskForm):
     # Form Fields
+    config = Env.SYNAPSE_SPACE_DCA_CREATE_CONFIG() or []
+    field_select_config = SelectField('Select Configuration',
+                                      choices=[(c['id'], c['name']) for c in config],
+                                      validators=[DataRequired()])
+
     field_institution_name = StringField('Institution Name', validators=[DataRequired()])
     field_institution_short_name = StringField('Institution Short Name', validators=[DataRequired()])
-
-    additional_parties = Env.SYNAPSE_SPACE_DCA_CREATE_ADDITIONAL_PARTIES()
-    ap_choices = [(p['name'], p['code']) for p in additional_parties]
+    # Choices are set in the view and Javascript.
     field_institution_add_party = MultiCheckboxField('Institution Additional Party',
-                                                     choices=ap_choices,
+                                                     choices=[],
                                                      validators=[Optional()])
-
     field_pi_surname = StringField('Principal Investigator Surname', validators=[DataRequired()])
     field_emails = TextAreaField('Emails to invite to the project')
     field_agreement_url = StringField('Contribution Agreement URL', validators=[URL(), Optional()])

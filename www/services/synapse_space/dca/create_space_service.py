@@ -10,11 +10,12 @@ import synapseclient as syn
 
 
 class CreateSpaceService:
-    def __init__(self, project_name, institution_name, institution_short_name, user_identifier,
+    def __init__(self, config_id, project_name, institution_name, institution_short_name, user_identifier,
                  agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
 
         Args:
+            config_id: The ID of the DCA Create JSON config to use.
             project_name: The name of the Synapse project to create.
             institution_name: The name of the institution the space is for.
             institution_short_name: The short name/code for the institution.
@@ -27,10 +28,12 @@ class CreateSpaceService:
         """
 
         self.start_time = datetime.now()
-        self.user_identifier = user_identifier
+        self.config_id = config_id
+        self.config = None
         self.project_name = project_name
         self.institution_name = institution_name
         self.institution_short_name = institution_short_name
+        self.user_identifier = user_identifier
         self.agreement_url = agreement_url
         self.emails = emails
         self.start_date = start_date
@@ -51,6 +54,9 @@ class CreateSpaceService:
             Self
         """
 
+        self.config = Env.SYNAPSE_SPACE_DCA_CREATE_CONFIG_by_id(self.config_id)
+        if self.config is None:
+            raise Exception('DCA Create Space config not found for ID: {0}'.format(self.config_id))
         self.project = None
         self.team = None
         self.errors = []
@@ -101,12 +107,8 @@ class CreateSpaceService:
                             'end_date': self.end_date.strftime('%Y-%m-%d') if self.end_date else None,
                             'comments': self.comments,
                             'storage_location_id': Env.SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID(),
-                            'grant_team_access': Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS(),
-                            'grant_project_access': Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS(),
-                            'folder_names': Env.SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES(),
-                            'wiki_project_id': Env.SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID(),
-                            'contribution_agreement_table_id': Env.SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID(),
-                            'log_folder_id': Env.SYNAPSE_SPACE_LOG_FOLDER_ID()
+                            'log_folder_id': Env.SYNAPSE_SPACE_LOG_FOLDER_ID(),
+                            'dca_config': self.config
                         },
                         'project': {
                             'id': self.project.id if self.project else None,
@@ -208,7 +210,7 @@ class CreateSpaceService:
     def _add_team_managers(self):
         errors = []
         try:
-            user_ids = Env.SYNAPSE_SPACE_DCA_CREATE_TEAM_MANAGER_USER_IDS()
+            user_ids = self.config.get('team_manager_user_ids', None)
 
             if user_ids:
                 for user_id in user_ids:
@@ -228,7 +230,7 @@ class CreateSpaceService:
                     logger.info('User: {0} has been given manager access on team: {1}.'.format(user_id, self.team.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_TEAM_MANAGER_USER_IDS not set. Team managers will not be added to the project team.')
+                    'Config Variable: team_manager_user_ids not set. Team managers will not be added to the project team.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error adding managers to the project team: {0}'.format(ex))
@@ -260,7 +262,7 @@ class CreateSpaceService:
     def _grant_team_access_to_entities(self):
         errors = []
         try:
-            config = Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS()
+            config = self.config.get('team_entity_access', None)
 
             if config:
                 for item in config:
@@ -276,7 +278,7 @@ class CreateSpaceService:
                     logger.info('Team: {0} granted access to entity: {1}'.format(self.team.name, entity_id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_GRANT_TEAM_ENTITY_ACCESS not set. Project team will not be shared on other entities.')
+                    'Config Variable: team_entity_access not set. Project team will not be shared on other entities.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error sharing project team with entities: {0}'.format(ex))
@@ -287,7 +289,7 @@ class CreateSpaceService:
     def _grant_principals_access_to_project(self):
         errors = []
         try:
-            config = Env.SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS()
+            config = self.config.get('project_access', None)
 
             if config:
                 for item in config:
@@ -303,7 +305,7 @@ class CreateSpaceService:
                     logger.info('Principal: {0} assigned to project: {1}'.format(principal_id, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_GRANT_PROJECT_ACCESS not set. Principals will not be added to this project.')
+                    'Config Variable: project_access not set. Principals will not be added to this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error adding principals to project: {0}'.format(ex))
@@ -314,7 +316,7 @@ class CreateSpaceService:
     def _create_folders(self):
         errors = []
         try:
-            folder_names = Env.SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES()
+            folder_names = self.config.get('folder_names', None)
 
             if folder_names:
                 for folder_path in folder_names:
@@ -327,7 +329,7 @@ class CreateSpaceService:
                         logger.info('Folder: {0} created in project: {1}'.format(folder_name, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_FOLDER_NAMES not set. Folders will not be created in this project.')
+                    'Config Variable: folder_names not set. Folders will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating folders: {0}'.format(ex))
@@ -338,7 +340,7 @@ class CreateSpaceService:
     def _create_wiki(self):
         errors = []
         try:
-            source_wiki_project_id = Env.SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID()
+            source_wiki_project_id = self.config.get('wiki_project_id', None)
 
             if source_wiki_project_id:
                 source_wiki = Synapse.client().getWiki(source_wiki_project_id)
@@ -356,7 +358,7 @@ class CreateSpaceService:
                                                                                        self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_WIKI_PROJECT_ID not set. Wiki will not be created in this project.')
+                    'Config Variable: wiki_project_id not set. Wiki will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error creating wiki: {0}'.format(ex))
@@ -378,7 +380,7 @@ class CreateSpaceService:
     def _update_contribution_agreement_table(self):
         errors = []
         try:
-            table_id = Env.SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID()
+            table_id = self.config.get('contribution_agreement_table_id', None)
 
             if table_id:
                 row = Synapse.build_syn_table_row(table_id, {
@@ -399,7 +401,7 @@ class CreateSpaceService:
                     'Contribution agreement table: {0} updated for project: {1}'.format(table_id, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTION_AGREEMENT_TABLE_ID not set. Contribution agreement table will not be updated.')
+                    'Config Variable: contribution_agreement_table_id not set. Contribution agreement table will not be updated.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error updating contribution agreement table: {0}'.format(ex))
@@ -412,7 +414,7 @@ class CreateSpaceService:
         """
         errors = []
         try:
-            view_id = Env.SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID()
+            view_id = self.config.get('contributor_tracking_view_id', None)
 
             if view_id:
                 view = Synapse.client().get(view_id)
@@ -423,7 +425,7 @@ class CreateSpaceService:
                 logger.info('Contributor tracking view: {0} updated for project: {1}'.format(view_id, self.project.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DCA_CREATE_CONTRIBUTOR_TRACKING_VIEW_ID not set. Contributor tracking view will not be updated.')
+                    'Config Variable: contributor_tracking_view_id not set. Contributor tracking view will not be updated.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error updating contributor tracking view: {0}'.format(ex))

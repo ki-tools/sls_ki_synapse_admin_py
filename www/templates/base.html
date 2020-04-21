@@ -6,6 +6,10 @@
   <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
   <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='css/base.css') }}">
   <link rel="stylesheet" type='text/css' href="{{ url_for('static', filename='css/fontawesome-all.min.css') }}">
+  <!-- JS   -->
+  <script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
   <title>{% block title %}{% endblock %}</title>
 </head>
 <body class="d-flex flex-column h-100">
@@ -60,11 +64,6 @@
     </span>
   </div>
 </footer>
-
-<!-- JS   -->
-<script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 </body>
 </html>
 

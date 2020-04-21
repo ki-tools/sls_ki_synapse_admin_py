@@ -8,10 +8,11 @@ import synapseclient as syn
 
 
 @pytest.fixture
-def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, monkeypatch):
+def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, daa_config, monkeypatch):
     services = []
 
-    def _mk(team_name=syn_test_helper.uniq_name(prefix='Team'),
+    def _mk(config=None,
+            team_name=syn_test_helper.uniq_name(prefix='Team'),
             institution_name=syn_test_helper.uniq_name(prefix='Institution'),
             institution_short_name=syn_test_helper.uniq_name(prefix='Institution Short Name'),
             user_identifier=mk_uniq_real_email(),
@@ -23,6 +24,9 @@ def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, monkeypatch):
             with_data_collection=False,
             with_emails=False):
 
+        if not config:
+            config = daa_config
+
         data_collection_name = None
         emails = None
 
@@ -33,13 +37,17 @@ def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, monkeypatch):
                 {"name": "Collection 1", "entities": [{"name": project.name, "id": project.id}]},
                 {"name": "Collection 2", "entities": [{"name": folder.name, "id": folder.id}]}
             ]
-            monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS', json.dumps(collections))
+            config['data_collections'] = collections
             data_collection_name = collections[0]['name']
 
         if with_emails or with_all:
             emails = [mk_uniq_real_email(), mk_uniq_real_email()]
 
-        service = GrantAccessService(team_name,
+        # Set the config in the Env so it's available to the service.
+        monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', json.dumps([config]))
+
+        service = GrantAccessService(config['id'],
+                                     team_name,
                                      institution_name,
                                      institution_short_name,
                                      data_collection_name,
@@ -114,9 +122,9 @@ def test_it_assigns_the_team_to_the_synapse_entities_with_can_download_access(mk
 def test_it_adds_managers_to_the_team(mk_service,
                                       assert_basic_service_success,
                                       syn_client,
-                                      monkeypatch):
+                                      daa_config):
     user_ids = [Env.Test.TEST_OTHER_SYNAPSE_USER_ID()]
-    monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_TEAM_MANAGER_USER_IDS', ','.join([str(u) for u in user_ids]))
+    daa_config['team_manager_user_ids'] = user_ids
 
     service = mk_service()
     assert service.execute() == service
@@ -216,7 +224,7 @@ def test_it_updates_the_access_agreement_table(mk_service,
                                                assert_basic_service_success,
                                                syn_test_helper,
                                                syn_client,
-                                               monkeypatch):
+                                               daa_config):
     # Create a project with a table to update.
     table_project = syn_test_helper.create_project()
     cols = [
@@ -233,7 +241,7 @@ def test_it_updates_the_access_agreement_table(mk_service,
     ]
     schema = syn.Schema(name='KiData_Access_Agreements', columns=cols, parent=table_project)
     syn_table = syn_client.store(schema)
-    monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID', syn_table.id)
+    daa_config['agreement_table_id'] = syn_table.id
 
     service = mk_service(with_all=True)
     assert service.data_collection_name is not None
@@ -266,7 +274,7 @@ def test_it_fails_if_the_access_agreement_table_does_not_have_the_required_colum
                                                                                    assert_basic_service_errors,
                                                                                    syn_test_helper,
                                                                                    syn_client,
-                                                                                   monkeypatch):
+                                                                                   daa_config):
     # Create a project with a table to update.
     table_project = syn_test_helper.create_project()
     cols = [
@@ -276,7 +284,7 @@ def test_it_fails_if_the_access_agreement_table_does_not_have_the_required_colum
     ]
     schema = syn.Schema(name='KiData_Access_Agreements', columns=cols, parent=table_project)
     syn_table = syn_client.store(schema)
-    monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID', syn_table.id)
+    daa_config['agreement_table_id'] = syn_table.id
 
     service = mk_service()
     assert service.execute() == service

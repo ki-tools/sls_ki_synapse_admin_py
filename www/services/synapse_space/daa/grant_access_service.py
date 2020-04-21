@@ -10,11 +10,13 @@ import synapseclient as syn
 
 
 class GrantAccessService:
-    def __init__(self, team_name, institution_name, institution_short_name, data_collection_name, user_identifier,
+    def __init__(self, config_id, team_name, institution_name, institution_short_name, data_collection_name,
+                 user_identifier,
                  agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
 
         Args:
+            config_id: The ID of the DAA Grant Access JSON config to use.
             team_name: The name of the Synapse project to create.
             institution_name: The name of the institution the space is for.
             institution_short_name: The short name/code for the institution.
@@ -28,6 +30,8 @@ class GrantAccessService:
         """
 
         self.start_time = datetime.now()
+        self.config_id = config_id
+        self.config = None
         self.team_name = team_name
         self.institution_name = institution_name
         self.institution_short_name = institution_short_name
@@ -53,6 +57,9 @@ class GrantAccessService:
             Self
         """
 
+        self.config = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG_by_id(self.config_id)
+        if self.config is None:
+            raise Exception('DAA Grant Access config not found for ID: {0}'.format(self.config_id))
         self.team = None
         self.errors = []
         self.warnings = []
@@ -89,8 +96,8 @@ class GrantAccessService:
                             'start_date': self.start_date.strftime('%Y-%m-%d') if self.start_date else None,
                             'end_date': self.end_date.strftime('%Y-%m-%d') if self.end_date else None,
                             'comments': self.comments,
-                            'access_agreement_table_id': Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID(),
-                            'log_folder_id': Env.SYNAPSE_SPACE_LOG_FOLDER_ID()
+                            'log_folder_id': Env.SYNAPSE_SPACE_LOG_FOLDER_ID(),
+                            'daa_config': self.config
                         },
                         'team': {
                             'id': self.team.id if self.team else None,
@@ -138,7 +145,7 @@ class GrantAccessService:
     def _grant_team_access(self):
         errors = []
         try:
-            config = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS()
+            config = self.config.get('data_collections', None)
 
             if config:
                 self.data_collection = next((c for c in config if c['name'] == self.data_collection_name), None)
@@ -154,7 +161,7 @@ class GrantAccessService:
                     logger.info('Team: {0} granted access to entity: {1}'.format(self.team.name, syn_id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DAA_GRANT_ACCESS_DATA_COLLECTIONS not set. Data collection will not be shared with team.')
+                    'Config Variable: data_collections not set. Data collection will not be shared with team.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error sharing data collection with team: {0}'.format(ex))
@@ -165,7 +172,7 @@ class GrantAccessService:
     def _add_team_managers(self):
         errors = []
         try:
-            user_ids = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_TEAM_MANAGER_USER_IDS()
+            user_ids = self.config.get('team_manager_user_ids', None)
 
             if user_ids:
                 for user_id in user_ids:
@@ -185,7 +192,7 @@ class GrantAccessService:
                     logger.info('User: {0} has been given manager access on team: {1}.'.format(user_id, self.team.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DAA_GRANT_ACCESS_TEAM_MANAGER_USER_IDS not set. Team managers will not be added to the project team.')
+                    'Config Variable: team_manager_user_ids not set. Team managers will not be added to the project team.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error adding managers to the team: {0}'.format(ex))
@@ -225,7 +232,7 @@ class GrantAccessService:
     def _update_access_agreement_table(self):
         errors = []
         try:
-            table_id = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID()
+            table_id = self.config.get('agreement_table_id', None)
 
             if table_id:
                 row = Synapse.build_syn_table_row(table_id, {
@@ -245,7 +252,7 @@ class GrantAccessService:
                 logger.info('Access agreement table: {0} updated for team: {1}'.format(table_id, self.team.id))
             else:
                 self.warnings.append(
-                    'Environment Variable: SYNAPSE_SPACE_DAA_GRANT_ACCESS_AGREEMENT_TABLE_ID not set. Access agreement table will not be updated.')
+                    'Config Variable: agreement_table_id not set. Access agreement table will not be updated.')
         except Exception as ex:
             logger.exception(ex)
             errors.append('Error updating access agreement table: {0}'.format(ex))

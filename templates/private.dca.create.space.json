@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1",
+    "name": "",
+    "wiki_project_id": "syn000",
+    "contribution_agreement_table_id": "syn000",
+    "contributor_tracking_view_id": "syn000",
+    "team_manager_user_ids": [
+      0
+    ],
+    "folder_names": [
+      "Research Data",
+      "Metadata",
+      "Supporting Documentation"
+    ],
+    "project_access": [
+      {
+        "id": 0,
+        "permission": ""
+      }
+    ],
+    "team_entity_access": [
+      {
+        "id": "syn000",
+        "permission": ""
+      }
+    ],
+    "additional_parties": [
+      {
+        "code": "",
+        "name": ""
+      }
+    ]
+  }
+]
