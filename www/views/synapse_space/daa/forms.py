@@ -2,6 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, TextAreaField, SelectField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError, URL, Optional
+
+from www.core import Env
 from ...components import MultiCheckboxField
 from www.services.synapse_space.daa import GrantAccessService
 import re
@@ -62,15 +64,37 @@ class GrantSynapseAccessForm(FlaskForm):
         self.team_name = None
         short_name = self.field_institution_short_name.data
         collection_name = self.field_data_collection.data
+        config = Env.get_default_daa_grant_access_config()
+        data_collection = Env.get_daa_grant_access_data_collection_by_name(config, collection_name)
+
         add_parties = ''
         if self.field_institution_add_party.data:
             party_codes = self.field_institution_add_party.data
             party_codes.sort()
             add_parties = '_'.join(party_codes)
-            add_parties = '_{0}'.format(add_parties)
+            add_parties = '{0}'.format(add_parties)
 
         if short_name and collection_name:
-            self.team_name = 'KiAccess_{0}{1}_{2}'.format(collection_name, add_parties, short_name)
+            short_name = short_name.strip()
+
+            if data_collection['include_collection_name_in_team_name'] is True:
+                if add_parties:
+                    add_parties = '_' + add_parties
+                self.team_name = 'KiAccess_{0}{1}_{2}'.format(collection_name, add_parties, short_name)
+            else:
+                if add_parties:
+                    add_parties = add_parties + '_'
+                self.team_name = 'KiAccess_{0}{1}'.format(add_parties, short_name)
+
+            # Clean up the name
+            # Remove multiple spaces:
+            self.team_name = ' '.join(self.team_name.split()).strip()
+            # Remove specific characters:
+            for replace_char in ['.']:
+                self.team_name = self.team_name.replace(replace_char, '')
+            # Replace specific characters with underscores:
+            for replace_char in [' ', '-']:
+                self.team_name = self.team_name.replace(replace_char, '_')
 
     def try_validate_team_name(self):
         if self.team_name:

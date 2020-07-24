@@ -92,6 +92,16 @@ class Env:
         configs = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()
         return next((c for c in configs if c['id'] == id), None)
 
+    @staticmethod
+    def get_daa_grant_access_data_collection_by_name(config, name):
+        data_collections = config.get('data_collections', [])
+        return next((c for c in data_collections if c['name'] == name), None)
+
+    @staticmethod
+    def get_default_daa_grant_access_config():
+        # We only have one config now so hard code this until we have more.
+        return Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()[0]
+
     class Test:
         @staticmethod
         def TEST_OTHER_SYNAPSE_USER_ID(default=None):

@@ -119,6 +119,8 @@
         {{ form.field_pi_surname(class_='form-control') }}
         <small class="text-muted">
           The surname of the principal investigator. This is used to build part of the project name.
+          <br/>
+          If the project errors because a duplicate name exists then add the principal investigator's last initial.
         </small>
         {% if form.field_pi_surname.errors %}
         <div>

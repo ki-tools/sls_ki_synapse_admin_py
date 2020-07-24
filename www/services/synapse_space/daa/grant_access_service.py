@@ -145,10 +145,10 @@ class GrantAccessService:
     def _grant_team_access(self):
         errors = []
         try:
-            config = self.config.get('data_collections', None)
 
-            if config:
-                self.data_collection = next((c for c in config if c['name'] == self.data_collection_name), None)
+            if self.config.get('data_collections', None):
+                self.data_collection = Env.get_daa_grant_access_data_collection_by_name(self.config,
+                                                                                        self.data_collection_name)
                 name = self.data_collection['name']
                 ids = [c['id'] for c in self.data_collection['entities']]
                 access_type = Synapse.CAN_DOWNLOAD_PERMS

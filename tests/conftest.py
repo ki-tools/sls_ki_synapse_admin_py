@@ -99,12 +99,99 @@ def open_json_config(filename):
 
 
 @pytest.fixture
-def dca_config():
+def blank_dca_config():
     config = open_json_config('private.dca.create.space.json')
     return config[0]
 
 
 @pytest.fixture
-def daa_config(syn_test_helper, monkeypatch):
+def set_dca_config(monkeypatch):
+    orig_config = Env.SYNAPSE_SPACE_DCA_CREATE_CONFIG()
+
+    def _set(config):
+        # Set the config in the Env so it's available.
+        monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONFIG', json.dumps(config))
+
+    yield _set
+    # Revert back to the original config.
+    monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONFIG', orig_config)
+
+
+@pytest.fixture
+def dca_config(blank_dca_config, set_dca_config):
+    config = blank_dca_config.copy()
+    config['id'] = '1'
+    config['name'] = 'Config 01'
+    # config['wiki_project_id'] = None
+    # config['contribution_agreement_table_id'] = None
+    # config['contributor_tracking_view_id'] = None
+    # config['team_manager_user_ids'] = []
+    config['folder_names'] = ['Folder 1', 'Folder 2']
+    # config['project_access'] = []
+    # config['team_entity_access'] = []
+    config['additional_parties'] = [
+        {
+            "code": "CODE_1",
+            "name": "Code 1"
+        },
+        {
+            "code": "CODE_2",
+            "name": "Code 2"
+        }
+    ]
+    set_dca_config([config])
+
+    return config
+
+
+@pytest.fixture
+def blank_daa_config(syn_test_helper, monkeypatch):
     config = open_json_config('private.daa.grant.access.json')
     return config[0]
+
+
+@pytest.fixture
+def set_daa_config(monkeypatch):
+    orig_config = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()
+
+    def _set(config):
+        # Set the config in the Env so it's available.
+        monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', json.dumps(config))
+
+    yield _set
+    # Revert back to the original config.
+    monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', orig_config)
+
+
+@pytest.fixture
+def daa_config(blank_daa_config, set_daa_config):
+    config = blank_daa_config.copy()
+    config['id'] = '1'
+    config['name'] = 'Config 01'
+    # config['agreement_table_id'] = None
+    config['team_manager_user_ids'] = []
+    config['data_collections'] = [
+        {
+            'name': 'Collection 1',
+            'include_collection_name_in_team_name': True,
+            'entities': []
+        }
+    ]
+    config['additional_parties'] = [
+        {
+            "code": "CODE_1",
+            "name": "Code 1"
+        },
+        {
+            "code": "CODE_2",
+            "name": "Code 2"
+        }
+    ]
+    set_daa_config([config])
+
+    return config
+
+
+@pytest.fixture
+def mk_daa_config():
+    pass

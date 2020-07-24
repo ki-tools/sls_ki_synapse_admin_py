@@ -7,7 +7,7 @@ import synapseclient as syn
 
 
 @pytest.fixture
-def mk_service(syn_test_helper, mk_uniq_real_email, dca_config, monkeypatch):
+def mk_service(syn_test_helper, mk_uniq_real_email, dca_config, set_dca_config):
     services = []
 
     def _mk(config=None,
@@ -40,7 +40,7 @@ def mk_service(syn_test_helper, mk_uniq_real_email, dca_config, monkeypatch):
             emails = [mk_uniq_real_email(), mk_uniq_real_email()]
 
         # Set the config in the Env so it's available to the service.
-        monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONFIG', json.dumps([config]))
+        set_dca_config([config])
 
         service = CreateSpaceService(config['id'],
                                      project_name,

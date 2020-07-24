@@ -9,6 +9,7 @@
     "data_collections": [
       {
         "name": "",
+        "include_collection_name_in_team_name": true,
         "entities": [
           {
             "name": "",
