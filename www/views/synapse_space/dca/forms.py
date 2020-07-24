@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, TextAreaField, SelectField
 from wtforms.fields.html5 import DateField
-from wtforms.validators import DataRequired, ValidationError, URL, Optional
+from wtforms.validators import DataRequired, ValidationError, URL, Optional, Length
 from ...components import MultiCheckboxField
 from www.services.synapse_space.dca import CreateSpaceService
 from www.core import Env
@@ -21,7 +21,9 @@ class CreateSynapseSpaceForm(FlaskForm):
     field_institution_add_party = MultiCheckboxField('Institution Additional Party',
                                                      choices=[],
                                                      validators=[Optional()])
-    field_pi_surname = StringField('Principal Investigator Surname', validators=[DataRequired()])
+    field_pi_surname = StringField('Principal Investigator Surname',
+                                   validators=[DataRequired(), Length(max=20,
+                                                                      message='Must be less than or equal to 20 characters.')])
     field_emails = TextAreaField('Emails to invite to the project')
     field_agreement_url = StringField('Contribution Agreement URL', validators=[URL(), Optional()])
     field_start_date = DateField('Start Date', validators=[Optional()])
@@ -68,6 +70,7 @@ class CreateSynapseSpaceForm(FlaskForm):
         self.project_name = None
         short_name = self.field_institution_short_name.data
         surname = self.field_pi_surname.data
+
         add_parties = ''
         if self.field_institution_add_party.data:
             party_codes = self.field_institution_add_party.data
@@ -76,7 +79,18 @@ class CreateSynapseSpaceForm(FlaskForm):
             add_parties = '{0}_'.format(add_parties)
 
         if short_name and surname:
+            short_name = short_name.strip()
             self.project_name = '{0}{1}_{2}'.format(add_parties, short_name, surname)
+
+            # Clean up the name
+            # Remove multiple spaces:
+            self.project_name = ' '.join(self.project_name.split()).strip()
+            # Remove specific characters:
+            for replace_char in ['.']:
+                self.project_name = self.project_name.replace(replace_char, '')
+            # Replace specific characters with underscores:
+            for replace_char in [' ', '-']:
+                self.project_name = self.project_name.replace(replace_char, '_')
 
     def try_validate_project_name(self):
         if self.project_name:

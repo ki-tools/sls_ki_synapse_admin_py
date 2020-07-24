@@ -13,8 +13,7 @@ def synapse_space_daa_grant():
     errors = []
     user_email = Cookies.user_email_get(request)
 
-    # We only have one config now so hard code this until we have more.
-    config = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()[0]
+    config = Env.get_default_daa_grant_access_config()
 
     add_parties = [(c['code'], c['name']) for c in config.get('additional_parties', [])]
     form.field_institution_add_party.choices = add_parties
