@@ -36,12 +36,9 @@ def synapse_space_dca_create():
                                      comments=form.field_comments.data)
 
         errors = service.execute().errors
-        warnings = service.warnings
 
         if not errors:
             flash('Synapse project created successfully: {0} ({1})'.format(service.project.name, service.project.id))
-            for warning in (warnings or []):
-                flash('WARNING: {0}'.format(warning))
             return redirect(url_for('synapse_space_dca_create'))
 
     return render_template('synapse_space/dca/create.html',

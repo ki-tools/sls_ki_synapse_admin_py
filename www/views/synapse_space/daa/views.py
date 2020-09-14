@@ -39,12 +39,9 @@ def synapse_space_daa_grant():
                                      comments=form.field_comments.data)
 
         errors = service.execute().errors
-        warnings = service.warnings
 
         if not errors:
             flash('Synapse team created successfully: {0} ({1})'.format(service.team.name, service.team.id))
-            for warning in (warnings or []):
-                flash('WARNING: {0}'.format(warning))
             return redirect(url_for('synapse_space_daa_grant'))
 
     return render_template('synapse_space/daa/grant.html',

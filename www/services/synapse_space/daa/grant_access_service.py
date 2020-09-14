@@ -75,6 +75,10 @@ class GrantAccessService:
 
         return self
 
+    def _add_warning(self, msg):
+        logger.warning(msg)
+        self.warnings.append(msg)
+
     def _write_synapse_log_file(self):
         errors = []
         try:
@@ -120,7 +124,7 @@ class GrantAccessService:
                 finally:
                     shutil.rmtree(tmp_dir, ignore_errors=True)
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Environment Variable: SYNAPSE_SPACE_LOG_FOLDER_ID not set. Log files will not be created.')
         except Exception as ex:
             logger.exception(ex)
@@ -160,7 +164,7 @@ class GrantAccessService:
                     Synapse.client().setPermissions(syn_id, principalId=self.team.id, accessType=access_type)
                     logger.info('Team: {0} granted access to entity: {1}'.format(self.team.name, syn_id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: data_collections not set. Data collection will not be shared with team.')
         except Exception as ex:
             logger.exception(ex)
@@ -191,7 +195,7 @@ class GrantAccessService:
                     Synapse.client().restPUT("/team/acl", body=json.dumps(acl))
                     logger.info('User: {0} has been given manager access on team: {1}.'.format(user_id, self.team.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: team_manager_user_ids not set. Team managers will not be added to the project team.')
         except Exception as ex:
             logger.exception(ex)
@@ -216,7 +220,7 @@ class GrantAccessService:
                 logger.exception(ex)
                 errors.append('Error inviting emails to team: {0}'.format(ex))
         else:
-            self.warnings.append('No emails specified. No users will be invited to the team.')
+            self._add_warning('No emails specified. No users will be invited to the team.')
 
         self.errors += errors
         return not errors
@@ -251,7 +255,7 @@ class GrantAccessService:
                 Synapse.client().store(syn.Table(table_id, [row]))
                 logger.info('Access agreement table: {0} updated for team: {1}'.format(table_id, self.team.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: agreement_table_id not set. Access agreement table will not be updated.')
         except Exception as ex:
             logger.exception(ex)

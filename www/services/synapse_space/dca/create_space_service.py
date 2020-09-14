@@ -86,6 +86,10 @@ class CreateSpaceService:
 
         return self
 
+    def _add_warning(self, msg):
+        logger.warning(msg)
+        self.warnings.append(msg)
+
     def _write_synapse_log_file(self):
         errors = []
         try:
@@ -134,7 +138,7 @@ class CreateSpaceService:
                 finally:
                     shutil.rmtree(tmp_dir, ignore_errors=True)
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Environment Variable: SYNAPSE_SPACE_LOG_FOLDER_ID not set. Log files will not be created.')
         except Exception as ex:
             logger.exception(ex)
@@ -171,7 +175,7 @@ class CreateSpaceService:
                 Synapse.client().setStorageLocation(self.project, storage_location_id)
                 logger.info('Storage location set on project: {0}'.format(self.project.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Environment Variable: SYNAPSE_ENCRYPTED_STORAGE_LOCATION_ID not set. Cannot set storage location.')
         except Exception as ex:
             logger.exception(ex)
@@ -229,7 +233,7 @@ class CreateSpaceService:
                     Synapse.client().restPUT("/team/acl", body=json.dumps(acl))
                     logger.info('User: {0} has been given manager access on team: {1}.'.format(user_id, self.team.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: team_manager_user_ids not set. Team managers will not be added to the project team.')
         except Exception as ex:
             logger.exception(ex)
@@ -254,7 +258,7 @@ class CreateSpaceService:
                 logger.exception(ex)
                 errors.append('Error inviting emails to team: {0}'.format(ex))
         else:
-            self.warnings.append('No emails specified. No users will be invited to this project.')
+            self._add_warning('No emails specified. No users will be invited to this project.')
 
         self.errors += errors
         return not errors
@@ -277,7 +281,7 @@ class CreateSpaceService:
                     Synapse.client().setPermissions(entity_id, principalId=self.team.id, accessType=access_type)
                     logger.info('Team: {0} granted access to entity: {1}'.format(self.team.name, entity_id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: team_entity_access not set. Project team will not be shared on other entities.')
         except Exception as ex:
             logger.exception(ex)
@@ -304,7 +308,7 @@ class CreateSpaceService:
                     Synapse.client().setPermissions(self.project, principalId=principal_id, accessType=access_type)
                     logger.info('Principal: {0} assigned to project: {1}'.format(principal_id, self.project.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: project_access not set. Principals will not be added to this project.')
         except Exception as ex:
             logger.exception(ex)
@@ -328,7 +332,7 @@ class CreateSpaceService:
                         parent = Synapse.client().store(syn.Folder(name=folder_name, parent=parent))
                         logger.info('Folder: {0} created in project: {1}'.format(folder_name, self.project.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: folder_names not set. Folders will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
@@ -357,7 +361,7 @@ class CreateSpaceService:
                 logger.info('Wiki imported from project: {0} into project: {1}'.format(source_wiki_project_id,
                                                                                        self.project.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: wiki_project_id not set. Wiki will not be created in this project.')
         except Exception as ex:
             logger.exception(ex)
@@ -400,7 +404,7 @@ class CreateSpaceService:
                 logger.info(
                     'Contribution agreement table: {0} updated for project: {1}'.format(table_id, self.project.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: contribution_agreement_table_id not set. Contribution agreement table will not be updated.')
         except Exception as ex:
             logger.exception(ex)
@@ -424,7 +428,7 @@ class CreateSpaceService:
                 Synapse.client().store(view)
                 logger.info('Contributor tracking view: {0} updated for project: {1}'.format(view_id, self.project.id))
             else:
-                self.warnings.append(
+                self._add_warning(
                     'Config Variable: contributor_tracking_view_id not set. Contributor tracking view will not be updated.')
         except Exception as ex:
             logger.exception(ex)
