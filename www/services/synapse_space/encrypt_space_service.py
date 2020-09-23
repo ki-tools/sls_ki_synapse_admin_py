@@ -1,7 +1,7 @@
 from www.core import Synapse, Env
 from www.core.log import logger
 import synapseclient as syn
-from synapseclient.exceptions import SynapseHTTPError
+from synapseclient.core.exceptions import SynapseHTTPError
 
 
 class EncryptSpaceService:

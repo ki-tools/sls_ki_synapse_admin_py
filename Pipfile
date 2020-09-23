@@ -29,6 +29,7 @@ Flask-Login = "*"
 Werkzeug = "*"
 pyOpenSSL = "*"
 pytz = "*"
+flask-talisman = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"

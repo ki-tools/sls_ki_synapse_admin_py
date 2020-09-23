@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.6"
+  - "3.7"
 before_install:
   - export LOG_LEVEL=DEBUG
   - export BOTO_CONFIG=/dev/null

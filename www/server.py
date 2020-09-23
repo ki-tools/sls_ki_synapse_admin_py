@@ -1,6 +1,7 @@
 from flask_login import LoginManager
 from oauthlib.oauth2 import WebApplicationClient
 from flask import Flask
+from flask_talisman import Talisman
 from www.models import User
 import www.config as config
 from www.core import Env
@@ -10,6 +11,7 @@ config.load_local_if_applicable()
 
 # Flask app setup.
 app = Flask(__name__)
+Talisman(app)
 
 # User session management setup.
 login_manager = LoginManager()
