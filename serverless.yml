@@ -56,6 +56,7 @@ custom:
     certificateName: ${self:custom.slsDeploy}.DOMAIN_CERTIFICATE_NAME}
     createRoute53Record: ${self:custom.slsDeploy}.DOMAIN_CREATE_ROUTE_53_RECORD}
     endpointType: ${self:custom.slsDeploy}.DOMAIN_ENDPOINT_TYPE}
+    securityPolicy: tls_1_2
 
 package:
   individually: false
