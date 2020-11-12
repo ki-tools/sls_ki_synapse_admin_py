@@ -1,11 +1,11 @@
 import pytest
 from www.server import app
-from www.views.synapse_space.dca.forms import CreateSynapseSpaceForm
+from www.views.synapse_space.dca.forms import CreateDcaSynapseSpaceForm
 
 
 def test_it_sets_the_project_name(client, dca_config):
     with app.test_request_context():
-        form = CreateSynapseSpaceForm()
+        form = CreateDcaSynapseSpaceForm()
         surname = 'AbcZ'
         form.field_pi_surname.data = surname
 

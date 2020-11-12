@@ -84,6 +84,15 @@ class Env:
         return next((c for c in configs if c['id'] == id), None)
 
     @staticmethod
+    def SYNAPSE_SPACE_BASIC_CREATE_CONFIG(default='[]'):
+        return ParamStore.get('SYNAPSE_SPACE_BASIC_CREATE_CONFIG', default).to_json()
+
+    @staticmethod
+    def SYNAPSE_SPACE_BASIC_CREATE_CONFIG_by_id(id):
+        configs = Env.SYNAPSE_SPACE_BASIC_CREATE_CONFIG()
+        return next((c for c in configs if c['id'] == id), None)
+
+    @staticmethod
     def SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG(default='[]'):
         return ParamStore.get('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', default).to_json()
 
@@ -101,6 +110,11 @@ class Env:
     def get_default_daa_grant_access_config():
         # We only have one config now so hard code this until we have more.
         return Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()[0]
+
+    @staticmethod
+    def get_default_basic_create_config():
+        # We only have one config now so hard code this until we have more.
+        return Env.SYNAPSE_SPACE_BASIC_CREATE_CONFIG()[0]
 
     class Test:
         @staticmethod

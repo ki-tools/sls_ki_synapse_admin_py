@@ -2,7 +2,7 @@ import pytest
 import json
 from datetime import date, timedelta
 from www.core import Synapse, Env
-from www.services.synapse_space.dca import CreateSpaceService
+from www.services.synapse_space.dca import CreateDcaSpaceService
 import synapseclient as syn
 
 
@@ -42,16 +42,16 @@ def mk_service(syn_test_helper, mk_uniq_real_email, dca_config, set_dca_config):
         # Set the config in the Env so it's available to the service.
         set_dca_config([config])
 
-        service = CreateSpaceService(config['id'],
-                                     project_name,
-                                     institution_name,
-                                     institution_short_name,
-                                     user_identifier,
-                                     agreement_url=agreement_url,
-                                     emails=emails,
-                                     start_date=start_date,
-                                     end_date=end_date,
-                                     comments=comments)
+        service = CreateDcaSpaceService(config['id'],
+                                        project_name,
+                                        institution_name,
+                                        institution_short_name,
+                                        user_identifier,
+                                        agreement_url=agreement_url,
+                                        emails=emails,
+                                        start_date=start_date,
+                                        end_date=end_date,
+                                        comments=comments)
         services.append(service)
         return service
 
@@ -451,5 +451,5 @@ def test_it_updates_the_scope_on_the_contributor_tracking_view(mk_service,
 
 def test_validations_validate_project_name(syn_test_helper):
     existing_project = syn_test_helper.create_project()
-    error = CreateSpaceService.Validations.validate_project_name(existing_project.name)
+    error = CreateDcaSpaceService.Validations.validate_project_name(existing_project.name)
     assert error == 'Project with name: "{0}" already exists.'.format(existing_project.name)

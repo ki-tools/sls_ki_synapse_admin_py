@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Create Synapse Space (Basic){% endblock %}
+{% block body %}
+<div class="row">
+  <div class="col">
+    <h1>Create Synapse Space (Basic)
+      <button class="btn" type="button" data-toggle="collapse" data-target="#helpSection" aria-expanded="false"
+              aria-controls="helpSection">
+        <i class="far fa-question-circle" title="Help"></i>
+      </button>
+    </h1>
+    <div class="card collapse mb-3" id="helpSection">
+      <div class="card-header">
+        Help
+      </div>
+      <div class="card-body">
+        <p>This process will do the following:</p>
+        <ul>
+          <li>Create a new Synapse project.</li>
+          <li>Set the project to use an encrypted storage location.</li>
+          <li>Create a new Synapse team and add it to the project with Can Download permission.</li>
+        </ul>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-primary" data-toggle="collapse" data-target="#helpSection"
+                aria-expanded="false"
+                aria-controls="helpSection">Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <form method="POST" action="">
+      {{ form.csrf_token }}
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <ul>
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% if errors %}
+      <div class="alert alert-danger" role="alert">
+        <span>Errors:</span>
+        <ul>
+          {% for message in errors %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        {{ form.field_project_name.label }}
+        {{ form.field_project_name(class_='form-control') }}
+        <small class="text-muted">
+          The name of the project to create.
+        </small>
+        {% if form.field_project_name.errors %}
+        <div>
+          {% for error in form.field_project_name.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_team_name.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_team_name(class_='form-control') }}
+        <small class="text-muted">
+          The name of the team to create.
+        </small>
+        {% if form.field_team_name.errors %}
+        <div>
+          {% for error in form.field_team_name.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.field_comments.label }} <small class="text-muted">(optional)</small>
+        {{ form.field_comments(class_='form-control') }}
+        {% if form.field_comments.errors %}
+        <div>
+          {% for error in form.field_comments.errors %}
+          <span class="field-error">[{{ error }}]</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      {{ form.field_submit(class_='btn btn-primary') }}
+    </form>
+  </div>
+</div>
+{% endblock %}

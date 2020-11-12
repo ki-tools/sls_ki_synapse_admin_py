@@ -5,11 +5,11 @@ from wtforms.validators import DataRequired, ValidationError, URL, Optional
 
 from www.core import Env
 from ...components import MultiCheckboxField
-from www.services.synapse_space.daa import GrantAccessService
+from www.services.synapse_space.daa import GrantDaaAccessService
 import re
 
 
-class GrantSynapseAccessForm(FlaskForm):
+class GrantDaaSynapseAccessForm(FlaskForm):
     # Form Fields
     field_institution_name = StringField('Institution Name', validators=[DataRequired()])
     field_institution_short_name = StringField('Institution Short Name', validators=[DataRequired()])
@@ -98,6 +98,6 @@ class GrantSynapseAccessForm(FlaskForm):
 
     def try_validate_team_name(self):
         if self.team_name:
-            error = GrantAccessService.Validations.validate_team_name(self.team_name)
+            error = GrantDaaAccessService.Validations.validate_team_name(self.team_name)
             if error:
                 raise ValidationError(error)

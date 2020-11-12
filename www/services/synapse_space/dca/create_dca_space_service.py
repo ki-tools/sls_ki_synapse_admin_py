@@ -9,7 +9,7 @@ from www.core.synapse import Synapse
 import synapseclient as syn
 
 
-class CreateSpaceService:
+class CreateDcaSpaceService:
     def __init__(self, config_id, project_name, institution_name, institution_short_name, user_identifier,
                  agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
         """Instantiates a new instance.
@@ -43,7 +43,6 @@ class CreateSpaceService:
         self.team = None
         self.errors = []
         self.warnings = []
-        self.log_data = {}
 
     def execute(self):
         """Creates a new Synapse space for data contribution.
