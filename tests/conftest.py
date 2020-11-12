@@ -105,6 +105,18 @@ def blank_dca_config():
 
 
 @pytest.fixture
+def blank_basic_config():
+    config = open_json_config('private.basic.create.space.json')
+    return config[0]
+
+
+@pytest.fixture
+def blank_daa_config(syn_test_helper, monkeypatch):
+    config = open_json_config('private.daa.grant.access.json')
+    return config[0]
+
+
+@pytest.fixture
 def set_dca_config(monkeypatch):
     orig_config = Env.SYNAPSE_SPACE_DCA_CREATE_CONFIG()
 
@@ -115,6 +127,32 @@ def set_dca_config(monkeypatch):
     yield _set
     # Revert back to the original config.
     monkeypatch.setenv('SYNAPSE_SPACE_DCA_CREATE_CONFIG', orig_config)
+
+
+@pytest.fixture
+def set_basic_config(monkeypatch):
+    orig_config = Env.SYNAPSE_SPACE_BASIC_CREATE_CONFIG()
+
+    def _set(config):
+        # Set the config in the Env so it's available.
+        monkeypatch.setenv('SYNAPSE_SPACE_BASIC_CREATE_CONFIG', json.dumps(config))
+
+    yield _set
+    # Revert back to the original config.
+    monkeypatch.setenv('SYNAPSE_SPACE_BASIC_CREATE_CONFIG', orig_config)
+
+
+@pytest.fixture
+def set_daa_config(monkeypatch):
+    orig_config = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()
+
+    def _set(config):
+        # Set the config in the Env so it's available.
+        monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', json.dumps(config))
+
+    yield _set
+    # Revert back to the original config.
+    monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', orig_config)
 
 
 @pytest.fixture
@@ -145,22 +183,14 @@ def dca_config(blank_dca_config, set_dca_config):
 
 
 @pytest.fixture
-def blank_daa_config(syn_test_helper, monkeypatch):
-    config = open_json_config('private.daa.grant.access.json')
-    return config[0]
+def basic_config(blank_basic_config, set_basic_config):
+    config = blank_basic_config.copy()
+    config['id'] = '1'
+    config['name'] = 'Config 01'
+    # config['contributor_tracking_view_id'] = None
+    set_basic_config([config])
 
-
-@pytest.fixture
-def set_daa_config(monkeypatch):
-    orig_config = Env.SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG()
-
-    def _set(config):
-        # Set the config in the Env so it's available.
-        monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', json.dumps(config))
-
-    yield _set
-    # Revert back to the original config.
-    monkeypatch.setenv('SYNAPSE_SPACE_DAA_GRANT_ACCESS_CONFIG', orig_config)
+    return config
 
 
 @pytest.fixture
@@ -190,8 +220,3 @@ def daa_config(blank_daa_config, set_daa_config):
     set_daa_config([config])
 
     return config
-
-
-@pytest.fixture
-def mk_daa_config():
-    pass

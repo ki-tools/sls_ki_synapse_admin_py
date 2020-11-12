@@ -3,7 +3,7 @@ import time
 import json
 from datetime import date, timedelta
 from www.core import Synapse, Env
-from www.services.synapse_space.daa import GrantAccessService
+from www.services.synapse_space.daa import GrantDaaAccessService
 import synapseclient as syn
 
 
@@ -46,17 +46,17 @@ def mk_service(syn_test_helper, syn_client, mk_uniq_real_email, blank_daa_config
         # Set the config in the Env so it's available to the service.
         set_daa_config([config])
 
-        service = GrantAccessService(config['id'],
-                                     team_name,
-                                     institution_name,
-                                     institution_short_name,
-                                     data_collection_name,
-                                     user_identifier,
-                                     agreement_url=agreement_url,
-                                     emails=emails,
-                                     start_date=start_date,
-                                     end_date=end_date,
-                                     comments=comments)
+        service = GrantDaaAccessService(config['id'],
+                                        team_name,
+                                        institution_name,
+                                        institution_short_name,
+                                        data_collection_name,
+                                        user_identifier,
+                                        agreement_url=agreement_url,
+                                        emails=emails,
+                                        start_date=start_date,
+                                        end_date=end_date,
+                                        comments=comments)
         services.append(service)
         return service
 
@@ -314,5 +314,5 @@ def test_validations_validate_team_name(syn_test_helper, syn_client):
             else:
                 time.sleep(3)
 
-    error = GrantAccessService.Validations.validate_team_name(existing_team.name)
+    error = GrantDaaAccessService.Validations.validate_team_name(existing_team.name)
     assert error == 'Team with name: "{0}" already exists.'.format(existing_team.name)

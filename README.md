@@ -76,6 +76,14 @@ The contribution agreement table must have the following columns (at a minimum):
 | End_Date | `DATE` | | The end date of the agreement. |
 | Comments | `STRING` | 1000 | Any comments related to the agreement. |
 
+### Create Synapse Space (Basic)
+
+This will create an empty project and a new team in Synapse.
+
+- Create a new Synapse project.
+- Set the project's storage location to a specific (encrypted) S3 bucket.
+- Create a new Synapse team and add it to the project.
+
 ### Grant Synapse Access Space (DAA)
 
 This will create a new team in Synapse and share it with one or more projects and/or folders with download access.

@@ -9,7 +9,7 @@ from www.core.synapse import Synapse
 import synapseclient as syn
 
 
-class GrantAccessService:
+class GrantDaaAccessService:
     def __init__(self, config_id, team_name, institution_name, institution_short_name, data_collection_name,
                  user_identifier,
                  agreement_url=None, emails=None, start_date=None, end_date=None, comments=None):
@@ -46,7 +46,6 @@ class GrantAccessService:
         self.data_collection = None
         self.errors = []
         self.warnings = []
-        self.log_data = {}
 
     def execute(self):
         """Creates a new Synapse team for data access.

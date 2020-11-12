@@ -1,15 +1,15 @@
 from flask import current_app as app, request
 from flask import render_template, redirect, url_for, flash
 from flask_login import fresh_login_required
-from www.services.synapse_space.daa import GrantAccessService
-from .forms import GrantSynapseAccessForm
+from www.services.synapse_space.daa import GrantDaaAccessService
+from .forms import GrantDaaSynapseAccessForm
 from ....core import Cookies, Env
 
 
 @app.route("/synapse_space/daa/grant", methods=('GET', 'POST'))
 @fresh_login_required
 def synapse_space_daa_grant():
-    form = GrantSynapseAccessForm()
+    form = GrantDaaSynapseAccessForm()
     errors = []
     user_email = Cookies.user_email_get(request)
 
@@ -26,17 +26,17 @@ def synapse_space_daa_grant():
     form.field_data_collection.choices = dc_choices
 
     if form.validate_on_submit():
-        service = GrantAccessService(config['id'],
-                                     form.team_name,
-                                     form.field_institution_name.data,
-                                     form.field_institution_short_name.data,
-                                     form.field_data_collection.data,
-                                     user_email,
-                                     agreement_url=form.field_agreement_url.data,
-                                     emails=form.valid_emails,
-                                     start_date=form.field_start_date.data,
-                                     end_date=form.field_end_date.data,
-                                     comments=form.field_comments.data)
+        service = GrantDaaAccessService(config['id'],
+                                        form.team_name,
+                                        form.field_institution_name.data,
+                                        form.field_institution_short_name.data,
+                                        form.field_data_collection.data,
+                                        user_email,
+                                        agreement_url=form.field_agreement_url.data,
+                                        emails=form.valid_emails,
+                                        start_date=form.field_start_date.data,
+                                        end_date=form.field_end_date.data,
+                                        comments=form.field_comments.data)
 
         errors = service.execute().errors
 

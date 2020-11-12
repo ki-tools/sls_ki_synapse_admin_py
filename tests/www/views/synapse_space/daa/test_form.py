@@ -1,11 +1,11 @@
 import pytest
 from www.server import app
-from www.views.synapse_space.daa.forms import GrantSynapseAccessForm
+from www.views.synapse_space.daa.forms import GrantDaaSynapseAccessForm
 
 
 def test_it_sets_the_team_name(client, daa_config, set_daa_config):
     with app.test_request_context():
-        form = GrantSynapseAccessForm()
+        form = GrantDaaSynapseAccessForm()
         data_collection_name = daa_config['data_collections'][0]['name']
         form.field_data_collection.data = data_collection_name
 

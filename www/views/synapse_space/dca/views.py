@@ -1,15 +1,15 @@
 from flask import current_app as app, request, jsonify
 from flask import render_template, redirect, url_for, flash
 from flask_login import fresh_login_required
-from www.services.synapse_space.dca import CreateSpaceService
-from .forms import CreateSynapseSpaceForm
+from www.services.synapse_space.dca import CreateDcaSpaceService
+from .forms import CreateDcaSynapseSpaceForm
 from ....core import Cookies, Env
 
 
 @app.route("/synapse_space/dca/create", methods=('GET', 'POST'))
 @fresh_login_required
 def synapse_space_dca_create():
-    form = CreateSynapseSpaceForm()
+    form = CreateDcaSynapseSpaceForm()
     errors = []
     user_email = Cookies.user_email_get(request)
 
@@ -24,16 +24,16 @@ def synapse_space_dca_create():
     form.field_institution_add_party.choices = add_parties
 
     if form.validate_on_submit():
-        service = CreateSpaceService(form.field_select_config.data,
-                                     form.project_name,
-                                     form.field_institution_name.data,
-                                     form.field_institution_short_name.data,
-                                     user_email,
-                                     agreement_url=form.field_agreement_url.data,
-                                     emails=form.valid_emails,
-                                     start_date=form.field_start_date.data,
-                                     end_date=form.field_end_date.data,
-                                     comments=form.field_comments.data)
+        service = CreateDcaSpaceService(form.field_select_config.data,
+                                        form.project_name,
+                                        form.field_institution_name.data,
+                                        form.field_institution_short_name.data,
+                                        user_email,
+                                        agreement_url=form.field_agreement_url.data,
+                                        emails=form.valid_emails,
+                                        start_date=form.field_start_date.data,
+                                        end_date=form.field_end_date.data,
+                                        comments=form.field_comments.data)
 
         errors = service.execute().errors
 

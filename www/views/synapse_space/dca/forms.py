@@ -3,12 +3,12 @@ from wtforms import SubmitField, StringField, TextAreaField, SelectField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError, URL, Optional, Length
 from ...components import MultiCheckboxField
-from www.services.synapse_space.dca import CreateSpaceService
+from www.services.synapse_space.dca import CreateDcaSpaceService
 from www.core import Env
 import re
 
 
-class CreateSynapseSpaceForm(FlaskForm):
+class CreateDcaSynapseSpaceForm(FlaskForm):
     # Form Fields
     config = Env.SYNAPSE_SPACE_DCA_CREATE_CONFIG() or []
     field_select_config = SelectField('Select Configuration',
@@ -94,6 +94,6 @@ class CreateSynapseSpaceForm(FlaskForm):
 
     def try_validate_project_name(self):
         if self.project_name:
-            error = CreateSpaceService.Validations.validate_project_name(self.project_name)
+            error = CreateDcaSpaceService.Validations.validate_project_name(self.project_name)
             if error:
                 raise ValidationError(error)
